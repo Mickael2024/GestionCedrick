@@ -1,0 +1,990 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Gestion Stock — Admin</title>
+    <meta name="description"
+        content="Application admin pour gérer le stock (téléphones, ordinateurs, chargeurs...) - marquer vendu, ajouter accessoires, suivre CA et bénéfice du dernier mois.">
+    <style>
+        /* ========== Variables ========== */
+        :root {
+            --bg: #0f1724;
+            /* dark blue */
+            --card: #0b1220;
+            --muted: #9aa4b2;
+            --accent: #7c5cff;
+            /* violet */
+            --accent-2: #00c9a7;
+            /* teal */
+            --glass: rgba(255, 255, 255, 0.04);
+            --glass-2: rgba(255, 255, 255, 0.02);
+            --success: #22c55e;
+            --danger: #ff6b6b;
+            --radius: 14px;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        }
+
+        /* ========== Reset & Base ========== */
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            height: 100%
+        }
+
+        body {
+            margin: 0;
+            background: linear-gradient(180deg, var(--bg), #071523 120%);
+            color: #e6eef6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            padding: 22px;
+            display: flex;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        /* Container */
+        .app {
+            width: 100%;
+            max-width: 1100px
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px
+        }
+
+        .logo {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), #5ad1ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6)
+        }
+
+        .logo svg {
+            width: 34px;
+            height: 34px
+        }
+
+        header h1 {
+            font-size: 18px;
+            margin: 0
+        }
+
+        header p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px
+        }
+
+        /* Layout grid */
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 18px
+        }
+
+        @media (max-width:900px) {
+            .layout {
+                grid-template-columns: 1fr
+            }
+
+            .sidebar {
+                order: 2
+            }
+        }
+
+        /* Main card */
+        .card {
+            background: linear-gradient(180deg, var(--card), rgba(255, 255, 255, 0.02));
+            border-radius: var(--radius);
+            padding: 16px;
+            box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6)
+        }
+
+        /* Dashboard summary */
+        .summary {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap
+        }
+
+        .stat {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px;
+            border-radius: 12px;
+            background: linear-gradient(180deg, var(--glass), var(--glass-2));
+        }
+
+        .stat h3 {
+            margin: 0;
+            font-size: 13px;
+            color: var(--muted)
+        }
+
+        .stat p {
+            margin: 6px 0 0;
+            font-weight: 700;
+            font-size: 18px
+        }
+
+        .stat .muted {
+            font-weight: 500;
+            color: var(--muted);
+            font-size: 12px
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap
+        }
+
+        .btn {
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 0;
+            background: linear-gradient(90deg, var(--accent), #6a8cff);
+            color: white;
+            font-weight: 600
+        }
+
+        .btn.outline {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: var(--muted);
+            font-weight: 600
+        }
+
+        .search {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--glass);
+            padding: 8px 10px;
+            border-radius: 10px
+        }
+
+        .search input {
+            background: transparent;
+            border: 0;
+            outline: none;
+            color: inherit;
+            width: 100%
+        }
+
+        /* Product grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px
+        }
+
+        @media (max-width:700px) {
+            .grid {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .product {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent);
+            align-items: center
+        }
+
+        .thumb {
+            width: 68px;
+            height: 68px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #0f1724, #1b2b3a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            font-weight: 700
+        }
+
+        .info {
+            flex: 1
+        }
+
+        .info h4 {
+            margin: 0 0 6px 0
+        }
+
+        .meta {
+            display: flex;
+            gap: 10px;
+            color: var(--muted);
+            font-size: 13px
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            align-items: center
+        }
+
+        .small-btn {
+            padding: 8px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 0;
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--muted)
+        }
+
+        .sell {
+            background: linear-gradient(90deg, var(--accent-2), #00e6c0);
+            color: #04211e;
+            font-weight: 700
+        }
+
+        .danger {
+            background: linear-gradient(90deg, #ff8f8f, #ff6b6b);
+            color: #390707
+        }
+
+        /* Sidebar */
+        .sidebar .card {
+            padding: 14px
+        }
+
+        .section {
+            margin-bottom: 12px
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 6px
+        }
+
+        input[type=text],
+        input[type=number],
+        select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 8px;
+            border: 0;
+            background: rgba(255, 255, 255, 0.03);
+            color: inherit
+        }
+
+        .field-row {
+            display: flex;
+            gap: 8px
+        }
+
+        .field-row>* {
+            flex: 1
+        }
+
+        /* History */
+        .history {
+            max-height: 280px;
+            overflow: auto;
+            padding-right: 6px
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 6px;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.02);
+            color: var(--muted)
+        }
+
+        /* Modal */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50
+        }
+
+        .modal {
+            width: 100%;
+            max-width: 720px;
+            background: linear-gradient(180deg, var(--card), rgba(255, 255, 255, 0.02));
+            border-radius: 12px;
+            padding: 14px
+        }
+
+        /* tiny helpers */
+        .muted {
+            color: var(--muted)
+        }
+
+        .pill {
+            padding: 6px 8px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            font-size: 12px
+        }
+
+        /* animations */
+        .pop {
+            transform-origin: center;
+            transition: transform .18s ease;
+        }
+
+        .pop:active {
+            transform: scale(.98)
+        }
+
+        /* footer note */
+        footer {
+            margin-top: 12px;
+            color: var(--muted);
+            font-size: 13px;
+            text-align: center
+        }
+        /* ========== Améliorations Responsive ========== */
+@media (max-width: 900px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+    .sidebar {
+      order: 2;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    body {
+      padding: 16px;
+    }
+    
+    header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    
+    .logo {
+      width: 48px;
+      height: 48px;
+    }
+    
+    .summary {
+      flex-direction: column;
+    }
+    
+    .stat {
+      min-width: 100%;
+    }
+    
+    .controls {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    .search {
+      order: 2;
+      width: 100%;
+    }
+    
+    .btn {
+      justify-content: center;
+    }
+    
+    .grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .product {
+      flex-direction: column;
+      text-align: center;
+      padding: 16px;
+    }
+    
+    .thumb {
+      width: 80px;
+      height: 80px;
+      font-size: 24px;
+    }
+    
+    .info {
+      width: 100%;
+      margin-top: 12px;
+    }
+    
+    .meta {
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .actions {
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      gap: 6px;
+    }
+    
+    .small-btn {
+      padding: 8px 12px;
+      font-size: 13px;
+    }
+    
+    .modal {
+      margin: 16px;
+      width: calc(100% - 32px);
+    }
+    
+    .field-row {
+      flex-direction: column;
+      gap: 12px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    body {
+      padding: 12px;
+      font-size: 13px;
+    }
+    
+    header h1 {
+      font-size: 16px;
+    }
+    
+    header p {
+      font-size: 12px;
+    }
+    
+    .card {
+      padding: 12px;
+    }
+    
+    .stat p {
+      font-size: 16px;
+    }
+    
+    .btn {
+      padding: 12px 16px;
+      font-size: 13px;
+    }
+    
+    .history-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+    
+    .modal {
+      padding: 12px;
+    }
+  }
+  
+  /* Amélioration de la lisibilité sur mobile */
+  @media (max-width: 768px) {
+    .product {
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .small-btn {
+      min-height: 36px;
+    }
+  }
+  
+  /* Correction pour les écrans très petits */
+  @media (max-width: 320px) {
+    .actions {
+      flex-direction: column;
+      width: 100%;
+    }
+    
+    .small-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+  
+  /* Amélioration du zoom sur iOS */
+  @media (max-width: 768px) {
+    input, select, textarea {
+      font-size: 16px; /* Empêche le zoom automatique sur iOS */
+    }
+  }
+  
+  /* Amélioration de l'accessibilité tactile */
+  @media (max-width: 768px) {
+    .btn, .small-btn {
+      min-height: 44px; /* Taille minimale recommandée pour les éléments tactiles */
+    }
+  }
+    </style>
+</head>
+
+<body>
+    <div class="app" role="application">
+        <header>
+            <div class="logo" aria-hidden>
+                <!-- SVG icon: box + spark -->
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 7.5L12 3l9 4.5v6L12 21 3 13.5v-6z" fill="#fff" opacity="0.08"></path>
+                    <path d="M12 3v18" stroke="#fff" stroke-opacity="0.6" stroke-width="1.2"></path>
+                    <circle cx="18" cy="6" r="1.5" fill="white" opacity="0.9" />
+                </svg>
+            </div>
+            <div>
+                <h1>Gestion Stock — Admin</h1>
+                <p>Gérer téléphones, ordinateurs et accessoires — mode administrateur</p>
+            </div>
+        </header>
+
+        <div class="layout">
+            <main class="card">
+                <section class="summary" aria-label="Résumés financiers">
+                    <div class="stat">
+                        <h3>Chiffre d'affaires (mois précédent)</h3>
+                        <p id="stat-revenue">0 Ar</p>
+                        <div class="muted">Total ventes</div>
+                    </div>
+                    <div class="stat">
+                        <h3>Coût total</h3>
+                        <p id="stat-cost">0 Ar</p>
+                        <div class="muted">Somme des coûts</div>
+                    </div>
+                    <div class="stat">
+                        <h3>Bénéfice / Perte</h3>
+                        <p id="stat-profit">0 Ar</p>
+                        <div class="muted">CA - Coût</div>
+                    </div>
+                </section>
+
+                <section class="controls" aria-label="Contrôles">
+                    <div class="search" role="search">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+                            <path d="M21 21l-4.35-4.35" stroke="white" stroke-opacity="0.6" stroke-width="1.4"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                            <circle cx="11" cy="11" r="6" stroke="white" stroke-opacity="0.6" stroke-width="1.4" />
+                        </svg>
+                        <input id="q" placeholder="Rechercher produit, catégorie..." />
+                    </div>
+                    <button class="btn" id="addProductBtn">➕ Ajouter produit</button>
+                    <button class="btn outline" id="resetBtn">Réinitialiser (local)</button>
+                </section>
+
+                <section>
+                    <div class="grid" id="productsGrid" aria-live="polite">
+                        <!-- product cards injected here -->
+                    </div>
+                </section>
+
+                <footer>
+                    <small>Application en local — intégration Firebase possible (voir commentaires dans le
+                        code).</small>
+                </footer>
+            </main>
+
+            <aside class="sidebar">
+                <div class="card">
+                    <div class="section">
+                        <h3>Ajouter accessoire rapide</h3>
+                        <div style="height:8px"></div>
+                        <label for="fast-product">Produit (ID)</label>
+                        <input id="fast-product" placeholder="ID produit (copier depuis carte)">
+                        <label for="fast-name">Nom accessoire</label>
+                        <input id="fast-name" placeholder="Ex: Coque silicone">
+                        <div class="field-row">
+                            <div>
+                                <label for="fast-price">Prix (vente)</label>
+                                <input id="fast-price" type="number" placeholder="0">
+                            </div>
+                            <div>
+                                <label for="fast-qty">Quantité</label>
+                                <input id="fast-qty" type="number" placeholder="1">
+                            </div>
+                        </div>
+                        <div style="height:8px"></div>
+                        <button class="btn" id="fastAddBtn">Ajouter accessoire</button>
+                    </div>
+
+                    <div class="section">
+                        <h3>Historique (récentes ventes)</h3>
+                        <div class="history" id="historyList"></div>
+                    </div>
+
+                    <div class="section">
+                        <h3>Filtrer période</h3>
+                        <label>Type de période</label>
+                        <select id="periodSelect">
+                            <option value="prev-month">Mois civil précédent</option>
+                            <option value="last-30">30 derniers jours</option>
+                        </select>
+                        <div style="height:8px"></div>
+                        <button class="btn" id="recalcBtn">Recalculer statistiques</button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Modal template (hidden by default) -->
+    <template id="modal-tpl">
+        <div class="modal-backdrop">
+            <div class="modal" role="dialog" aria-modal="true"></div>
+        </div>
+    </template>
+
+    <script>
+        /* =========================
+           Storage & Data helpers
+           ========================= */
+        const STORAGE_KEY = 'gestion_stock_v1';
+
+        function uid(prefix = '') {
+            return prefix + Math.random().toString(36).slice(2, 9);
+        }
+
+        function readState() {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return { products: [], accessories: [], sales: [] };
+            try { return JSON.parse(raw); } catch (e) { return { products: [], accessories: [], sales: [] }; }
+        }
+        function saveState(state) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            // TODO: remplacer par envoi vers Firestore
+            // ex: await firestore.collection('products').doc(id).set(...)
+        }
+
+        let state = readState();
+
+        /* ========== Demo seed (one-time) ========== */
+        if (state.products.length === 0) {
+            state.products.push({ id: uid('p_'), name: 'Smartphone X Pro', sku: 'SPX-01', purchasePrice: 300000, salePrice: 450000, stock: 8, category: 'téléphone', img: null });
+            state.products.push({ id: uid('p_'), name: 'Laptop Ultra 14"', sku: 'LPU-14', purchasePrice: 600000, salePrice: 900000, stock: 3, category: 'ordinateur', img: null });
+            state.accessories.push({ id: uid('a_'), productId: state.products[0].id, name: 'Chargeur Turbo', price: 45000, stock: 12 });
+            saveState(state);
+        }
+
+        /* =========================
+           UI Rendering
+           ========================= */
+        const productsGrid = document.getElementById('productsGrid');
+        const historyList = document.getElementById('historyList');
+        const statRevenue = document.getElementById('stat-revenue');
+        const statCost = document.getElementById('stat-cost');
+        const statProfit = document.getElementById('stat-profit');
+        const qInput = document.getElementById('q');
+
+        function formatCurrency(x) {
+            if (isNaN(x)) return '0 Ar';
+            return x.toLocaleString('fr-FR') + ' Ar';
+        }
+
+        function render() {
+            productsGrid.innerHTML = '';
+            const q = qInput.value.trim().toLowerCase();
+            const filtered = state.products.filter(p => (!q) || p.name.toLowerCase().includes(q) || (p.category || '').toLowerCase().includes(q) || (p.sku || '').toLowerCase().includes(q));
+            for (const p of filtered) {
+                const card = document.createElement('div'); card.className = 'product pop';
+                const thumb = document.createElement('div'); thumb.className = 'thumb'; thumb.textContent = (p.name || '')[0] || 'P';
+                const info = document.createElement('div'); info.className = 'info';
+                const h = document.createElement('h4'); h.textContent = p.name;
+                const meta = document.createElement('div'); meta.className = 'meta';
+                const cat = document.createElement('div'); cat.className = 'pill'; cat.textContent = p.category || '—';
+                const price = document.createElement('div'); price.textContent = formatCurrency(p.salePrice);
+                const stock = document.createElement('div'); stock.textContent = 'Stock: ' + (p.stock || 0);
+                meta.append(cat, price, stock);
+                info.append(h, meta);
+
+                const actions = document.createElement('div'); actions.className = 'actions';
+                const addAccBtn = document.createElement('button'); addAccBtn.className = 'small-btn'; addAccBtn.textContent = '➕ Accessoire';
+                addAccBtn.onclick = () => openAddAccessoryModal(p.id);
+
+                const soldBtn = document.createElement('button'); soldBtn.className = 'small-btn sell'; soldBtn.textContent = 'VENDU';
+                soldBtn.onclick = () => markSold('product', p.id, 1);
+
+                const moreBtn = document.createElement('button'); moreBtn.className = 'small-btn'; moreBtn.textContent = '✎';
+                moreBtn.onclick = () => openEditProductModal(p.id);
+
+                const delBtn = document.createElement('button'); delBtn.className = 'small-btn danger'; delBtn.textContent = '🗑';
+                delBtn.onclick = () => { if (confirm('Supprimer ce produit ?')) { removeProduct(p.id); } };
+
+                // accessories list
+                const accList = document.createElement('div'); accList.style.marginTop = '10px';
+                const accs = state.accessories.filter(a => a.productId === p.id);
+                for (const a of accs) {
+                    const arow = document.createElement('div'); arow.style.display = 'flex'; arow.style.justifyContent = 'space-between'; arow.style.gap = '10px'; arow.style.marginTop = '6px';
+                    const left = document.createElement('div'); left.textContent = a.name + ' — ' + formatCurrency(a.price) + ' (stk:' + (a.stock || 0) + ')'; left.className = 'muted';
+                    const right = document.createElement('div');
+                    const sellAccBtn = document.createElement('button'); sellAccBtn.className = 'small-btn sell'; sellAccBtn.textContent = 'VENDU';
+                    sellAccBtn.onclick = () => markSold('accessory', a.id, 1);
+                    right.appendChild(sellAccBtn);
+                    arow.appendChild(left); arow.appendChild(right);
+                    accList.appendChild(arow);
+                }
+
+                actions.append(addAccBtn, soldBtn, moreBtn, delBtn);
+                card.append(thumb, info, actions);
+                info.appendChild(accList);
+                // show product id small for admin
+                const idnote = document.createElement('div'); idnote.className = 'muted'; idnote.style.fontSize = '12px'; idnote.textContent = 'ID: ' + p.id;
+                info.appendChild(idnote);
+
+                productsGrid.appendChild(card);
+            }
+
+            renderHistory();
+            recalcStats();
+        }
+
+        /* =========================
+           CRUD & Actions
+           ========================= */
+        function addProduct({ name = 'Nouveau produit', sku = '', purchasePrice = 0, salePrice = 0, stock = 0, category = '' }) {
+            const p = { id: uid('p_'), name, sku, purchasePrice: +purchasePrice, salePrice: +salePrice, stock: +stock, category, img: null };
+            state.products.push(p); saveState(state); render();
+        }
+        function updateProduct(id, patch) {
+            const p = state.products.find(x => x.id === id); if (!p) return;
+            Object.assign(p, patch); saveState(state); render();
+        }
+        function removeProduct(id) {
+            state.products = state.products.filter(x => x.id !== id);
+            state.accessories = state.accessories.filter(a => a.productId !== id);
+            saveState(state); render();
+        }
+        function addAccessory({ productId, name, price = 0, stock = 1 }) {
+            const a = { id: uid('a_'), productId, name, price: +price, stock: +stock };
+            state.accessories.push(a); saveState(state); render();
+        }
+
+        function markSold(type, id, qty = 1) {
+            // type = 'product' or 'accessory'
+            let item, costPrice, salePrice;
+            if (type === 'product') {
+                item = state.products.find(p => p.id === id); if (!item) return alert('Produit introuvable');
+                if ((item.stock || 0) < qty) return alert('Stock insuffisant');
+                item.stock = (item.stock || 0) - qty;
+                costPrice = item.purchasePrice; salePrice = item.salePrice;
+            } else {
+                item = state.accessories.find(a => a.id === id); if (!item) return alert('Accessoire introuvable');
+                if ((item.stock || 0) < qty) return alert('Stock accessoire insuffisant');
+                item.stock = (item.stock || 0) - qty;
+                // try to find parent product cost as reference
+                const parent = state.products.find(p => p.id === item.productId);
+                costPrice = parent ? Math.round((parent.purchasePrice || 0) * 0.1) : 0; // heuristic: accessory cost ~10% product cost
+                salePrice = item.price;
+            }
+
+            const total = salePrice * qty;
+            const costTotal = costPrice * qty;
+            // add sale record
+            state.sales.push({ id: uid('s_'), itemType: type, itemId: id, qty, salePrice, costPrice, total, costTotal, timestamp: new Date().toISOString() });
+            saveState(state); render();
+
+            // small visual feedback
+            toast(`${qty} × vendu — ${formatCurrency(total)}`);
+        }
+
+        /* =========================
+           History & Stats
+           ========================= */
+        function renderHistory() {
+            historyList.innerHTML = '';
+            const last = state.sales.slice(-40).reverse();
+            for (const s of last) {
+                const row = document.createElement('div'); row.className = 'history-item';
+                const left = document.createElement('div');
+                const name = (s.itemType === 'product') ? (state.products.find(p => p.id === s.itemId) || {}).name : (state.accessories.find(a => a.id === s.itemId) || {}).name;
+                left.innerHTML = `<strong>${name || '(supprimé)'}</strong> <div class="muted">${s.qty} × ${formatCurrency(s.salePrice)}</div>`;
+                const right = document.createElement('div'); right.innerHTML = `<div style="text-align:right">${formatCurrency(s.total)}<div class="muted" style="font-size:12px">${new Date(s.timestamp).toLocaleString()}</div></div>`;
+                row.append(left, right);
+                historyList.appendChild(row);
+            }
+        }
+
+        function recalcStats() {
+            const period = document.getElementById('periodSelect').value;
+            const now = new Date();
+            let start;
+            if (period === 'prev-month') {
+                // month civil précédent
+                const year = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
+                const month = now.getMonth() === 0 ? 11 : now.getMonth() - 1; // 0-based
+                start = new Date(year, month, 1);
+                var end = new Date(year, month + 1, 1);
+            } else { // last-30
+                end = now;
+                start = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+            }
+
+            let revenue = 0, cost = 0;
+            for (const s of state.sales) {
+                const ts = new Date(s.timestamp);
+                if (ts >= start && ts < end) { revenue += (s.total || 0); cost += (s.costTotal || (s.costPrice * s.qty)); }
+            }
+            const profit = revenue - cost;
+            statRevenue.textContent = formatCurrency(revenue);
+            statCost.textContent = formatCurrency(cost);
+            statProfit.textContent = (profit >= 0 ? '+ ' : '- ') + formatCurrency(Math.abs(profit));
+            // color change
+            statProfit.style.color = profit >= 0 ? 'var(--success)' : 'var(--danger)';
+        }
+
+        /* =========================
+           Modals & Forms
+           ========================= */
+        const tpl = document.getElementById('modal-tpl');
+        function openModal(html) {
+            const node = tpl.content.cloneNode(true);
+            const backdrop = node.querySelector('.modal-backdrop');
+            const dialog = node.querySelector('.modal');
+            dialog.innerHTML = html;
+            document.body.appendChild(backdrop);
+            backdrop.addEventListener('click', (e) => { if (e.target === backdrop) backdrop.remove(); });
+            return { backdrop, dialog };
+        }
+
+        function openAddProductModal() {
+            const html = `
+        <h2>Ajouter produit</h2>
+        <div style="height:8px"></div>
+        <label>Nom</label><input id="m-name" type="text" />
+        <label>SKU</label><input id="m-sku" type="text" />
+        <div class="field-row"><div><label>Coût achat</label><input id="m-cost" type="number" /></div><div><label>Prix vente</label><input id="m-price" type="number" /></div></div>
+        <div class="field-row"><div><label>Stock</label><input id="m-stock" type="number" /></div><div><label>Catégorie</label><input id="m-cat" type="text" /></div></div>
+        <div style="height:10px"></div>
+        <div style="display:flex; gap:8px; justify-content:flex-end"><button id="m-add" class="btn">Ajouter</button><button id="m-cancel" class="btn outline">Annuler</button></div>
+      `;
+            const modal = openModal(html);
+            modal.dialog.querySelector('#m-cancel').onclick = () => modal.backdrop.remove();
+            modal.dialog.querySelector('#m-add').onclick = () => {
+                const name = modal.dialog.querySelector('#m-name').value || 'Produit';
+                const sku = modal.dialog.querySelector('#m-sku').value || '';
+                const cost = +modal.dialog.querySelector('#m-cost').value || 0;
+                const price = +modal.dialog.querySelector('#m-price').value || 0;
+                const stock = +modal.dialog.querySelector('#m-stock').value || 0;
+                const cat = modal.dialog.querySelector('#m-cat').value || '';
+                addProduct({ name, sku, purchasePrice: cost, salePrice: price, stock, category: cat });
+                modal.backdrop.remove();
+            };
+        }
+
+        function openEditProductModal(id) {
+            const p = state.products.find(x => x.id === id); if (!p) return alert('Produit introuvable');
+            const html = `
+        <h2>Modifier produit</h2>
+        <label>Nom</label><input id="m-name" type="text" value="${p.name}" />
+        <label>SKU</label><input id="m-sku" type="text" value="${p.sku || ''}" />
+        <div class="field-row"><div><label>Coût achat</label><input id="m-cost" type="number" value="${p.purchasePrice || 0}" /></div><div><label>Prix vente</label><input id="m-price" type="number" value="${p.salePrice || 0}" /></div></div>
+        <div class="field-row"><div><label>Stock</label><input id="m-stock" type="number" value="${p.stock || 0}" /></div><div><label>Catégorie</label><input id="m-cat" type="text" value="${p.category || ''}" /></div></div>
+        <div style="height:10px"></div>
+        <div style="display:flex; gap:8px; justify-content:flex-end"><button id="m-save" class="btn">Enregistrer</button><button id="m-cancel" class="btn outline">Annuler</button></div>
+      `;
+            const modal = openModal(html);
+            modal.dialog.querySelector('#m-cancel').onclick = () => modal.backdrop.remove();
+            modal.dialog.querySelector('#m-save').onclick = () => {
+                const name = modal.dialog.querySelector('#m-name').value || 'Produit';
+                const sku = modal.dialog.querySelector('#m-sku').value || '';
+                const cost = +modal.dialog.querySelector('#m-cost').value || 0;
+                const price = +modal.dialog.querySelector('#m-price').value || 0;
+                const stock = +modal.dialog.querySelector('#m-stock').value || 0;
+                const cat = modal.dialog.querySelector('#m-cat').value || '';
+                updateProduct(id, { name, sku, purchasePrice: cost, salePrice: price, stock, category: cat });
+                modal.backdrop.remove();
+            };
+        }
+
+        function openAddAccessoryModal(productId) {
+            const html = `
+        <h2>Ajouter accessoire</h2>
+        <label>Nom</label><input id="m-name" type="text" />
+        <div class="field-row"><div><label>Prix</label><input id="m-price" type="number" /></div><div><label>Stock</label><input id="m-stock" type="number" value="1" /></div></div>
+        <div style="height:10px"></div>
+        <div style="display:flex; gap:8px; justify-content:flex-end"><button id="m-add" class="btn">Ajouter</button><button id="m-cancel" class="btn outline">Annuler</button></div>
+      `;
+            const modal = openModal(html);
+            modal.dialog.querySelector('#m-cancel').onclick = () => modal.backdrop.remove();
+            modal.dialog.querySelector('#m-add').onclick = () => {
+                const name = modal.dialog.querySelector('#m-name').value || 'Accessoire';
+                const price = +modal.dialog.querySelector('#m-price').value || 0;
+                const stock = +modal.dialog.querySelector('#m-stock').value || 1;
+                addAccessory({ productId, name, price, stock });
+                modal.backdrop.remove();
+            };
+        }
+
+        /* =========================
+           Small utilities
+           ========================= */
+        function toast(msg) {
+            const el = document.createElement('div'); el.textContent = msg; el.style.position = 'fixed'; el.style.right = '18px'; el.style.bottom = '18px'; el.style.padding = '12px 14px'; el.style.borderRadius = '10px'; el.style.background = 'linear-gradient(90deg,var(--accent-2),#00e6c0)'; el.style.color = '#04211e'; el.style.boxShadow = '0 8px 30px rgba(0,0,0,0.5)'; el.style.fontWeight = '700';
+            document.body.appendChild(el);
+            setTimeout(() => el.style.opacity = 0, 1600);
+            setTimeout(() => el.remove(), 2200);
+        }
+
+        /* =========================
+           Events binding
+           ========================= */
+        document.getElementById('addProductBtn').onclick = openAddProductModal;
+        document.getElementById('recalcBtn').onclick = recalcStats;
+        document.getElementById('resetBtn').onclick = () => { if (confirm('Réinitialiser toutes les données locales ?')) { localStorage.removeItem(STORAGE_KEY); location.reload(); } };
+        document.getElementById('fastAddBtn').onclick = () => {
+            const pid = document.getElementById('fast-product').value.trim();
+            const name = document.getElementById('fast-name').value.trim();
+            const price = +document.getElementById('fast-price').value || 0;
+            const qty = +document.getElementById('fast-qty').value || 1;
+            if (!pid || !name) return alert('ID produit et nom requis');
+            if (!state.products.find(p => p.id === pid)) return alert('Produit introuvable');
+            addAccessory({ productId: pid, name, price, stock: qty });
+        };
+
+        qInput.addEventListener('input', () => render());
+        document.getElementById('periodSelect').addEventListener('change', recalcStats);
+
+        /* =========================
+           Initial render
+           ========================= */
+        render();
+
+        /* =========================
+           Notes pour intégration Firebase
+           ========================= */
+        /*
+          - Remplacer readState/saveState par lecture/écriture Firestore.
+          - Exemple (pseudocode):
+              const db = firebase.firestore();
+              // Charger produits
+              const prods = await db.collection('products').where('owner','==', uid).get();
+              // A la vente: db.collection('sales').add({...}); db.collection('products').doc(id).update({stock: newStock});
+          - Mettre en place Firebase Authentication et règles Firestore pour que seul l'admin puisse écrire.
+        */
+    </script>
+</body>
+
+</html>
