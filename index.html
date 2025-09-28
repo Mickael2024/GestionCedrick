@@ -584,6 +584,858 @@ textarea.form-control {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
+/* Styles pour les modals de confirmation */
+.confirm-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+
+.confirm-danger {
+    color: #f72585;
+}
+
+.confirm-warning {
+    color: #f8961e;
+}
+
+.confirm-info {
+    color: #4361ee;
+}
+
+.confirm-success {
+    color: #4cc9f0;
+}
+
+/* Animation de secousse pour les modals */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.modal.shake {
+    animation: shake 0.3s ease-in-out;
+}
+
+/* Styles pour les messages d'alerte */
+.alert-message {
+    background: #fff3e0;
+    border: 1px solid #ff9800;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.alert-message i {
+    color: #ff9800;
+}
+
+.alert-message.danger {
+    background: #ffebee;
+    border-color: #f44336;
+}
+
+.alert-message.danger i {
+    color: #f44336;
+}
+/* ===== RESPONSIVE SMARTPHONE ===== */
+
+/* Smartphones (max-width: 767px) */
+@media (max-width: 767px) {
+    /* Container et layout général */
+    .container {
+        padding: 0 10px;
+    }
+    
+    body {
+        padding: 5px;
+        font-size: 14px;
+    }
+    
+    /* Header */
+    header {
+        padding: 15px 0;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .logo {
+        justify-content: center;
+    }
+    
+    .logo h1 {
+        font-size: 1.3rem;
+    }
+    
+    .logo i {
+        font-size: 1.5rem;
+    }
+    
+    .user-info {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    /* Navigation */
+    nav {
+        margin-bottom: 15px;
+    }
+    
+    .nav-tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 0 5px;
+    }
+    
+    .nav-tabs li {
+        min-width: 100px;
+    }
+    
+    .nav-tabs a {
+        padding: 12px 15px;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+    
+    /* Dashboard Cards */
+    .dashboard-cards {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    
+    .card {
+        padding: 15px;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+        margin-bottom: 12px;
+    }
+    
+    .card-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+    }
+    
+    .card-value {
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+    }
+    
+    .card-footer {
+        font-size: 0.8rem;
+    }
+    
+    /* Chart */
+    .chart-container {
+        height: 250px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    
+    /* Boutons d'action dans les tables */
+    .action-buttons {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .btn-sm {
+        padding: 6px 8px;
+        font-size: 0.8rem;
+        min-height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Modals */
+    .modal-content {
+        width: 95%;
+        margin: 10px;
+        max-width: none;
+    }
+    
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 15px;
+    }
+    
+    .modal-title {
+        font-size: 1.2rem;
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .modal-footer .btn {
+       
+        justify-content: center;
+        min-height: 44px;
+    }
+    
+    /* Forms */
+    .form-group {
+        margin-bottom: 12px;
+    }
+    
+    .form-control {
+        padding: 12px;
+        font-size: 16px; /* Empêche le zoom sur iOS */
+        min-height: 44px;
+    }
+    
+    textarea.form-control {
+        min-height: 80px;
+    }
+    
+    /* Boutons généraux */
+    .btn {
+        padding: 12px 16px;
+        font-size: 0.9rem;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    /* Export buttons */
+    .export-buttons {
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+    }
+    
+    .export-buttons .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Toast notifications */
+    .toast-container {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+    }
+    
+    .toast {
+        min-width: auto;
+        width: 100%;
+        padding: 12px 15px;
+    }
+    
+    /* Login page */
+    .login-card {
+        padding: 20px;
+        margin: 10px;
+        width: 95%;
+    }
+    
+    .login-title {
+        font-size: 1.3rem;
+        margin-bottom: 20px;
+    }
+    
+    /* Feature grid pour les rapports */
+    .feature-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    /* Statuts stock */
+    .stock-low, .stock-out {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+    }
+}
+
+/* Très petits smartphones (max-width: 375px) */
+@media (max-width: 375px) {
+    .container {
+        padding: 0 5px;
+    }
+    
+    /* Header */
+    .logo h1 {
+        font-size: 1.1rem;
+    }
+    
+    /* Navigation */
+    .nav-tabs a {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .nav-tabs li {
+        min-width: 90px;
+    }
+    
+    /* Cards */
+    .card {
+        padding: 12px;
+    }
+    
+    .card-value {
+        font-size: 1.3rem;
+    }
+    
+   
+    /* Boutons */
+    .btn {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .btn i {
+        margin-right: 5px;
+    }
+    
+    /* Modals */
+    .modal-content {
+        margin: 5px;
+    }
+    
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 12px;
+    }
+}
+
+/* Orientation paysage sur mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+    .login-container {
+        padding: 10px 0;
+    }
+    
+    .login-card {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .modal-content {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .dashboard-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Correction pour les inputs sur iOS */
+@supports (-webkit-touch-callout: none) {
+    @media (max-width: 767px) {
+        .form-control {
+            font-size: 16px; /* Empêche le zoom automatique sur iOS */
+        }
+        
+        input, select, textarea {
+            font-size: 16px !important;
+        }
+    }
+}
+
+/* Améliorations pour le tactile */
+@media (hover: none) and (pointer: coarse) {
+    .btn {
+        min-height: 44px; /* Taille minimale pour les doigts */
+    }
+    
+    .nav-tabs a {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .action-buttons .btn-sm {
+        min-height: 36px;
+        min-width: 36px;
+    }
+    
+    /* Meilleur feedback tactile */
+    .btn:active {
+        transform: scale(0.98);
+        transition: transform 0.1s;
+    }
+    
+    .card:active {
+        transform: scale(0.99);
+        transition: transform 0.1s;
+    }
+}
+
+/* Support du mode somme automatique */
+@media (prefers-color-scheme: dark) {
+    @media (max-width: 767px) {
+    
+       
+    }
+}
+
+/* Animations réduites pour les préférences utilisateur */
+@media (prefers-reduced-motion: reduce) {
+    @media (max-width: 767px) {
+        .card,
+        .btn,
+        .modal-content {
+            transition: none;
+        }
+        
+        .toast {
+            animation: none;
+        }
+    }
+}
+
+/* Optimisations pour la performance mobile */
+@media (max-width: 767px) {
+    /* Réduire les ombres pour meilleures performances */
+    .card,
+    .modal-content {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Optimiser les transitions */
+    .card,
+    .btn {
+        transition: all 0.2s ease;
+    }
+}
+
+/* Correction pour le scroll horizontal involontaire */
+@media (max-width: 767px) {
+    body {
+        overflow-x: hidden;
+    }
+    
+    .container {
+        max-width: 100%;
+    }
+}
+
+/* Amélioration de la lisibilité sur petits écrans */
+@media (max-width: 767px) {
+    h2 {
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+    }
+    
+    h3 {
+        font-size: 1.1rem;
+    }
+    
+    .card-title {
+        font-size: 0.9rem;
+    }
+}
+
+
+/* Ajustements pour les modals de confirmation sur mobile */
+@media (max-width: 767px) {
+    #deleteConfirmModal .modal-content,
+    #confirmModal .modal-content {
+        width: 90%;
+        margin: 20px auto;
+    }
+    
+    .confirm-icon {
+        font-size: 3rem;
+    }
+}
+/* ===== TABLES RESPONSIVE CSS SEULEMENT ===== */
+
+@media (max-width: 767px) {
+    /* Container des tables */  
+    .table-container, #products, #sales{
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        background: var(--white);
+    }
+    
+    /* Tables */
+    
+ 
+    table {
+        min-width: 600px;
+        width: 100%;
+        font-size: 0.8rem;
+        border-collapse: collapse;
+   
+    }
+    
+    /* En-têtes de table */
+    th {
+        background: var(--primary);
+        color: white;
+        padding: 12px 8px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-align: left;
+        position: sticky;
+        left: 0;
+        white-space: nowrap;
+    }
+    
+    /* Cellules */
+    td {
+        padding: 10px 8px;
+        border-bottom: 1px solid #f0f0f0;
+        vertical-align: top;
+        background: var(--white);
+        position: relative;
+    }
+    
+    /* Première colonne fixe pour meilleure lisibilité */
+    th:first-child,
+    td:first-child {
+        position: sticky;
+        left: 0;
+        background: var(--white);
+        z-index: 2;
+        box-shadow: 1px 0 0 #f0f0f0;
+    }
+    
+    th:first-child {
+        background: var(--primary);
+        z-index: 3;
+    }
+    
+    /* Lignes */
+    tr {
+        transition: background-color 0.2s;
+    }
+    
+    tr:hover {
+        background: #f8f9fa;
+    }
+    
+    /* Boutons d'action dans les tables */
+    .action-buttons {
+        display: flex;
+        gap: 4px;
+        flex-wrap: nowrap;
+    }
+    
+    .action-buttons .btn-sm {
+        padding: 6px 8px;
+        font-size: 0.7rem;
+        min-width: 32px;
+        min-height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Indicateurs de stock */
+    .stock-low,
+    .stock-out {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+ 
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    
+    .stock-low {
+        background: #fff3e0;
+        color: #f57c00;
+    }
+    
+    .stock-out {
+        background: #ffebee;
+        color: #d32f2f;
+    }
+    
+    /* Scrollbar personnalisée pour mobile */
+    .table-container::-webkit-scrollbar {
+        height: 6px;
+    }
+    
+    .table-container::-webkit-scrollbar-thumb {
+        background: var(--primary);
+        border-radius: 3px;
+    }
+    
+    .table-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+    
+    /* Header des tables */
+    .table-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+        padding: 15px;
+    }
+    
+    .table-title {
+        font-size: 1.1rem;
+        text-align: center;
+    }
+    
+    /* Export buttons dans les tables */
+    .export-buttons {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+    }
+    
+    .export-buttons .btn {
+        flex: 1;
+        min-height: 44px;
+        font-size: 0.8rem;
+    }
+    
+    /* Styles spécifiques pour la table des produits */
+    #productsTable td:nth-child(1) { /* Nom */
+        min-width: 120px;
+        max-width: 150px;
+        word-break: break-word;
+    }
+    
+    #productsTable td:nth-child(2) { /* Catégorie */
+        min-width: 80px;
+    }
+    
+    #productsTable td:nth-child(3), /* Prix achat */
+    #productsTable td:nth-child(4) { /* Prix vente */
+        min-width: 70px;
+        text-align: right;
+    }
+    
+    #productsTable td:nth-child(5) { /* Stock */
+        min-width: 80px;
+        text-align: center;
+    }
+    
+    #productsTable td:nth-child(6) { /* Actions */
+        min-width: 100px;
+    }
+    
+    /* Styles spécifiques pour la table des ventes */
+    #salesTable td:nth-child(1) { /* Date */
+        min-width: 80px;
+    }
+    
+    #salesTable td:nth-child(2) { /* Produit */
+        min-width: 120px;
+        max-width: 150px;
+        word-break: break-word;
+    }
+    
+    #salesTable td:nth-child(3) { /* Quantité */
+        min-width: 50px;
+        text-align: center;
+    }
+    
+    #salesTable td:nth-child(4), /* Prix achat */
+    #salesTable td:nth-child(5), /* Prix vente */
+    #salesTable td:nth-child(6) { /* Bénéfice */
+        min-width: 70px;
+        text-align: right;
+    }
+    
+    /* Tableau de bord - Ventes récentes */
+    #recentSalesTable td:nth-child(1) { /* Date */
+        min-width: 80px;
+    }
+    
+    #recentSalesTable td:nth-child(2) { /* Produit */
+        min-width: 100px;
+        max-width: 130px;
+        word-break: break-word;
+    }
+    
+    #recentSalesTable td:nth-child(3) { /* Quantité */
+        min-width: 50px;
+        text-align: center;
+    }
+    
+    #recentSalesTable td:nth-child(4), /* Prix vente */
+    #recentSalesTable td:nth-child(5) { /* Total */
+        min-width: 70px;
+        text-align: right;
+    }
+    
+    /* Statistiques */
+    #statsTable td:nth-child(1) { /* Période */
+        min-width: 100px;
+    }
+    
+    #statsTable td:nth-child(2), /* CA */
+    #statsTable td:nth-child(3), /* Coût */
+    #statsTable td:nth-child(4) { /* Bénéfice */
+        min-width: 80px;
+        text-align: right;
+    }
+    
+    #statsTable td:nth-child(5) { /* Marge */
+        min-width: 60px;
+        text-align: center;
+    }
+}
+
+/* Très petits écrans (max-width: 375px) */
+@media (max-width: 375px) {
+    .table-container {
+        margin-bottom: 12px;
+    }
+    
+    table {
+        min-width: 550px;
+        font-size: 0.75rem;
+    }
+    
+    th, td {
+        padding: 8px 6px;
+    }
+    
+    .action-buttons .btn-sm {
+        padding: 4px 6px;
+        font-size: 0.65rem;
+        min-width: 28px;
+        min-height: 28px;
+    }
+    
+    .stock-low,
+    .stock-out {
+        font-size: 0.7rem;
+        padding: 3px 6px;
+    }
+    
+    .table-header {
+        padding: 12px;
+    }
+    
+    .table-title {
+        font-size: 1rem;
+    }
+}
+
+/* Orientation paysage sur mobile */
+@media (max-width: 767px) and (orientation: landscape) {
+    .table-container {
+        max-height: 60vh;
+        overflow: auto;
+    }
+    
+    table {
+        min-width: 700px;
+    }
+    
+    th {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+    }
+    
+    th:first-child {
+        z-index: 4;
+    }
+}
+
+/* Améliorations pour le scroll tactile */
+@media (max-width: 767px) {
+    .table-container {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+    
+    /* Indicateur visuel pour le scroll */
+    .table-container::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 20px;
+        background: linear-gradient(90deg, transparent, rgba(0,0,0,0.1));
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    
+    .table-container.scrolling::after {
+        opacity: 1;
+    }
+}
+
+/* Support du mode sombre pour les tables */
+@media (max-width: 767px) and (prefers-color-scheme: dark) {
+    
+    
+    th {
+        background: var(--secondary);
+    }
+    
+
+    
+    th:first-child {
+        background: var(--secondary);
+    }
+    
+    tr:hover {
+        background: #3d3d3d;
+    }
+    
+    .stock-low {
+        background: #332900;
+        color: #e5ff00;
+    }
+    
+    .stock-out {
+        background: #330000;
+        color: #ff5252;
+    }
+}
+
+/* Animation de chargement pour les tables */
+@media (max-width: 767px) {
+    .table-container.loading {
+        position: relative;
+        min-height: 100px;
+    }
+    
+    .table-container.loading::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 30px;
+        height: 30px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        z-index: 10;
+    }
+    
+    @keyframes spin {
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+}
     </style>
 </head>
 <body>
@@ -640,68 +1492,127 @@ textarea.form-control {
 
         <!-- Main Content -->
         <main class="container">
+            <!-- Modal de confirmation de suppression -->
+<div id="deleteConfirmModal" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                <i class="fas fa-exclamation-triangle" style="color: #f8961e; margin-right: 10px;"></i>
+                Confirmation de suppression
+            </h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div style="text-align: center; padding: 20px 0;">
+                <i class="fas fa-trash-alt" style="font-size: 3rem; color: #f72585; margin-bottom: 15px;"></i>
+                <p id="deleteConfirmMessage" style="font-size: 1.1rem; margin-bottom: 10px;">
+                    Êtes-vous sûr de vouloir supprimer ce produit ?
+                </p>
+                <p id="deleteWarningMessage" style="color: #f8961e; font-size: 0.9rem; display: none;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="warningText"></span>
+                </p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="cancelDeleteBtn">
+                <i class="fas fa-times"></i> Annuler
+            </button>
+            <button class="btn btn-danger" id="confirmDeleteBtn">
+                <i class="fas fa-trash"></i> Supprimer
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation générale -->
+<div id="confirmModal" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-header">
+            <h3 class="modal-title" id="confirmModalTitle">
+                <i class="fas fa-question-circle" style="color: #4361ee; margin-right: 10px;"></i>
+                Confirmation
+            </h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div style="text-align: center; padding: 20px 0;">
+                <i class="fas fa-info-circle" style="font-size: 3rem; color: #4361ee; margin-bottom: 15px;"></i>
+                <p id="confirmModalMessage" style="font-size: 1.1rem;">
+                    Êtes-vous sûr de vouloir continuer ?
+                </p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="cancelConfirmBtn">
+                <i class="fas fa-times"></i> Annuler
+            </button>
+            <button class="btn btn-primary" id="confirmActionBtn">
+                <i class="fas fa-check"></i> Confirmer
+            </button>
+        </div>
+    </div>
+</div>
           <!-- Modal d'édition de produit -->
-<!-- <div id="editProductModal" class="modal">
-  <div class="modal-content">
-      <div class="modal-header">
-          <h3 class="modal-title">Modifier le produit</h3>
-          <button class="close-modal">&times;</button>
-      </div>
-      <div class="modal-body">
-          <form id="editProductForm">
-              <input type="hidden" id="editProductId">
-              
-              <div class="form-group">
-                  <label class="form-label" for="editProductName">Nom du produit *</label>
-                  <input type="text" id="editProductName" class="form-control" required>
-              </div>
-              
-              <div class="form-group">
-                  <label class="form-label" for="editProductCategory">Catégorie *</label>
-                  <select id="editProductCategory" class="form-control" required>
-                      <option value="">Sélectionnez une catégorie</option>
-                      <option value="ordinateur">Ordinateur</option>
-                      <option value="telephone">Téléphone</option>
-                      <option value="tablette">Tablette</option>
-                      <option value="accessoire">Accessoire</option>
-                      <option value="composant">Composant</option>
-                      <option value="autre">Autre</option>
-                  </select>
-              </div>
-              
-              <div class="form-group">
-                  <label class="form-label" for="editPurchasePrice">Prix d'achat (Ar) *</label>
-                  <input type="number" id="editPurchasePrice" class="form-control" step="0.01" min="0" required>
-              </div>
-              
-              <div class="form-group">
-                  <label class="form-label" for="editSalePrice">Prix de vente (Ar) *</label>
-                  <input type="number" id="editSalePrice" class="form-control" step="0.01" min="0" required>
-              </div>
-              
-              <div class="form-group">
-                  <label class="form-label" for="editStockQuantity">Quantité en stock *</label>
-                  <input type="number" id="editStockQuantity" class="form-control" min="0" required>
-              </div>
-            
-          </form>
-      </div>
-      <div class="modal-footer">
-          <div style="display: flex; justify-content: space-between; width: 100%;">
-              <button class="btn btn-danger" id="deleteProductBtn">
-                  <i class="fas fa-trash"></i> Supprimer
-              </button>
-              <div>
-                  <button class="btn btn-primary" id="updateProductBtn">
-                      <i class="fas fa-save"></i> Mettre à jour
-                  </button>
-                  <button class="btn btn-secondary close-modal">Annuler</button>
-              </div>
-          </div>
-      </div>
-  </div>
-</div> -->
-            <!-- Dashboard Tab -->
+<!-- Modal d'édition de produit -->
+<div id="editProductModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Modifier le produit</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="editProductForm">
+                <input type="hidden" id="editProductId">
+                
+                <div class="form-group">
+                    <label class="form-label" for="editProductName">Nom du produit *</label>
+                    <input type="text" id="editProductName" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="editProductCategory">Catégorie *</label>
+                    <select id="editProductCategory" class="form-control" required>
+                        <option value="">Sélectionnez une catégorie</option>
+                        <option value="ordinateur">Ordinateur</option>
+                        <option value="telephone">Téléphone</option>
+                        <option value="tablette">Tablette</option>
+                        <option value="accessoire">Accessoire</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="editPurchasePrice">Prix d'achat (Ariary) *</label>
+                    <input type="number" id="editPurchasePrice" class="form-control" step="0.01" min="0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="editSalePrice">Prix de vente (Ariary) *</label>
+                    <input type="number" id="editSalePrice" class="form-control" step="0.01" min="0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="editStockQuantity">Quantité en stock *</label>
+                    <input type="number" id="editStockQuantity" class="form-control" min="0" required>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <div style="display: flex; justify-content: space-between; width: 100%;">
+                <button class="btn btn-danger" id="deleteProductBtn">
+                    <i class="fas fa-trash"></i> Supprimer
+                </button>
+                <div>
+                    <button class="btn btn-primary" id="updateProductBtn">
+                        <i class="fas fa-save"></i> Mettre à jour
+                    </button>
+                    <button class="btn btn-secondary close-modal">Annuler</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+          <!-- Dashboard Tab -->
             <div id="dashboard" class="tab-content active">
                 <h2 style="margin-bottom: 20px;">Tableau de bord</h2>
                 
@@ -1151,6 +2062,72 @@ textarea.form-control {
           if (resetDataBtn) {
               resetDataBtn.addEventListener('click', resetAllData);
           }
+          // Bouton de mise à jour du produit
+    document.getElementById('updateProductBtn').addEventListener('click', updateProduct);
+    // Fermeture du modal d'édition
+    document.querySelectorAll('#editProductModal .close-modal').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.getElementById('editProductModal').style.display = 'none';
+            document.getElementById('editProductForm').reset();
+        });
+    });
+     // Fermer le modal d'édition en cliquant à l'extérieur
+     document.getElementById('editProductModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.style.display = 'none';
+            document.getElementById('editProductForm').reset();
+        }
+    });
+    
+    // Soumission du formulaire d'édition avec Enter
+    document.getElementById('editProductForm').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            updateProduct();
+        }
+    });
+        // Confirmation de suppression
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+            if (currentDeleteCallback) {
+                currentDeleteCallback();
+            }
+            document.getElementById('deleteConfirmModal').style.display = 'none';
+            currentDeleteCallback = null;
+        });
+        document.getElementById('cancelDeleteBtn').addEventListener('click', function() {
+            document.getElementById('deleteConfirmModal').style.display = 'none';
+            currentDeleteCallback = null;
+        });
+         // Confirmation générale
+    document.getElementById('confirmActionBtn').addEventListener('click', function() {
+        if (currentConfirmCallback) {
+            currentConfirmCallback();
+        }
+        document.getElementById('confirmModal').style.display = 'none';
+        currentConfirmCallback = null;
+    });
+  // Fermeture des modals de confirmation
+  document.querySelectorAll('#deleteConfirmModal .close-modal, #confirmModal .close-modal').forEach(btn => {
+    btn.addEventListener('click', function() {
+        this.closest('.modal').style.display = 'none';
+        currentDeleteCallback = null;
+        currentConfirmCallback = null;
+    });
+});
+
+// Fermer en cliquant à l'extérieur
+document.getElementById('deleteConfirmModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        this.style.display = 'none';
+        currentDeleteCallback = null;
+    }
+});
+document.getElementById('confirmModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        this.style.display = 'none';
+        currentConfirmCallback = null;
+    }
+});
       }
   
       function handleLogin() {
@@ -1778,69 +2755,84 @@ textarea.form-control {
       }
   
       function editProduct(productId) {
-          const product = products.find(p => p.id === productId);
-          if (!product) return;
-          
-          document.getElementById('productName').value = product.name;
-          document.getElementById('productCategory').value = product.category;
-          document.getElementById('purchasePrice').value = product.purchasePrice;
-          document.getElementById('salePrice').value = product.salePrice;
-          document.getElementById('stockQuantity').value = product.stockQuantity;
-          
-          // Change modal title and button
-          document.querySelector('#addProductModal .modal-title').textContent = 'Modifier le produit';
-          document.getElementById('saveProductBtn').textContent = 'Modifier';
-          
-          // Change save function to update instead of create
-          document.getElementById('saveProductBtn').onclick = function() {
-              updateProduct(productId);
-          };
-          
-          document.getElementById('addProductModal').style.display = 'flex';
-      }
-  // Fonction de mise à jour du produit
-
-function updateProduct(productId) {
-          const name = document.getElementById('productName').value;
-          const category = document.getElementById('productCategory').value;
-          const purchasePrice = parseFloat(document.getElementById('purchasePrice').value);
-          const salePrice = parseFloat(document.getElementById('salePrice').value);
-          const stockQuantity = parseInt(document.getElementById('stockQuantity').value);
-          
-          if (!name || !category || isNaN(purchasePrice) || isNaN(salePrice) || isNaN(stockQuantity)) {
-              showToast('Veuillez remplir tous les champs correctement', 'error');
-              return;
-          }
-          
-          if (purchasePrice < 0 || salePrice < 0 || stockQuantity < 0) {
-              showToast('Les valeurs ne peuvent pas être négatives', 'error');
-              return;
-          }
-          
-          const productIndex = products.findIndex(p => p.id === productId);
-          if (productIndex === -1) {
-              showToast('Produit non trouvé', 'error');
-              return;
-          }
-          
-          products[productIndex].name = name;
-          products[productIndex].category = category;
-          products[productIndex].purchasePrice = purchasePrice;
-          products[productIndex].salePrice = salePrice;
-          products[productIndex].stockQuantity = stockQuantity;
-          
-          localStorage.setItem('products', JSON.stringify(products));
-          
-          document.getElementById('addProductModal').style.display = 'none';
-          document.getElementById('productForm').reset();
-          
-          // Reset modal to default state
-          resetProductForm();
-          
-          loadProductsTable();
-          showToast('Produit modifié avec succès', 'success');
-      }
-  
+        const product = products.find(p => p.id === productId);
+        if (!product) {
+            showToast('Produit non trouvé', 'error');
+            return;
+        }
+    
+        // Remplir le formulaire d'édition avec les données du produit
+        document.getElementById('editProductId').value = product.id;
+        document.getElementById('editProductName').value = product.name;
+        document.getElementById('editProductCategory').value = product.category;
+        document.getElementById('editPurchasePrice').value = product.purchasePrice;
+        document.getElementById('editSalePrice').value = product.salePrice;
+        document.getElementById('editStockQuantity').value = product.stockQuantity;
+    
+        // Configurer le bouton de suppression
+        document.getElementById('deleteProductBtn').onclick = function() {
+            deleteProduct(productId);
+        };
+    
+        // Ouvrir le modal d'édition
+        document.getElementById('editProductModal').style.display = 'flex';
+        
+        // Focus sur le premier champ
+        setTimeout(() => {
+            document.getElementById('editProductName').focus();
+        }, 100);
+    }
+    
+    function updateProduct() {
+        const productId = document.getElementById('editProductId').value;
+        const name = document.getElementById('editProductName').value.trim();
+        const category = document.getElementById('editProductCategory').value;
+        const purchasePrice = parseFloat(document.getElementById('editPurchasePrice').value);
+        const salePrice = parseFloat(document.getElementById('editSalePrice').value);
+        const stockQuantity = parseInt(document.getElementById('editStockQuantity').value);
+    
+        // Validation des champs requis
+        if (!name || !category || isNaN(purchasePrice) || isNaN(salePrice) || isNaN(stockQuantity)) {
+            showToast('Veuillez remplir tous les champs obligatoires', 'error');
+            return;
+        }
+    
+        if (purchasePrice < 0 || salePrice < 0 || stockQuantity < 0) {
+            showToast('Les valeurs ne peuvent pas être négatives', 'error');
+            return;
+        }
+    
+        const productIndex = products.findIndex(p => p.id === productId);
+        if (productIndex === -1) {
+            showToast('Produit non trouvé', 'error');
+            return;
+        }
+    
+        // Mettre à jour le produit
+        products[productIndex] = {
+            ...products[productIndex],
+            name,
+            category,
+            purchasePrice,
+            salePrice,
+            stockQuantity,
+            updatedAt: new Date().toISOString()
+        };
+    
+        // Sauvegarder dans le localStorage
+        localStorage.setItem('products', JSON.stringify(products));
+    
+        // Fermer le modal
+        document.getElementById('editProductModal').style.display = 'none';
+        document.getElementById('editProductForm').reset();
+    
+        // Mettre à jour l'interface
+        loadProductsTable();
+        loadDashboardData();
+        loadReportsData();
+    
+        showToast('Produit modifié avec succès', 'success');
+    }
       function resetProductForm() {
           document.querySelector('#addProductModal .modal-title').textContent = 'Ajouter un produit';
           document.getElementById('saveProductBtn').textContent = 'Enregistrer';
@@ -1848,31 +2840,106 @@ function updateProduct(productId) {
           document.getElementById('productForm').reset();
       }
   
-      function deleteProduct(productId) {
-          if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-              // Vérifier si le produit a des ventes associées
-              const productSales = sales.filter(sale => sale.productId === productId);
-              if (productSales.length > 0) {
-                  if (!confirm('Ce produit a des ventes associées. Supprimer le produit supprimera également ces ventes. Continuer ?')) {
-                      return;
-                  }
-                  // Supprimer les ventes associées
-                  sales = sales.filter(sale => sale.productId !== productId);
-                  localStorage.setItem('sales', JSON.stringify(sales));
-              }
-              
-              products = products.filter(p => p.id !== productId);
-              localStorage.setItem('products', JSON.stringify(products));
-              
-              loadProductsTable();
-              loadSalesTable();
-              loadDashboardData();
-              loadReportsData();
-              
-              showToast('Produit supprimé avec succès', 'success');
-          }
-      }
-  
+    // Variables pour gérer les callbacks de confirmation
+let currentDeleteCallback = null;
+let currentConfirmCallback = null;
+
+function deleteProduct(productId) {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+
+    // Vérifier les ventes associées
+    const productSales = sales.filter(sale => sale.productId === productId);
+    
+    let message = `Êtes-vous sûr de vouloir supprimer le produit "<strong>${product.name}</strong>" ?`;
+    let warningMessage = '';
+    let showWarning = false;
+
+    if (productSales.length > 0) {
+        const totalRevenue = productSales.reduce((sum, sale) => sum + sale.total, 0);
+        warningMessage = `Ce produit a ${productSales.length} vente(s) associée(s) pour un total de ${totalRevenue.toFixed(2)} Ariary. Supprimer le produit supprimera également ces ventes.`;
+        showWarning = true;
+    }
+
+    // Afficher le modal de confirmation
+    showDeleteConfirm(message, warningMessage, showWarning, () => {
+        // Callback exécuté si l'utilisateur confirme
+        performProductDeletion(productId, productSales);
+    });
+}
+
+function performProductDeletion(productId, productSales) {
+    // Supprimer les ventes associées si elles existent
+    if (productSales.length > 0) {
+        sales = sales.filter(sale => sale.productId !== productId);
+        localStorage.setItem('sales', JSON.stringify(sales));
+    }
+    
+    // Supprimer le produit
+    products = products.filter(p => p.id !== productId);
+    localStorage.setItem('products', JSON.stringify(products));
+    
+    // Fermer le modal d'édition si ouvert
+    document.getElementById('editProductModal').style.display = 'none';
+    
+    // Mettre à jour l'interface
+    loadProductsTable();
+    loadSalesTable();
+    loadDashboardData();
+    loadReportsData();
+    
+    showToast('Produit supprimé avec succès', 'success');
+}
+
+// Fonction pour afficher la confirmation de suppression
+function showDeleteConfirm(message, warningMessage = '', showWarning = false, callback) {
+    currentDeleteCallback = callback;
+    
+    // Mettre à jour les messages
+    document.getElementById('deleteConfirmMessage').innerHTML = message;
+    
+    const warningElement = document.getElementById('deleteWarningMessage');
+    const warningText = document.getElementById('warningText');
+    
+    if (showWarning && warningMessage) {
+        warningElement.style.display = 'block';
+        warningText.textContent = warningMessage;
+    } else {
+        warningElement.style.display = 'none';
+    }
+    
+    // Afficher le modal
+    document.getElementById('deleteConfirmModal').style.display = 'flex';
+}
+
+// Fonction de confirmation générale réutilisable
+function showConfirm(title, message, callback, options = {}) {
+    currentConfirmCallback = callback;
+    
+    const {
+        type = 'info',
+        confirmText = 'Confirmer',
+        cancelText = 'Annuler',
+        icon = 'fa-question-circle'
+    } = options;
+    
+    // Mettre à jour le modal
+    document.getElementById('confirmModalTitle').innerHTML = 
+        `<i class="fas ${icon} confirm-${type}" style="margin-right: 10px;"></i>${title}`;
+    
+    document.getElementById('confirmModalMessage').textContent = message;
+    document.getElementById('confirmActionBtn').innerHTML = 
+        `<i class="fas fa-check"></i> ${confirmText}`;
+    document.getElementById('cancelConfirmBtn').innerHTML = 
+        `<i class="fas fa-times"></i> ${cancelText}`;
+    
+    // Changer la couleur du bouton selon le type
+    const confirmBtn = document.getElementById('confirmActionBtn');
+    confirmBtn.className = `btn btn-${type}`;
+    
+    // Afficher le modal
+    document.getElementById('confirmModal').style.display = 'flex';
+}
       function exportToCSV() {
           if (sales.length === 0) {
               showToast('Aucune vente à exporter', 'warning');
