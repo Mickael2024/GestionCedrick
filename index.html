@@ -1681,6 +1681,201 @@ textarea.form-control {
         grid-template-columns: 1fr;
     }
 }
+/* Styles pour le chat IA */
+.chat-modal {
+    display: flex;
+    flex-direction: column;
+    max-width: 500px;
+    height: 80vh;
+}
+
+.chat-body {
+    flex: 1;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-messages {
+    overflow: auto;
+    height: 395px;
+    padding: 20px;
+    background: #f8f9fa;
+}
+
+.chat-footer {
+    padding: 15px;
+    border-top: 1px solid #eee;
+    background: white;
+}
+
+.chat-input-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.chat-input {
+    flex: 1;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    outline: none;
+    font-size: 14px;
+}
+
+.chat-input:focus {
+    border-color: #4361ee;
+}
+
+.chat-input:disabled {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+}
+
+.chat-status {
+    font-size: 0.8rem;
+    text-align: center;
+    padding: 5px;
+}
+
+/* Messages */
+.message {
+    display: flex;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+.user-message {
+    justify-content: flex-end;
+}
+
+.ai-message {
+    justify-content: flex-start;
+}
+
+.message-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.user-message .message-avatar {
+    background: #4361ee;
+    color: white;
+    order: 2;
+}
+
+.ai-message .message-avatar {
+    background: #6c757d;
+    color: white;
+}
+
+.message-content {
+    max-width: 70%;
+    background: white;
+    padding: 12px 15px;
+    border-radius: 18px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.user-message .message-content {
+    background: #4361ee;
+    color: white;
+    border-bottom-right-radius: 5px;
+}
+
+.ai-message .message-content {
+    background: white;
+    border-bottom-left-radius: 5px;
+}
+
+.message-text {
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+.message-text ul {
+    margin: 5px 0;
+    padding-left: 20px;
+}
+
+.message-text li {
+    margin-bottom: 3px;
+}
+
+.message-time {
+    font-size: 0.7rem;
+    opacity: 0.7;
+    margin-top: 5px;
+}
+
+.user-message .message-time {
+    text-align: right;
+}
+
+/* Indicateur de frappe */
+.typing-indicator {
+    display: flex;
+    gap: 3px;
+    padding: 10px 0;
+}
+
+.typing-indicator span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #6c757d;
+    animation: typing 1.4s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+.typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes typing {
+    0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+    40% { transform: scale(1); opacity: 1; }
+}
+
+/* Scrollbar personnalisée */
+.chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .chat-modal {
+        width: 95% !important;
+        height: 90vh;
+        margin: 10px;
+    }
+    
+    .message-content {
+        max-width: 85%;
+    }
+    
+    .chat-input-container {
+        flex-direction: column;
+    }
+    
+    #sendChatBtn {
+        align-self: flex-end;
+        width: 100px;
+    }
+}
     </style>
 </head>
 <body>
@@ -1715,6 +1910,9 @@ textarea.form-control {
                     </div>
                     <div class="user-info">
                         <span id="userDisplayName">Administrateur</span>
+                        <button class="btn btn-info" id="aiChatBtn">
+                            <i class="fas fa-robot"></i> Assistant IA
+                        </button>
                         <button id="logoutBtn" class="btn btn-primary">
                             <i class="fas fa-sign-out-alt"></i> Déconnexion
                         </button>
@@ -2128,7 +2326,53 @@ textarea.form-control {
             </div>
         </div>
     </div>
-
+<!-- Ajoutez ce modal à la fin du body -->
+<div id="aiChatModal" class="modal">
+    <div class="modal-content chat-modal" style="max-width: 500px; height: 80vh;">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                <i class="fas fa-robot"></i> Assistant IA - Analyse Marché
+            </h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body chat-body">
+            <div id="chatMessages" class="chat-messages">
+                <div class="message ai-message">
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-text">
+                            Bonjour ! Je suis votre assistant IA pour analyser votre gestion de stock. 
+                            Je peux vous aider à :
+                            <ul>
+                                <li>📊 Analyser vos performances commerciales</li>
+                                <li>💡 Donner des conseils pour optimiser vos stocks</li>
+                                <li>📈 Identifier les tendances de vente</li>
+                                <li>🎯 Suggérer des stratégies marketing</li>
+                            </ul>
+                            Posez-moi vos questions sur vos données !
+                        </div>
+                        <div class="message-time" id="currentTime"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer chat-footer">
+            <div class="chat-input-container">
+                <input type="text" id="chatInput" class="chat-input" 
+                       placeholder="Posez votre question sur vos données..." 
+                       disabled>
+                <button id="sendChatBtn" class="btn btn-primary" disabled>
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            <div class="chat-status" id="chatStatus">
+                <!-- /<i class="fas fa-wifi"></i> En attente de connexion... -->
+            </div>
+        </div>
+    </div>
+</div>
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
@@ -3810,6 +4054,432 @@ document.addEventListener('DOMContentLoaded', function() {
         statsBtn.addEventListener('click', showProductsStats);
     }
 });
+// Variables pour le chat IA
+let chatHistory = [];
+let isOnline = false;
+
+// Initialisation du chat
+function initializeChat() {
+
+    setupChatEventListeners();
+    checkConnection();   
+}
+
+// Vérifier la connexion internet
+function checkConnection() {
+   
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendChatBtn');
+    
+    
+        chatInput.disabled = false;
+        sendBtn.disabled = false;
+        chatInput.placeholder = "Posez votre question sur vos données...";
+    
+}
+
+// Configuration des événements du chat
+function setupChatEventListeners() {
+    // Bouton d'ouverture du chat
+    document.getElementById('aiChatBtn').addEventListener('click', openChat);
+    
+    // Envoi de message avec Enter
+    document.getElementById('chatInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && isOnline) {
+            sendMessage();
+        }
+    });
+    
+    // Bouton d'envoi
+    document.getElementById('sendChatBtn').addEventListener('click', sendMessage);
+    
+    // Fermeture du modal
+    document.querySelectorAll('#aiChatModal .close-modal').forEach(btn => {
+        btn.addEventListener('click', closeChat);
+    });
+    
+    document.getElementById('aiChatModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeChat();
+        }
+    });
+}
+
+// Ouvrir le chat
+function openChat() {
+    document.getElementById('aiChatModal').style.display = 'flex';
+    document.getElementById('chatInput').focus();
+    updateCurrentTime();
+}
+
+// Fermer le chat
+function closeChat() {
+    document.getElementById('aiChatModal').style.display = 'none';
+}
+
+// Envoyer un message
+function sendMessage() {
+    const chatInput = document.getElementById('chatInput');
+    const message = chatInput.value.trim();
+    
+    if (!message) return;
+    
+    // Ajouter le message de l'utilisateur
+    addUserMessage(message);
+    chatInput.value = '';
+    
+    // Simuler un temps de traitement
+    showTypingIndicator();
+    
+    // Analyser et répondre
+    setTimeout(() => {
+        removeTypingIndicator();
+        const response = generateAIResponse(message);
+        addAIMessage(response);
+    }, 2000);
+}
+
+// Ajouter un message utilisateur
+function addUserMessage(message) {
+    const chatMessages = document.getElementById('chatMessages');
+    const messageElement = document.createElement('div');
+    messageElement.className = 'message user-message';
+    messageElement.innerHTML = `
+        <div class="message-content">
+            <div class="message-text">${escapeHtml(message)}</div>
+            <div class="message-time">${getCurrentTime()}</div>
+        </div>
+        <div class="message-avatar">
+            <i class="fas fa-user"></i>
+        </div>
+    `;
+    
+    chatMessages.appendChild(messageElement);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    // Sauvegarder dans l'historique
+    chatHistory.push({
+        type: 'user',
+        message: message,
+        time: new Date().toISOString()
+    });
+}
+
+// Ajouter un message IA
+function addAIMessage(message) {
+    const chatMessages = document.getElementById('chatMessages');
+    const messageElement = document.createElement('div');
+    messageElement.className = 'message ai-message';
+    messageElement.innerHTML = `
+        <div class="message-avatar">
+            <i class="fas fa-robot"></i>
+        </div>
+        <div class="message-content">
+            <div class="message-text">${message}</div>
+            <div class="message-time">${getCurrentTime()}</div>
+        </div>
+    `;
+    
+    chatMessages.appendChild(messageElement);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    // Sauvegarder dans l'historique
+    chatHistory.push({
+        type: 'ai',
+        message: message,
+        time: new Date().toISOString()
+    });
+}
+
+// Générer la réponse IA
+function generateAIResponse(userMessage) {
+    const analysis = analyzeBusinessData();
+    const lowerMessage = userMessage.toLowerCase();
+    
+    // Analyse des intentions
+    if (lowerMessage.includes('bonjour') || lowerMessage.includes('salut') || lowerMessage.includes('hello')) {
+        return generateGreetingResponse();
+    }
+    else if (lowerMessage.includes('performance') || lowerMessage.includes('chiffre') || lowerMessage.includes('bénéfice')) {
+        return generatePerformanceResponse(analysis);
+    }
+    else if (lowerMessage.includes('stock') || lowerMessage.includes('inventaire') || lowerMessage.includes('quantité')) {
+        return generateStockResponse(analysis);
+    }
+    else if (lowerMessage.includes('vente') || lowerMessage.includes('vendu') || lowerMessage.includes('produit populaire')) {
+        return generateSalesResponse(analysis);
+    }
+    else if (lowerMessage.includes('conseil') || lowerMessage.includes('suggestion') || lowerMessage.includes('améliorer')) {
+        return generateAdviceResponse(analysis);
+    }
+    else if (lowerMessage.includes('catégorie') || lowerMessage.includes('type')) {
+        return generateCategoryResponse(analysis);
+    }
+    else if (lowerMessage.includes('risque') || lowerMessage.includes('problème') || lowerMessage.includes('attention')) {
+        return generateRiskResponse(analysis);
+    }
+    else {
+        return generateGeneralResponse(analysis);
+    }
+}
+
+// Analyser les données commerciales
+function analyzeBusinessData() {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    
+    // Ventes du mois
+    const currentMonthSales = sales.filter(sale => {
+        const saleDate = new Date(sale.date);
+        return saleDate.getMonth() === currentMonth && saleDate.getFullYear() === currentYear;
+    });
+    
+    const monthlyRevenue = currentMonthSales.reduce((sum, sale) => sum + sale.total, 0);
+    const monthlyProfit = currentMonthSales.reduce((sum, sale) => sum + sale.profit, 0);
+    const monthlyCost = currentMonthSales.reduce((sum, sale) => sum + (sale.purchasePrice * sale.quantity), 0);
+    
+    // Produits les plus vendus
+    const productSales = {};
+    currentMonthSales.forEach(sale => {
+        if (!productSales[sale.productId]) {
+            productSales[sale.productId] = {
+                name: sale.productName,
+                quantity: 0,
+                revenue: 0
+            };
+        }
+        productSales[sale.productId].quantity += sale.quantity;
+        productSales[sale.productId].revenue += sale.total;
+    });
+    
+    const topProducts = Object.values(productSales)
+        .sort((a, b) => b.quantity - a.quantity)
+        .slice(0, 3);
+    
+    // Analyse des stocks
+    const totalStockValue = products.reduce((sum, product) => sum + (product.purchasePrice * product.stockQuantity), 0);
+    const lowStockProducts = products.filter(p => p.stockQuantity < 5 && p.stockQuantity > 0);
+    const outOfStockProducts = products.filter(p => p.stockQuantity === 0);
+    
+    // Analyse par catégorie
+    const categoryStats = {};
+    products.forEach(product => {
+        if (!categoryStats[product.category]) {
+            categoryStats[product.category] = {
+                count: 0,
+                totalStock: 0,
+                totalValue: 0
+            };
+        }
+        categoryStats[product.category].count++;
+        categoryStats[product.category].totalStock += product.stockQuantity;
+        categoryStats[product.category].totalValue += product.purchasePrice * product.stockQuantity;
+    });
+    
+    return {
+        monthlyRevenue,
+        monthlyProfit,
+        monthlyCost,
+        profitMargin: monthlyRevenue > 0 ? (monthlyProfit / monthlyRevenue * 100) : 0,
+        topProducts,
+        totalProducts: products.length,
+        totalStockValue,
+        lowStockProducts: lowStockProducts.length,
+        outOfStockProducts: outOfStockProducts.length,
+        categoryStats,
+        totalSales: currentMonthSales.length,
+        averageSaleValue: currentMonthSales.length > 0 ? monthlyRevenue / currentMonthSales.length : 0
+    };
+}
+
+// Générer les réponses spécifiques
+function generateGreetingResponse() {
+    return `Bonjour ! Je suis ravi de vous aider à analyser votre activité. J'ai examiné vos données et je peux vous donner des insights sur vos performances, stocks, et ventes. Que souhaitez-vous savoir en particulier ?`;
+}
+
+function generatePerformanceResponse(analysis) {
+    const performance = analysis.monthlyProfit >= 0 ? 'positive' : 'négative';
+    const marginLevel = analysis.profitMargin > 30 ? 'excellente' : 
+                       analysis.profitMargin > 20 ? 'bonne' : 
+                       analysis.profitMargin > 10 ? 'moyenne' : 'faible';
+    
+    return `📊 <strong>Performances du mois :</strong><br>
+    • Chiffre d'affaires : <strong>${analysis.monthlyRevenue.toFixed(2)} Ar</strong><br>
+    • Bénéfice : <strong>${analysis.monthlyProfit.toFixed(2)} Ar</strong> (${performance})<br>
+    • Marge bénéficiaire : <strong>${analysis.profitMargin.toFixed(1)}%</strong> (${marginLevel})<br>
+    • Nombre de ventes : <strong>${analysis.totalSales}</strong><br>
+    • Valeur moyenne par vente : <strong>${analysis.averageSaleValue.toFixed(2)} Ar</strong><br><br>
+    Votre performance est ${performance} ce mois-ci.`;
+}
+
+function generateStockResponse(analysis) {
+    const stockHealth = analysis.lowStockProducts === 0 && analysis.outOfStockProducts === 0 ? 'excellente' :
+                       analysis.outOfStockProducts > 0 ? 'critique' : 'à surveiller';
+    
+    return `📦 <strong>Analyse des stocks :</strong><br>
+    • Produits en stock : <strong>${analysis.totalProducts}</strong><br>
+    • Valeur totale du stock : <strong>${analysis.totalStockValue.toFixed(2)} Ar</strong><br>
+    • Produits en rupture : <strong>${analysis.outOfStockProducts}</strong><br>
+    • Produits stock faible : <strong>${analysis.lowStockProducts}</strong><br><br>
+    Votre santé des stocks est <strong>${stockHealth}</strong>. ${
+        analysis.outOfStockProducts > 0 ? 
+        '⚠️ <strong>Attention :</strong> Vous avez des produits en rupture qui font perdre des ventes.' :
+        analysis.lowStockProducts > 0 ?
+        '🔸 <strong>Conseil :</strong> Pensez à réapprovisionner les produits à stock faible.' :
+        '✅ <strong>Excellent :</strong> Votre gestion des stocks est optimale.'
+    }`;
+}
+
+function generateSalesResponse(analysis) {
+    if (analysis.topProducts.length === 0) {
+        return `📈 <strong>Analyse des ventes :</strong><br>
+        Aucune vente enregistrée ce mois-ci. C'est le moment de lancer des actions commerciales !`;
+    }
+    
+    let productsList = analysis.topProducts.map((product, index) => 
+        `${index + 1}. <strong>${product.name}</strong> - ${product.quantity} unités (${product.revenue.toFixed(2)} Ar)`
+    ).join('<br>');
+    
+    return `📈 <strong>Top produits du mois :</strong><br>${productsList}<br><br>
+    <strong>Insight :</strong> Ces produits représentent vos meilleures performances. Pensez à :<br>
+    • Maintenir leur stock<br>
+    • Créer des offres groupées<br>
+    • Mettre en avant ces produits`;
+}
+
+function generateAdviceResponse(analysis) {
+    const advice = [];
+    
+    if (analysis.outOfStockProducts > 0) {
+        advice.push('🔸 <strong>Réapprovisionnement urgent</strong> pour les produits en rupture');
+    }
+    
+    if (analysis.lowStockProducts > 0) {
+        advice.push('🔸 <strong>Surveiller les stocks</strong> des produits à faible niveau');
+    }
+    
+    if (analysis.profitMargin < 15) {
+        advice.push('🔸 <strong>Revoir les prix</strong> pour améliorer la marge bénéficiaire');
+    }
+    
+    if (analysis.totalSales === 0) {
+        advice.push('🔸 <strong>Stratégie commerciale</strong> à renforcer - aucune vente ce mois');
+    }
+    
+    if (analysis.monthlyRevenue > 0 && analysis.averageSaleValue < 10000) {
+        advice.push('🔸 <strong>Vente croisée</strong> pour augmenter le panier moyen');
+    }
+    
+    if (advice.length === 0) {
+        advice.push('✅ <strong>Continuez ainsi !</strong> Votre gestion est optimale');
+    }
+    
+    return `💡 <strong>Conseils pour optimiser votre activité :</strong><br>${advice.join('<br>')}`;
+}
+
+function generateCategoryResponse(analysis) {
+    const categories = Object.entries(analysis.categoryStats)
+        .map(([category, stats]) => 
+            `• <strong>${category}</strong> : ${stats.count} produits, ${stats.totalStock} unités`
+        ).join('<br>');
+    
+    return `🏷️ <strong>Répartition par catégorie :</strong><br>${categories}`;
+}
+
+function generateRiskResponse(analysis) {
+    const risks = [];
+    
+    if (analysis.outOfStockProducts > 0) {
+        risks.push(`🔴 <strong>Rupture de stock</strong> : ${analysis.outOfStockProducts} produit(s) non disponible(s)`);
+    }
+    
+    if (analysis.lowStockProducts > 3) {
+        risks.push(`🟡 <strong>Stock faible</strong> : ${analysis.lowStockProducts} produit(s) à réapprovisionner`);
+    }
+    
+    if (analysis.profitMargin < 10) {
+        risks.push(`🟠 <strong>Marge faible</strong> : ${analysis.profitMargin.toFixed(1)}% - risque de rentabilité`);
+    }
+    
+    if (analysis.totalSales === 0) {
+        risks.push(`🔴 <strong>Aucune vente</strong> : activité commerciale à relancer`);
+    }
+    
+    if (risks.length === 0) {
+        return `✅ <strong>Aucun risque majeur</strong> détecté. Votre activité est saine !`;
+    }
+    
+    return `⚠️ <strong>Risques identifiés :</strong><br>${risks.join('<br>')}`;
+}
+
+function generateGeneralResponse(analysis) {
+    return `🤖 <strong>Analyse globale de votre activité :</strong><br>
+    J'ai analysé vos données et voici mon résumé :<br><br>
+    • <strong>Performance commerciale</strong> : ${analysis.monthlyRevenue.toFixed(2)} Ar de CA ce mois<br>
+    • <strong>Rentabilité</strong> : Marge de ${analysis.profitMargin.toFixed(1)}%<br>
+    • <strong>Gestion des stocks</strong> : ${analysis.totalProducts} produits, ${analysis.lowStockProducts} à faible stock<br>
+    • <strong>Activité</strong> : ${analysis.totalSales} ventes réalisées<br><br>
+    Pour une analyse plus spécifique, demandez-moi :<br>
+    • "Comment sont mes performances ?"<br>
+    • "Quels sont mes produits les plus vendus ?"<br>
+    • "Donne-moi des conseils pour améliorer"<br>
+    • "Y a-t-il des risques ?"`;
+}
+
+// Utilitaires
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function getCurrentTime() {
+    return new Date().toLocaleTimeString('fr-FR', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+    });
+}
+
+function updateCurrentTime() {
+    document.getElementById('currentTime').textContent = getCurrentTime();
+}
+
+function showTypingIndicator() {
+    const chatMessages = document.getElementById('chatMessages');
+    const typingElement = document.createElement('div');
+    typingElement.className = 'message ai-message typing';
+    typingElement.id = 'typingIndicator';
+    typingElement.innerHTML = `
+        <div class="message-avatar">
+            <i class="fas fa-robot"></i>
+        </div>
+        <div class="message-content">
+            <div class="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    `;
+    chatMessages.appendChild(typingElement);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function removeTypingIndicator() {
+    const typingElement = document.getElementById('typingIndicator');
+    if (typingElement) {
+        typingElement.remove();
+    }
+}
+
+// Initialiser le chat au chargement
+document.addEventListener('DOMContentLoaded', function() {
+    initializeChat();
+});
+
+// Écouter les changements de connexion
+
         // Make functions available globally for onclick handlers
         window.editProduct = editProduct;
         window.deleteProduct = deleteProduct;
