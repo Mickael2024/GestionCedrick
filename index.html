@@ -1436,6 +1436,251 @@ textarea.form-control {
         100% { transform: translate(-50%, -50%) rotate(360deg); }
     }
 }
+/* Styles pour le modal des statistiques */
+.stats-modal {
+    max-width: 800px !important;
+}
+
+.stats-container {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.stats-section {
+    margin-bottom: 25px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #4361ee;
+}
+
+.stats-section h4 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+/* Produits les plus vendus */
+.products-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.product-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.product-rank {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.medal {
+    font-size: 1.5rem;
+}
+
+.rank {
+    background: #4361ee;
+    color: white;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.product-info {
+    flex: 1;
+}
+
+.product-name {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.product-stats {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.product-stats .stat {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.product-stats .stat.profit {
+    color: #28a745;
+    font-weight: 500;
+}
+
+/* Produits non vendus */
+.unsold-products {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.unsold-item {
+    padding: 10px;
+    background: white;
+    border-radius: 6px;
+    border-left: 4px solid #6c757d;
+}
+
+.unsold-item.stock-low {
+    border-left-color: #ffc107;
+}
+
+.unsold-item.stock-out {
+    border-left-color: #dc3545;
+}
+
+.product-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.product-category {
+    background: #e9ecef;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.product-details {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+/* Catégories */
+.category-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.category-item {
+    padding: 12px;
+    background: white;
+    border-radius: 6px;
+}
+
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.category-name {
+    font-weight: 600;
+    color: #333;
+}
+
+.category-count {
+    background: #4361ee;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+.category-details {
+    display: flex;
+    gap: 15px;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+/* Performances financières */
+.financial-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.financial-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.financial-item i {
+    font-size: 1.5rem;
+    color: #4361ee;
+}
+
+.financial-info {
+    flex: 1;
+}
+
+.financial-label {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.financial-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.financial-value.profit {
+    color: #28a745;
+}
+
+.no-data {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .stats-modal {
+        width: 95% !important;
+        margin: 10px;
+    }
+    
+    .product-stats {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .product-details {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .financial-stats {
+        grid-template-columns: 1fr;
+    }
+}
     </style>
 </head>
 <body>
@@ -1781,6 +2026,9 @@ textarea.form-control {
                 <div class="table-container">
                     <div class="table-header">
                         <div class="table-title">Statistiques détaillées</div>
+                        <button class="btn btn-info" id="productsStatsBtn">
+                            <i class="fas fa-chart-bar"></i> Stats Produits
+                        </button>
                         <button class="btn btn-primary" id="resetMonthBtn">
                             <i class="fas fa-redo"></i> Réinitialiser le mois
                         </button>
@@ -3185,6 +3433,383 @@ function showConfirm(title, message, callback, options = {}) {
                 }
             });
         }
+        // Fonction pour afficher les statistiques des produits
+function showProductsStats() {
+    if (products.length === 0) {
+        showToast('Aucun produit enregistré', 'warning');
+        return;
+    }
+
+    const stats = calculateProductsStats();
+    
+    // Créer le contenu HTML pour le modal
+    let htmlContent = `
+        <div class="stats-container">
+            <div class="stats-section">
+                <h4><i class="fas fa-trophy" style="color: #FFD700;"></i> Top 5 des produits les plus vendus</h4>
+                ${generateTopProductsHTML(stats.topProducts)}
+            </div>
+            
+            <div class="stats-section">
+                <h4><i class="fas fa-exclamation-triangle" style="color: #FF6B6B;"></i> Produits non vendus ce mois</h4>
+                ${generateUnsoldProductsHTML(stats.unsoldProducts)}
+            </div>
+            
+            <div class="stats-section">
+                <h4><i class="fas fa-chart-pie" style="color: #4ECDC4;"></i> Répartition par catégorie</h4>
+                ${generateCategoryStatsHTML(stats.categoryStats)}
+            </div>
+            
+            <div class="stats-section">
+                <h4><i class="fas fa-money-bill-wave" style="color: #45B7D1;"></i> Performances financières</h4>
+                ${generateFinancialStatsHTML(stats.financialStats)}
+            </div>
+        </div>
+    `;
+    
+    // Afficher le modal
+    showStatsModal('Statistiques des Produits', htmlContent);
+}
+
+// Calculer toutes les statistiques des produits
+function calculateProductsStats() {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    
+    // Ventes du mois en cours
+    const currentMonthSales = sales.filter(sale => {
+        const saleDate = new Date(sale.date);
+        return saleDate.getMonth() === currentMonth && saleDate.getFullYear() === currentYear;
+    });
+    
+    // Produits les plus vendus
+    const productSales = {};
+    currentMonthSales.forEach(sale => {
+        if (!productSales[sale.productId]) {
+            productSales[sale.productId] = {
+                name: sale.productName,
+                quantity: 0,
+                revenue: 0,
+                profit: 0
+            };
+        }
+        productSales[sale.productId].quantity += sale.quantity;
+        productSales[sale.productId].revenue += sale.total;
+        productSales[sale.productId].profit += sale.profit;
+    });
+    
+    const topProducts = Object.values(productSales)
+        .sort((a, b) => b.quantity - a.quantity)
+        .slice(0, 5);
+    
+    // Produits non vendus ce mois
+    const soldProductIds = new Set(currentMonthSales.map(sale => sale.productId));
+    const unsoldProducts = products
+        .filter(product => !soldProductIds.has(product.id))
+        .map(product => ({
+            name: product.name,
+            category: product.category,
+            stock: product.stockQuantity,
+            purchasePrice: product.purchasePrice,
+            salePrice: product.salePrice
+        }));
+    
+    // Statistiques par catégorie
+    const categoryStats = {};
+    products.forEach(product => {
+        if (!categoryStats[product.category]) {
+            categoryStats[product.category] = {
+                count: 0,
+                totalStock: 0,
+                totalValue: 0
+            };
+        }
+        categoryStats[product.category].count++;
+        categoryStats[product.category].totalStock += product.stockQuantity;
+        categoryStats[product.category].totalValue += product.purchasePrice * product.stockQuantity;
+    });
+    
+    // Performances financières
+    const totalStockValue = products.reduce((sum, product) => 
+        sum + (product.purchasePrice * product.stockQuantity), 0);
+    
+    const totalPotentialRevenue = products.reduce((sum, product) => 
+        sum + (product.salePrice * product.stockQuantity), 0);
+    
+    const totalPotentialProfit = products.reduce((sum, product) => 
+        sum + ((product.salePrice - product.purchasePrice) * product.stockQuantity), 0);
+    
+    const financialStats = {
+        totalStockValue,
+        totalPotentialRevenue,
+        totalPotentialProfit,
+        stockTurnover: currentMonthSales.length > 0 ? 
+            (currentMonthSales.reduce((sum, sale) => sum + sale.quantity, 0) / 
+             products.reduce((sum, product) => sum + product.stockQuantity, 0) * 100).toFixed(1) : 0
+    };
+    
+    return {
+        topProducts,
+        unsoldProducts,
+        categoryStats,
+        financialStats
+    };
+}
+
+// Générer le HTML pour les produits les plus vendus
+function generateTopProductsHTML(topProducts) {
+    if (topProducts.length === 0) {
+        return '<p class="no-data">Aucune vente ce mois</p>';
+    }
+    
+    let html = '<div class="products-list">';
+    topProducts.forEach((product, index) => {
+        const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '📦';
+        html += `
+            <div class="product-item">
+                <div class="product-rank">
+                    <span class="medal">${medal}</span>
+                    <span class="rank">${index + 1}</span>
+                </div>
+                <div class="product-info">
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-stats">
+                        <span class="stat"><i class="fas fa-shopping-cart"></i> ${product.quantity} vendus</span>
+                        <span class="stat"><i class="fas fa-money-bill"></i> ${product.revenue.toFixed(2)} Ar</span>
+                        <span class="stat profit"><i class="fas fa-chart-line"></i> ${product.profit.toFixed(2)} Ar bénéfice</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    html += '</div>';
+    return html;
+}
+
+// Générer le HTML pour les produits non vendus
+function generateUnsoldProductsHTML(unsoldProducts) {
+    if (unsoldProducts.length === 0) {
+        return '<p class="no-data">Tous les produits ont été vendus ce mois</p>';
+    }
+    
+    let html = '<div class="unsold-products">';
+    unsoldProducts.forEach(product => {
+        const stockStatus = product.stock === 0 ? 'stock-out' : 
+                           product.stock < 5 ? 'stock-low' : 'stock-normal';
+        const statusText = product.stock === 0 ? 'Rupture' : 
+                          product.stock < 5 ? 'Stock faible' : 'En stock';
+        
+        html += `
+            <div class="unsold-item ${stockStatus}">
+                <div class="product-main">
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-category">${product.category}</div>
+                </div>
+                <div class="product-details">
+                    <span class="stock-info">${product.stock} unités - ${statusText}</span>
+                    <span class="price-info">Achat: ${product.purchasePrice.toFixed(2)} Ar | Vente: ${product.salePrice.toFixed(2)} Ar</span>
+                </div>
+            </div>
+        `;
+    });
+    html += '</div>';
+    return html;
+}
+
+// Générer le HTML pour les statistiques par catégorie
+function generateCategoryStatsHTML(categoryStats) {
+    if (Object.keys(categoryStats).length === 0) {
+        return '<p class="no-data">Aucune catégorie</p>';
+    }
+    
+    let html = '<div class="category-stats">';
+    Object.entries(categoryStats).forEach(([category, stats]) => {
+        html += `
+            <div class="category-item">
+                <div class="category-header">
+                    <span class="category-name">${category}</span>
+                    <span class="category-count">${stats.count} produits</span>
+                </div>
+                <div class="category-details">
+                    <span class="detail"><i class="fas fa-boxes"></i> Stock: ${stats.totalStock} unités</span>
+                    <span class="detail"><i class="fas fa-money-bill"></i> Valeur: ${stats.totalValue.toFixed(2)} Ar</span>
+                </div>
+            </div>
+        `;
+    });
+    html += '</div>';
+    return html;
+}
+
+// Générer le HTML pour les performances financières
+function generateFinancialStatsHTML(financialStats) {
+    return `
+        <div class="financial-stats">
+            <div class="financial-item">
+                <i class="fas fa-warehouse"></i>
+                <div class="financial-info">
+                    <div class="financial-label">Valeur totale du stock</div>
+                    <div class="financial-value">${financialStats.totalStockValue.toFixed(2)} Ar</div>
+                </div>
+            </div>
+            <div class="financial-item">
+                <i class="fas fa-chart-line"></i>
+                <div class="financial-info">
+                    <div class="financial-label">Revenu potentiel</div>
+                    <div class="financial-value">${financialStats.totalPotentialRevenue.toFixed(2)} Ar</div>
+                </div>
+            </div>
+            <div class="financial-item">
+                <i class="fas fa-hand-holding-usd"></i>
+                <div class="financial-info">
+                    <div class="financial-label">Bénéfice potentiel</div>
+                    <div class="financial-value profit">${financialStats.totalPotentialProfit.toFixed(2)} Ar</div>
+                </div>
+            </div>
+            <div class="financial-item">
+                <i class="fas fa-sync-alt"></i>
+                <div class="financial-info">
+                    <div class="financial-label">Rotation du stock</div>
+                    <div class="financial-value">${financialStats.stockTurnover}%</div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Afficher le modal des statistiques
+function showStatsModal(title, content) {
+    // Créer le modal dynamiquement
+    const modalId = 'statsModal';
+    let modal = document.getElementById(modalId);
+    
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = modalId;
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content stats-modal" style="max-width: 800px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">${title}</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body stats-body">
+                    ${content}
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="exportStatsToPDF()">
+                        <i class="fas fa-file-pdf"></i> Exporter PDF
+                    </button>
+                    <button class="btn btn-secondary close-modal">
+                        <i class="fas fa-times"></i> Fermer
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        // Ajouter les écouteurs d'événements
+        modal.querySelectorAll('.close-modal').forEach(btn => {
+            btn.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    } else {
+        modal.querySelector('.modal-title').textContent = title;
+        modal.querySelector('.stats-body').innerHTML = content;
+    }
+    
+    modal.style.display = 'flex';
+}
+// Exporter les statistiques en PDF
+function exportStatsToPDF() {
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Titre
+        doc.setFontSize(18);
+        doc.setTextColor(67, 97, 238);
+        doc.text('RAPPORT STATISTIQUES DES PRODUITS', 105, 20, { align: 'center' });
+        
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Généré le: ${new Date().toLocaleDateString('fr-FR')}`, 105, 30, { align: 'center' });
+        
+        const stats = calculateProductsStats();
+        let yPosition = 45;
+        
+        // Top produits
+        doc.setFontSize(14);
+        doc.setTextColor(67, 97, 238);
+        doc.text('TOP 5 DES PRODUITS LES PLUS VENDUS', 20, yPosition);
+        
+        yPosition += 10;
+        if (stats.topProducts.length > 0) {
+            stats.topProducts.forEach((product, index) => {
+                if (yPosition > 270) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
+                doc.setFontSize(10);
+                doc.setTextColor(40, 40, 40);
+                doc.text(`${index + 1}. ${product.name}`, 25, yPosition);
+                doc.text(`Quantité: ${product.quantity} | CA: ${product.revenue.toFixed(2)} Ar | Bénéfice: ${product.profit.toFixed(2)} Ar`, 25, yPosition + 5);
+                yPosition += 12;
+            });
+        } else {
+            doc.text('Aucune vente ce mois', 25, yPosition);
+            yPosition += 8;
+        }
+        
+        yPosition += 10;
+        
+        // Produits non vendus
+        doc.setFontSize(14);
+        doc.setTextColor(67, 97, 238);
+        doc.text('PRODUITS NON VENDUS CE MOIS', 20, yPosition);
+        
+        yPosition += 10;
+        if (stats.unsoldProducts.length > 0) {
+            doc.setFontSize(8);
+            stats.unsoldProducts.forEach(product => {
+                if (yPosition > 270) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
+                doc.setTextColor(40, 40, 40);
+                doc.text(`${product.name} (${product.category}) - Stock: ${product.stock} - Achat: ${product.purchasePrice.toFixed(2)} Ar`, 25, yPosition);
+                yPosition += 6;
+            });
+        } else {
+            doc.setFontSize(10);
+            doc.text('Tous les produits ont été vendus', 25, yPosition);
+            yPosition += 8;
+        }
+        
+        doc.save(`statistiques_produits_${new Date().toISOString().split('T')[0]}.pdf`);
+        showToast('PDF des statistiques généré', 'success');
+        
+    } catch (error) {
+        console.error('Erreur génération PDF:', error);
+        showToast('Erreur lors de la génération du PDF', 'error');
+    }
+}
+
+// Ajouter l'écouteur d'événement
+document.addEventListener('DOMContentLoaded', function() {
+    const statsBtn = document.getElementById('productsStatsBtn');
+    if (statsBtn) {
+        statsBtn.addEventListener('click', showProductsStats);
+    }
+});
         // Make functions available globally for onclick handlers
         window.editProduct = editProduct;
         window.deleteProduct = deleteProduct;
