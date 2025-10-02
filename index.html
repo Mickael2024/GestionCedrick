@@ -2464,6 +2464,15 @@ textarea.form-control {
 .trend-down {
     color: #ef4444;
 }
+.price-option:hover {
+    background-color: #f8f9fa !important;
+    border-color: #4361ee !important;
+}
+
+.price-option input[type="radio"]:checked + label {
+    color: #4361ee;
+    font-weight: bold;
+}
     </style>
 </head>
 <body>
@@ -3637,6 +3646,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 
+// Dans initializeApp(), assurez-vous que le bon onglet est actif
 function initializeApp() {
     // Charger les données avec gestion d'erreur
     loadDataFromStorage();
@@ -3647,6 +3657,8 @@ function initializeApp() {
         try {
             currentUser = JSON.parse(savedUser);
             showApp();
+            // Forcer l'affichage du dashboard au début
+            switchTab('dashboard');
         } catch (e) {
             console.error('Erreur parsing currentUser:', e);
             localStorage.removeItem('currentUser');
@@ -3666,6 +3678,10 @@ function initializeApp() {
     loadProductsTable();
     loadSalesTable();
     loadReportsData();
+    
+    // Debug
+    console.log('Application initialisée');
+ 
 }
 function preventFormSubmit() {
     // Empêcher le submit du formulaire d'édition de produit
@@ -3825,10 +3841,11 @@ function setupEventListeners() {
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
-            switchTab(this.getAttribute('href').substring(1));
+            const tabId = this.getAttribute('href').substring(1);
+            console.log('Clic sur navigation:', tabId); // Debug
+            switchTab(tabId);
         });
     });
-    
     // Modals
     document.querySelectorAll('.close-modal').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -4054,17 +4071,27 @@ function cancelLogout() {
 }
 
 function switchTab(tabId) {
+    console.log('Changement d\'onglet vers:', tabId); // Debug
+    
     // Update active nav link
     document.querySelectorAll('.nav-link').forEach(link => {
         link.classList.remove('active');
     });
-    document.querySelector(`a[href="#${tabId}"]`).classList.add('active');
+    
+    const targetLink = document.querySelector(`a[href="#${tabId}"]`);
+    if (targetLink) {
+        targetLink.classList.add('active');
+    }
     
     // Show active tab content
     document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');
     });
-    document.getElementById(tabId).classList.add('active');
+    
+    const targetTab = document.getElementById(tabId);
+    if (targetTab) {
+        targetTab.classList.add('active');
+    }
     
     // Load data for the tab if needed
     if (tabId === 'dashboard') {
@@ -4079,9 +4106,8 @@ function switchTab(tabId) {
         updateProfileStats();
     } else if (tabId === 'archive') {
         loadArchiveData();
-    } 
+    }
 }
-
 function generateId() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
@@ -4158,22 +4184,343 @@ function saveSale() {
     }
 }
 
-function completeSale(productId, quantity, purchasePrice, salePrice) {
+function completeSale(productId, quantity, purchasePrice, salePrice, lotIndex = null) {
     const product = products.find(p => p.id === productId);
     
-    // Mettre à jour le stock
+    if (!product) {
+        showToast('Produit non trouvé', 'error');
+        return;
+    }
+    
+    // Mettre à jour le stock global
     product.stockQuantity -= quantity;
     
-    // Mettre à jour l'historique des stocks (retirer du lot approprié)
+    // Mettre à jour l'historique des stocks
     if (product.stockHistory && product.stockHistory.length > 0) {
-        // Logique simplifiée : retirer du premier lot disponible
-        for (let i = 0; i < product.stockHistory.length; i++) {
-            if (product.stockHistory[i].quantity >= quantity) {
-                product.stockHistory[i].quantity -= quantity;
-                if (product.stockHistory[i].quantity === 0) {
-                    product.stockHistory.splice(i, 1);
+        if (lotIndex !== null && product.stockHistory[lotIndex]) {
+            // Retirer du lot spécifique
+            product.stockHistory[lotIndex].quantity -= quantity;
+            
+            // Si le lot est vide, le supprimer
+            if (product.stockHistory[lotIndex].quantity === 0) {
+                product.stockHistory.splice(lotIndex, 1);
+            }
+        } else {
+            // Retirer du premier lot disponible (méthode FIFO)
+            let remainingQuantity = quantity;
+            for (let i = 0; i < product.stockHistory.length && remainingQuantity > 0; i++) {
+                if (product.stockHistory[i].quantity > 0) {
+                    const quantityToTake = Math.min(product.stockHistory[i].quantity, remainingQuantity);
+                    product.stockHistory[i].quantity -= quantityToTake;
+                    remainingQuantity -= quantityToTake;
+                    
+                    if (product.stockHistory[i].quantity === 0) {
+                        product.stockHistory.splice(i, 1);
+                        i--; // Ajuster l'index après suppression
+                    }
                 }
-                break;
+            }
+        }
+    }
+
+    // Créer l'enregistrement de vente avec les prix du lot
+    const newSale = {
+        id: generateId(),
+        productId,
+        productName: product.name,
+        quantity,
+        purchasePrice: purchasePrice, // Prix d'achat du lot
+        salePrice: salePrice, // Prix de vente du lot
+        total: salePrice * quantity,
+        profit: (salePrice - purchasePrice) * quantity,
+        date: new Date().toISOString(),
+        userId: currentUser.username,
+        lotIndex: lotIndex // Sauvegarder l'index du lot utilisé
+    };
+    
+    sales.push(newSale);
+    
+    // Sauvegarder
+    localStorage.setItem('products', JSON.stringify(products));
+    localStorage.setItem('sales', JSON.stringify(sales));
+    
+    document.getElementById('addSaleModal').style.display = 'none';
+    document.getElementById('saleForm').reset();
+    
+    loadDashboardData();
+    loadProductsTable();
+    loadSalesTable();
+    loadReportsData();
+    
+    showToast('Vente enregistrée avec succès', 'success');
+}
+function populateProductsDropdown() {
+    const dropdown = document.getElementById('saleProduct');
+    dropdown.innerHTML = '<option value="">Sélectionnez un produit</option>';
+    
+    let hasProducts = false;
+    
+    products.forEach(product => {
+        if (product.stockQuantity > 0) {
+            hasProducts = true;
+            const option = document.createElement('option');
+            option.value = product.id;
+            
+            let stockInfo = `Stock: ${product.stockQuantity}`;
+            let hasMultiplePrices = false;
+            
+            // Vérifier si le produit a plusieurs lots avec des prix différents
+            if (product.stockHistory && product.stockHistory.length > 1) {
+                const uniquePurchasePrices = new Set();
+                const uniqueSalePrices = new Set();
+                
+                product.stockHistory.forEach(lot => {
+                    uniquePurchasePrices.add(lot.purchasePrice);
+                    uniqueSalePrices.add(lot.salePrice);
+                });
+                
+                if (uniquePurchasePrices.size > 1 || uniqueSalePrices.size > 1) {
+                    hasMultiplePrices = true;
+                    stockInfo += ` (${product.stockHistory.length} lots avec prix différents)`;
+                }
+            } else if (product.stockHistory && product.stockHistory.length === 1) {
+                // Un seul lot mais montrer quand même l'info
+                stockInfo += ` (1 lot - Prix: ${product.stockHistory[0].salePrice.toFixed(2)} Ar)`;
+            }
+            
+            option.textContent = `${product.name} - ${stockInfo}`;
+            option.setAttribute('data-has-multiple-prices', hasMultiplePrices.toString());
+            dropdown.appendChild(option);
+        }
+    });
+    
+    if (!hasProducts) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Aucun produit en stock';
+        option.disabled = true;
+        dropdown.appendChild(option);
+    }
+}
+function saveSale() {
+    const productId = document.getElementById('saleProduct').value;
+    const quantity = parseInt(document.getElementById('saleQuantity').value);
+    // NOTE: On ne utilise plus salePriceInput pour les produits avec multiple lots
+    const salePriceInput = parseFloat(document.getElementById('salePriceInput').value);
+    
+    if (!productId || isNaN(quantity) || quantity < 1) {
+        showToast('Veuillez remplir tous les champs correctement', 'error');
+        return;
+    }
+    
+    const product = products.find(p => p.id === productId);
+    if (!product) {
+        showToast('Produit non trouvé', 'error');
+        return;
+    }
+    
+    if (product.stockQuantity < quantity) {
+        showToast(`Stock insuffisant. Stock disponible: ${product.stockQuantity}`, 'error');
+        return;
+    }
+
+    // Vérifier si le produit a plusieurs lots avec des prix différents
+    const dropdown = document.getElementById('saleProduct');
+    const selectedOption = dropdown.options[dropdown.selectedIndex];
+    const hasMultiplePrices = selectedOption.getAttribute('data-has-multiple-prices') === 'true';
+
+    if (hasMultiplePrices && product.stockHistory && product.stockHistory.length > 1) {
+        // Pour les produits avec multiple lots, on ignore le prix saisi et on utilise les prix des lots
+        showLotSelectionModal(productId, quantity, salePriceInput);
+    } else {
+        // Pour les produits avec un seul lot, utiliser le prix saisi
+        let selectedLot = null;
+        let selectedLotIndex = 0;
+        
+        if (product.stockHistory && product.stockHistory.length > 0) {
+            // Trouver le premier lot avec du stock
+            for (let i = 0; i < product.stockHistory.length; i++) {
+                if (product.stockHistory[i].quantity >= quantity) {
+                    selectedLot = product.stockHistory[i];
+                    selectedLotIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        if (selectedLot) {
+            completeSale(productId, quantity, selectedLot.purchasePrice, salePriceInput, selectedLotIndex);
+        } else {
+            completeSale(productId, quantity, product.purchasePrice, salePriceInput);
+        }
+    }
+}
+function showLotSelectionModal(productId, quantity, salePrice) {
+    const product = products.find(p => p.id === productId);
+    if (!product || !product.stockHistory || product.stockHistory.length <= 1) {
+        // Si un seul lot, utiliser directement
+        const selectedLot = product.stockHistory[0];
+        completeSale(productId, quantity, selectedLot.purchasePrice, salePrice);
+        return;
+    }
+
+    // Créer le modal de sélection de lot
+    let lotOptionsHTML = '';
+    product.stockHistory.forEach((lot, index) => {
+        if (lot.quantity > 0) {
+            // CORRECTION : Utiliser le prix de vente du LOT, pas du formulaire
+            const lotSalePrice = lot.salePrice; // Prix de vente spécifique du lot
+            const profitPerUnit = lotSalePrice - lot.purchasePrice;
+            const totalProfit = profitPerUnit * quantity;
+            
+            lotOptionsHTML += `
+                <div class="price-option" style="padding: 12px; border: 1px solid #ddd; margin: 8px 0; border-radius: 6px; cursor: pointer; transition: all 0.3s ease;">
+                    <input type="radio" name="lotSelection" value="${index}" id="lotOption${index}" style="margin-right: 10px;">
+                    <label for="lotOption${index}" style="cursor: pointer; width: 100%;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">
+                            Lot ${index + 1} - ${lot.quantity} unités disponibles
+                        </div>
+                        <div style="font-size: 0.9em; color: #666;">
+                            <div>Prix d'achat: <strong>${lot.purchasePrice.toFixed(2)} Ar</strong></div>
+                            <div>Prix de vente du lot: <strong>${lotSalePrice.toFixed(2)} Ar</strong></div>
+                            <div style="color: ${profitPerUnit >= 0 ? '#28a745' : '#dc3545'};">
+                                Bénéfice unitaire: <strong>${profitPerUnit.toFixed(2)} Ar</strong>
+                            </div>
+                            <div style="color: ${totalProfit >= 0 ? '#28a745' : '#dc3545'};">
+                                Bénéfice total: <strong>${totalProfit.toFixed(2)} Ar</strong>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            `;
+        }
+    });
+
+    const modalHTML = `
+        <div class="modal" id="lotSelectionModal" style="display: flex;">
+            <div class="modal-content" style="max-width: 600px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">
+                        <i class="fas fa-boxes" style="margin-right: 10px;"></i>
+                        Choisir le lot de stock
+                    </h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p style="margin-bottom: 15px;">
+                        <strong>Produit:</strong> ${product.name}<br>
+                        <strong>Quantité:</strong> ${quantity} unités<br>
+                        <strong>Note:</strong> Chaque lot a son propre prix de vente
+                    </p>
+                    <p style="color: #666; font-size: 0.9em; margin-bottom: 20px;">
+                        Sélectionnez le lot à utiliser pour cette vente :
+                    </p>
+                    <div id="lotOptionsContainer">
+                        ${lotOptionsHTML}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" id="confirmLotSelection">
+                        <i class="fas fa-check"></i> Confirmer la vente
+                    </button>
+                    <button class="btn btn-secondary close-modal">
+                        <i class="fas fa-times"></i> Annuler
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Ajouter le modal au DOM
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Configurer les événements
+    const modal = document.getElementById('lotSelectionModal');
+    const confirmBtn = document.getElementById('confirmLotSelection');
+    
+    // Style pour les options sélectionnées
+    document.querySelectorAll('.price-option').forEach(option => {
+        option.addEventListener('click', function() {
+            const radio = this.querySelector('input[type="radio"]');
+            radio.checked = true;
+            
+            // Retirer le style de toutes les options
+            document.querySelectorAll('.price-option').forEach(opt => {
+                opt.style.background = 'white';
+                opt.style.borderColor = '#ddd';
+            });
+            
+            // Appliquer le style à l'option sélectionnée
+            this.style.background = '#f8f9ff';
+            this.style.borderColor = '#4361ee';
+        });
+    });
+    
+    confirmBtn.onclick = function() {
+        const selectedOption = document.querySelector('input[name="lotSelection"]:checked');
+        if (!selectedOption) {
+            showToast('Veuillez sélectionner un lot', 'error');
+            return;
+        }
+        
+        const selectedLotIndex = parseInt(selectedOption.value);
+        const selectedLot = product.stockHistory[selectedLotIndex];
+        
+        // Vérifier que le lot a suffisamment de stock
+        if (selectedLot.quantity < quantity) {
+            showToast(`Stock insuffisant dans le lot sélectionné. Stock disponible: ${selectedLot.quantity}`, 'error');
+            return;
+        }
+        
+        // CORRECTION : Utiliser le prix de vente du LOT sélectionné
+        completeSale(productId, quantity, selectedLot.purchasePrice, selectedLot.salePrice, selectedLotIndex);
+        modal.remove();
+    };
+    
+    // Fermeture du modal
+    modal.querySelectorAll('.close-modal').forEach(btn => {
+        btn.onclick = function() {
+            modal.remove();
+        };
+    });
+    
+    modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.remove();
+        }
+    });
+}
+function completeSale(productId, quantity, purchasePrice, salePrice, lotIndex = null) {
+    const product = products.find(p => p.id === productId);
+    
+    if (!product) {
+        showToast('Produit non trouvé', 'error');
+        return;
+    }
+    
+    // Mettre à jour le stock global
+    product.stockQuantity -= quantity;
+    
+    // Mettre à jour l'historique des stocks
+    if (product.stockHistory && product.stockHistory.length > 0) {
+        if (lotIndex !== null && product.stockHistory[lotIndex]) {
+            // Retirer du lot spécifique
+            product.stockHistory[lotIndex].quantity -= quantity;
+            
+            // Si le lot est vide, le supprimer
+            if (product.stockHistory[lotIndex].quantity === 0) {
+                product.stockHistory.splice(lotIndex, 1);
+            }
+        } else {
+            // Retirer du premier lot disponible (méthode FIFO)
+            for (let i = 0; i < product.stockHistory.length; i++) {
+                if (product.stockHistory[i].quantity >= quantity) {
+                    product.stockHistory[i].quantity -= quantity;
+                    if (product.stockHistory[i].quantity === 0) {
+                        product.stockHistory.splice(i, 1);
+                    }
+                    break;
+                }
             }
         }
     }
@@ -4208,29 +4555,6 @@ function completeSale(productId, quantity, purchasePrice, salePrice) {
     
     showToast('Vente enregistrée avec succès', 'success');
 }
-
-function populateProductsDropdown() {
-    const dropdown = document.getElementById('saleProduct');
-    dropdown.innerHTML = '<option value="">Sélectionnez un produit</option>';
-    
-    products.forEach(product => {
-        if (product.stockQuantity > 0) {
-            const option = document.createElement('option');
-            option.value = product.id;
-            option.textContent = `${product.name} (Stock: ${product.stockQuantity})`;
-            dropdown.appendChild(option);
-        }
-    });
-    
-    if (dropdown.options.length === 1) {
-        const option = document.createElement('option');
-        option.value = '';
-        option.textContent = 'Aucun produit en stock';
-        option.disabled = true;
-        dropdown.appendChild(option);
-    }
-}
-
 function loadDashboardData() {
     // Calculate current month stats
     const now = new Date();
@@ -4673,7 +4997,10 @@ function addStatRow(tableBody, period, revenue, cost, profit, margin) {
 }
 
 // Fonction pour ouvrir l'édition du produit avec gestion des lots
+// Fonction pour ouvrir l'édition du produit avec gestion des lots - CORRIGÉE
 function editProduct(productId) {
+    console.log('Édition du produit:', productId); // Debug
+    
     const product = products.find(p => p.id === productId);
     if (!product) {
         showToast('Produit non trouvé', 'error');
@@ -4693,10 +5020,16 @@ function editProduct(productId) {
         deleteProduct(productId);
     };
 
+    // Réinitialiser les autres écouteurs
+    document.getElementById('updateProductBtn').onclick = function() {
+        updateProduct();
+    };
+
     // Ouvrir le modal d'édition
     document.getElementById('editProductModal').style.display = 'flex';
+    
+    console.log('Modal d\'édition ouvert'); // Debug
 }
-
 // Fonction pour générer l'affichage des lots
 function generateStockLotsDisplay(product) {
     const container = document.getElementById('stockLotsContainer');
@@ -4737,31 +5070,32 @@ function generateStockLotsDisplay(product) {
             align-items: center;
         `;
 
-        lotElement.innerHTML = `
-            <div style="flex: 1;">
-                <div style="font-weight: bold; margin-bottom: 5px;">
-                    Lot ${index + 1} - ${lot.quantity} unités
-                </div>
-                <div style="font-size: 0.9em; color: #666;">
-                    Achat: ${lot.purchasePrice.toFixed(2)} Ar | 
-                    Vente: ${lot.salePrice.toFixed(2)} Ar
-                </div>
-                <div style="font-size: 0.8em; color: #999;">
-                    Ajouté: ${new Date(lot.addedAt).toLocaleDateString('fr-FR')}
-                </div>
-            </div>
-            <div>
-                <button type="button" class="btn btn-primary btn-sm edit-lot-btn" data-index="${index}">
-                    <i class="fas fa-edit"></i>
-                </button>
-                ${product.stockHistory.length > 1 ? `
-                    <button type="button" class="btn btn-danger btn-sm delete-lot-btn" data-index="${index}" style="margin-left: 5px;">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                ` : ''}
-            </div>
-        `;
-
+     // Dans la fonction generateStockLotsDisplay, modifiez l'affichage pour montrer clairement les différences de prix
+lotElement.innerHTML = `
+<div style="flex: 1;">
+    <div style="font-weight: bold; margin-bottom: 5px;">
+        Lot ${index + 1} - ${lot.quantity} unités
+    </div>
+    <div style="font-size: 0.9em; color: #666;">
+        <strong>Prix d'achat:</strong> ${lot.purchasePrice.toFixed(2)} Ar | 
+        <strong>Prix de vente:</strong> ${lot.salePrice.toFixed(2)} Ar
+    </div>
+    <div style="font-size: 0.8em; color: #999;">
+        Marge: ${((lot.salePrice - lot.purchasePrice) / lot.purchasePrice * 100).toFixed(1)}% |
+        Ajouté: ${new Date(lot.addedAt).toLocaleDateString('fr-FR')}
+    </div>
+</div>
+<div>
+    <button type="button" class="btn btn-primary btn-sm edit-lot-btn" data-index="${index}">
+        <i class="fas fa-edit"></i>
+    </button>
+    ${product.stockHistory.length > 1 ? `
+        <button type="button" class="btn btn-danger btn-sm delete-lot-btn" data-index="${index}" style="margin-left: 5px;">
+            <i class="fas fa-trash"></i>
+        </button>
+    ` : ''}
+</div>
+`;
         container.appendChild(lotElement);
     });
 
@@ -5485,27 +5819,22 @@ function addNewLot() {
 }
 
 // Fonction pour recalculer les prix du produit basés sur les lots
+// Fonction pour recalculer les prix du produit basés sur les lots - CORRIGÉE
 function updateProductPricesFromLots(product) {
     if (!product.stockHistory || product.stockHistory.length === 0) {
         return;
     }
 
-    // Calculer la quantité totale
+    // Calculer la quantité totale seulement
     const totalQuantity = product.stockHistory.reduce((sum, lot) => sum + lot.quantity, 0);
     product.stockQuantity = totalQuantity;
 
-    // Calculer les prix moyens pondérés
-    const totalPurchaseValue = product.stockHistory.reduce((sum, lot) => sum + (lot.purchasePrice * lot.quantity), 0);
-    const totalSaleValue = product.stockHistory.reduce((sum, lot) => sum + (lot.salePrice * lot.quantity), 0);
-
-    if (totalQuantity > 0) {
-        product.purchasePrice = totalPurchaseValue / totalQuantity;
-        product.salePrice = totalSaleValue / totalQuantity;
-    }
+    // NE PAS recalculer les prix moyens - garder les prix individuels des lots
+    // Les prix d'achat et de vente du produit servent seulement de référence
+    // Pour les ventes, on utilisera les prix spécifiques de chaque lot
 
     product.updatedAt = new Date().toISOString();
 }
-
 // Fonction pour mettre à jour le produit (informations générales)
 function updateProduct() {
     const productId = document.getElementById('editProductId').value;
@@ -6258,6 +6587,7 @@ function updateStock(productId) {
 }
 
 // Fonction pour sauvegarder la mise à jour du stock
+// Fonction pour sauvegarder la mise à jour du stock - CORRIGÉE
 function saveStockUpdate() {
     const productId = document.getElementById('updateStockProductId').value;
     const newQuantity = parseInt(document.getElementById('newStockQuantity').value);
@@ -6280,40 +6610,27 @@ function saveStockUpdate() {
 
     const product = products[productIndex];
     
-    // Créer une nouvelle entrée de stock avec les nouveaux prix
+    // Initialiser l'historique si nécessaire
     if (!product.stockHistory) {
         product.stockHistory = [];
     }
 
-    // Ajouter l'ancien stock à l'historique s'il n'est pas déjà présent
-    const existingStockEntry = product.stockHistory.find(entry => 
-        entry.purchasePrice === product.purchasePrice && 
-        entry.salePrice === product.salePrice
-    );
-
-    if (existingStockEntry) {
-        existingStockEntry.quantity += product.stockQuantity;
-    } else if (product.stockQuantity > 0) {
-        product.stockHistory.push({
-            purchasePrice: product.purchasePrice,
-            salePrice: product.salePrice,
-            quantity: product.stockQuantity,
-            addedAt: new Date().toISOString()
-        });
-    }
-
-    // Ajouter le nouveau stock à l'historique
-    product.stockHistory.push({
+    // Ajouter le nouveau lot avec ses propres prix
+    const newLot = {
         purchasePrice: newPurchasePrice,
         salePrice: newSalePrice,
         quantity: newQuantity,
         addedAt: new Date().toISOString()
-    });
+    };
 
-    // Mettre à jour le produit avec les nouveaux prix et la quantité totale
-    product.purchasePrice = newPurchasePrice; // Le dernier prix d'achat devient le prix courant
-    product.salePrice = newSalePrice; // Le dernier prix de vente devient le prix courant
+    product.stockHistory.push(newLot);
+
+    // Mettre à jour le stock total seulement
     product.stockQuantity += newQuantity;
+    
+    // NE PAS mettre à jour les prix du produit - garder les prix des lots individuels
+    // Les prix du produit servent seulement de référence générale
+    
     product.updatedAt = new Date().toISOString();
 
     // Sauvegarder
@@ -6325,9 +6642,8 @@ function saveStockUpdate() {
 
     // Mettre à jour l'interface
     loadProductsTable();
-    showToast('Stock mis à jour avec succès', 'success');
+    showToast('Stock mis à jour avec succès avec nouveau lot', 'success');
 }
-
 // Fonction pour choisir le prix lors d'une vente
 function showPriceSelectionModal(productId, quantity) {
     const product = products.find(p => p.id === productId);
