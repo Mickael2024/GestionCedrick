@@ -3692,14 +3692,14 @@ function setupArchiveEventListeners() {
         });
     }
 
-    // Application des filtres
-    const applyArchiveFilters = document.getElementById('applyArchiveFilters');
-    if (applyArchiveFilters) {
-        applyArchiveFilters.addEventListener('click', function() {
-            applyArchiveFilters();
-        });
-    }
-    
+  // Application des filtres
+// Application des filtres
+const applyArchiveFiltersBtn = document.getElementById('applyArchiveFilters');
+if (applyArchiveFiltersBtn) {
+    applyArchiveFiltersBtn.addEventListener('click', function() {
+        applyArchiveFilters(); // ← CORRECTION
+    });
+}   
     // Boutons d'exportation
     const exportArchiveCSVBtn = document.getElementById('exportArchiveCSVBtn');
     if (exportArchiveCSVBtn) {
@@ -6720,6 +6720,314 @@ function calculateMonthlyStats() {
     }
     
     return stats;
+}
+
+function loadArchiveData() {
+    updateArchiveSummary();
+    loadArchiveProducts();
+    loadArchiveSales();
+    loadArchiveStats();
+    loadArchiveHistory();
+    loadArchiveCategories();
+    updateArchiveSummary();
+    updateArchiveNavStats();
+    
+    // Charger la section active
+    const activeSection = document.querySelector('.archive-section.active');
+    if (activeSection) {
+        loadArchiveSectionData(activeSection.id);
+    } else {
+        // Par défaut, charger les produits
+        switchArchiveSection('archive-products');
+    }
+}
+
+function updateArchiveSummary() {
+    // Produits
+    const archivedProductsCount = document.getElementById('archivedProductsCount');
+    if (archivedProductsCount) {
+        archivedProductsCount.textContent = products.length;
+    }
+    
+    // Ventes
+    const archivedSalesCount = document.getElementById('archivedSalesCount');
+    if (archivedSalesCount) {
+        archivedSalesCount.textContent = sales.length;
+    }
+    
+    // Chiffre d'affaires total
+    const archivedTotalRevenue = document.getElementById('archivedTotalRevenue');
+    if (archivedTotalRevenue) {
+        const totalRevenue = sales.reduce((sum, sale) => sum + sale.total, 0);
+        archivedTotalRevenue.textContent = totalRevenue.toFixed(2) + ' Ar';
+    }
+    
+    // Bénéfice total
+    const archivedTotalProfit = document.getElementById('archivedTotalProfit');
+    if (archivedTotalProfit) {
+        const totalProfit = sales.reduce((sum, sale) => sum + sale.profit, 0);
+        archivedTotalProfit.textContent = totalProfit.toFixed(2) + ' Ar';
+    }
+}
+
+function loadArchiveProducts() {
+    updateProductsQuickStats();
+    const tableBody = document.getElementById('archiveProductsTable');
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = '';
+
+    if (products.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Aucun produit archivé</td></tr>';
+        return;
+    }
+
+    products.forEach(product => {
+        const totalStock = product.stockHistory ? 
+            product.stockHistory.reduce((sum, lot) => sum + lot.quantity, 0) : 
+            product.stockQuantity;
+        
+        const stockValue = product.stockHistory ?
+            product.stockHistory.reduce((sum, lot) => sum + (lot.purchasePrice * lot.quantity), 0) :
+            (product.purchasePrice * product.stockQuantity);
+        
+        const lotsCount = product.stockHistory ? product.stockHistory.length : 1;
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${product.name}</td>
+            <td>${product.category}</td>
+            <td>${totalStock}</td>
+            <td>${product.purchasePrice.toFixed(2)} Ar</td>
+            <td>${product.salePrice.toFixed(2)} Ar</td>
+            <td>${lotsCount} lot(s)</td>
+            <td>${stockValue.toFixed(2)} Ar</td>
+            <td>${new Date(product.createdAt).toLocaleDateString('fr-FR')}</td>
+            <td>${product.updatedAt ? new Date(product.updatedAt).toLocaleDateString('fr-FR') : '-'}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+function loadArchiveSales() {
+    const tableBody = document.getElementById('archiveSalesTable');
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = '';
+
+    if (sales.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Aucune vente archivée</td></tr>';
+        return;
+    }
+
+    // Trier par date (plus récent en premier)
+    const sortedSales = sales.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    sortedSales.forEach(sale => {
+        const product = products.find(p => p.id === sale.productId);
+        const category = product ? product.category : 'N/A';
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${new Date(sale.date).toLocaleDateString('fr-FR')}</td>
+            <td>${sale.productName}</td>
+            <td>${category}</td>
+            <td>${sale.quantity}</td>
+            <td>${sale.purchasePrice.toFixed(2)} Ar</td>
+            <td>${sale.salePrice.toFixed(2)} Ar</td>
+            <td>${sale.total.toFixed(2)} Ar</td>
+            <td>${sale.profit.toFixed(2)} Ar</td>
+            <td>${sale.userId}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+function loadArchiveStats() {
+    const tableBody = document.getElementById('archiveStatsTable');
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = '';
+
+    // Générer des statistiques par mois
+    const monthlyStats = calculateMonthlyStats();
+    
+    if (monthlyStats.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Aucune statistique disponible</td></tr>';
+        return;
+    }
+
+    monthlyStats.forEach(stat => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${stat.period}</td>
+            <td>${stat.productsSold}</td>
+            <td>${stat.revenue.toFixed(2)} Ar</td>
+            <td>${stat.cost.toFixed(2)} Ar</td>
+            <td>${stat.profit.toFixed(2)} Ar</td>
+            <td>${stat.margin.toFixed(1)}%</td>
+            <td>${stat.topProduct}</td>
+            <td>${stat.topCategory}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+function loadArchiveHistory() {
+    const tableBody = document.getElementById('archiveHistoryTable');
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = '';
+
+    // Si pas d'historique, en générer un à partir des données existantes
+    if (archiveHistory.length === 0) {
+        generateInitialHistory();
+    }
+
+    if (archiveHistory.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Aucun historique disponible</td></tr>';
+        return;
+    }
+
+    // Trier par date (plus récent en premier)
+    const sortedHistory = archiveHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    sortedHistory.forEach(record => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${new Date(record.date).toLocaleDateString('fr-FR')}</td>
+            <td>${record.type}</td>
+            <td>${record.element}</td>
+            <td>${record.action}</td>
+            <td>${record.user}</td>
+            <td>${record.details || '-'}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+function generateInitialHistory() {
+    archiveHistory = [];
+    
+    // Historique des produits
+    products.forEach(product => {
+        archiveHistory.push({
+            date: product.createdAt,
+            type: 'Produit',
+            element: product.name,
+            action: 'Création',
+            user: 'Système',
+            details: `Catégorie: ${product.category}, Stock initial: ${product.stockQuantity}`
+        });
+        
+        if (product.updatedAt && product.updatedAt !== product.createdAt) {
+            archiveHistory.push({
+                date: product.updatedAt,
+                type: 'Produit',
+                element: product.name,
+                action: 'Modification',
+                user: 'Système',
+                details: 'Mise à jour des informations'
+            });
+        }
+    });
+    
+    // Historique des ventes
+    sales.forEach(sale => {
+        archiveHistory.push({
+            date: sale.date,
+            type: 'Vente',
+            element: sale.productName,
+            action: 'Transaction',
+            user: sale.userId,
+            details: `Quantité: ${sale.quantity}, Total: ${sale.total.toFixed(2)} Ar`
+        });
+    });
+    
+    localStorage.setItem('archiveHistory', JSON.stringify(archiveHistory));
+}
+
+function loadArchiveCategories() {
+    const tableBody = document.getElementById('archiveCategoriesTable');
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = '';
+
+    const categoryStats = {};
+    
+    // Calculer les statistiques par catégorie
+    products.forEach(product => {
+        if (!categoryStats[product.category]) {
+            categoryStats[product.category] = {
+                productCount: 0,
+                totalStock: 0,
+                stockValue: 0,
+                salesCount: 0,
+                revenue: 0,
+                profit: 0
+            };
+        }
+        
+        categoryStats[product.category].productCount++;
+        categoryStats[product.category].totalStock += product.stockQuantity;
+        categoryStats[product.category].stockValue += product.purchasePrice * product.stockQuantity;
+    });
+    
+    // Ajouter les données de vente par catégorie
+    sales.forEach(sale => {
+        const product = products.find(p => p.id === sale.productId);
+        if (product && categoryStats[product.category]) {
+            categoryStats[product.category].salesCount += sale.quantity;
+            categoryStats[product.category].revenue += sale.total;
+            categoryStats[product.category].profit += sale.profit;
+        }
+    });
+    
+    if (Object.keys(categoryStats).length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Aucune donnée par catégorie</td></tr>';
+        return;
+    }
+    
+    Object.entries(categoryStats).forEach(([category, stats]) => {
+        const margin = stats.revenue > 0 ? (stats.profit / stats.revenue * 100) : 0;
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${category}</td>
+            <td>${stats.productCount}</td>
+            <td>${stats.totalStock}</td>
+            <td>${stats.stockValue.toFixed(2)} Ar</td>
+            <td>${stats.salesCount}</td>
+            <td>${stats.revenue.toFixed(2)} Ar</td>
+            <td>${stats.profit.toFixed(2)} Ar</td>
+            <td>${margin.toFixed(1)}%</td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+function updateProductsQuickStats() {
+    const totalProducts = products.length;
+    const totalStock = products.reduce((sum, product) => sum + product.stockQuantity, 0);
+    const stockValue = products.reduce((sum, product) => sum + (product.purchasePrice * product.stockQuantity), 0);
+    
+    // Calcul de la marge moyenne
+    const totalMargin = products.reduce((sum, product) => {
+        const margin = product.salePrice > 0 ? ((product.salePrice - product.purchasePrice) / product.salePrice * 100) : 0;
+        return sum + margin;
+    }, 0);
+    const avgMargin = totalProducts > 0 ? (totalMargin / totalProducts) : 0;
+
+    const quickTotalProducts = document.getElementById('quick-total-products');
+    if (quickTotalProducts) quickTotalProducts.textContent = totalProducts;
+    
+    const quickTotalStock = document.getElementById('quick-total-stock');
+    if (quickTotalStock) quickTotalStock.textContent = totalStock;
+    
+    const quickStockValue = document.getElementById('quick-stock-value');
+    if (quickStockValue) quickStockValue.textContent = stockValue.toFixed(2) + ' Ar';
+    
+    const quickAvgMargin = document.getElementById('quick-avg-margin');
+    if (quickAvgMargin) quickAvgMargin.textContent = avgMargin.toFixed(1) + '%';
 }
 // Make functions available globally for onclick handlers
 window.editProduct = editProduct;
