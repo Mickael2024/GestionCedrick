@@ -2111,6 +2111,47 @@ textarea.form-control {
         height: 120px;
     }
 }
+.price-option:hover {
+    background-color: #f8f9fa;
+    border-color: #4361ee;
+}
+
+.price-option input[type="radio"]:checked + label {
+    color: #4361ee;
+    font-weight: bold;
+}
+.stock-lot-item {
+    transition: all 0.3s ease;
+}
+
+.stock-lot-item:hover {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-color: #4361ee;
+}
+
+.stock-lot-item .btn-sm {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+}
+
+#stockLotsContainer {
+    scrollbar-width: thin;
+    scrollbar-color: #4361ee #f1f1f1;
+}
+
+#stockLotsContainer::-webkit-scrollbar {
+    width: 6px;
+}
+
+#stockLotsContainer::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+#stockLotsContainer::-webkit-scrollbar-thumb {
+    background: #4361ee;
+    border-radius: 3px;
+}
     </style>
 </head>
 <body>
@@ -2235,11 +2276,13 @@ textarea.form-control {
 </div>
           <!-- Modal d'édition de produit -->
 <!-- Modal d'édition de produit -->
+<!-- Modal d'édition de produit avec gestion des lots -->
+<!-- Modal d'édition de produit avec gestion des lots -->
 <div id="editProductModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width: 700px;">
         <div class="modal-header">
-            <h3 class="modal-title">Modifier le produit</h3>
-            <button class="close-modal">&times;</button>
+            <h3 class="modal-title">Gérer le produit</h3>
+            <button type="button" class="close-modal">&times;</button>
         </div>
         <div class="modal-body">
             <form id="editProductForm">
@@ -2260,35 +2303,83 @@ textarea.form-control {
                         <option value="accessoire">Accessoire</option>
                     </select>
                 </div>
-                
+
+                <!-- Section des lots de stock -->
                 <div class="form-group">
-                    <label class="form-label" for="editPurchasePrice">Prix d'achat (Ariary) *</label>
-                    <input type="number" id="editPurchasePrice" class="form-control" step="0.01" min="0" required>
+                    <label class="form-label">Gestion des lots de stock</label>
+                    <div id="stockLotsContainer" style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 10px;">
+                        <!-- Les lots seront générés ici dynamiquement -->
+                    </div>
                 </div>
-                
-                <div class="form-group">
-                    <label class="form-label" for="editSalePrice">Prix de vente (Ariary) *</label>
-                    <input type="number" id="editSalePrice" class="form-control" step="0.01" min="0" required>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label" for="editStockQuantity">Quantité en stock *</label>
-                    <input type="number" id="editStockQuantity" class="form-control" min="0" required>
+
+                <div class="alert-message">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Modifiez les lots individuels ou ajoutez un nouveau lot avec le bouton ci-dessous.</span>
                 </div>
             </form>
         </div>
         <div class="modal-footer">
-            <div style="display: flex; justify-content: space-between; width: 100%;">
-                <button class="btn btn-danger" id="deleteProductBtn">
-                    <i class="fas fa-trash"></i> Supprimer
-                </button>
+            <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
                 <div>
-                    <button class="btn btn-primary" id="updateProductBtn">
+                    <button type="button" class="btn btn-success" id="addNewLotBtn">
+                        <i class="fas fa-plus"></i> Nouveau lot
+                    </button>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-danger" id="deleteProductBtn">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </button>
+                    <button type="button" class="btn btn-primary" id="updateProductBtn" style="margin-left: 10px;">
                         <i class="fas fa-save"></i> Mettre à jour
                     </button>
-                    <button class="btn btn-secondary close-modal">Annuler</button>
+                    <button type="button" class="btn btn-secondary close-modal" style="margin-left: 10px;">Annuler</button>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+<!-- Modal pour ajouter/modifier un lot -->
+<!-- Modal pour ajouter/modifier un lot -->
+<div id="editLotModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-header">
+            <h3 class="modal-title" id="editLotModalTitle">Modifier le lot</h3>
+            <button type="button" class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="editLotForm">
+                <input type="hidden" id="editLotIndex">
+                <input type="hidden" id="editLotProductId">
+                
+                <div class="form-group">
+                    <label class="form-label" for="editLotQuantity">Quantité *</label>
+                    <input type="number" id="editLotQuantity" class="form-control" min="0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="editLotPurchasePrice">Prix d'achat (Ariary) *</label>
+                    <input type="number" id="editLotPurchasePrice" class="form-control" step="0.01" min="0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="editLotSalePrice">Prix de vente (Ariary) *</label>
+                    <input type="number" id="editLotSalePrice" class="form-control" step="0.01" min="0" required>
+                </div>
+
+                <div class="alert-message" id="lotWarningMessage" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span id="lotWarningText"></span>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" id="deleteLotBtn" style="display: none;">
+                <i class="fas fa-trash"></i> Supprimer le lot
+            </button>
+            <button type="button" class="btn btn-primary" id="saveLotBtn">
+                <i class="fas fa-save"></i> Sauvegarder
+            </button>
+            <button type="button" class="btn btn-secondary close-modal">Annuler</button>
         </div>
     </div>
 </div>
@@ -2372,7 +2463,56 @@ textarea.form-control {
                     </table>
                 </div>
             </div>
-            
+            <!-- Modal de mise à jour de stock -->
+<div id="updateStockModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Mettre à jour le stock</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="updateStockForm">
+                <input type="hidden" id="updateStockProductId">
+                
+                <div class="form-group">
+                    <label class="form-label">Produit</label>
+                    <p id="updateProductName" style="font-weight: bold; padding: 8px; background: #f8f9fa; border-radius: 4px;"></p>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Stock actuel</label>
+                    <p id="currentStockInfo" style="padding: 8px; background: #f8f9fa; border-radius: 4px;"></p>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="newStockQuantity">Nouvelle quantité à ajouter *</label>
+                    <input type="number" id="newStockQuantity" class="form-control" min="1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="newPurchasePrice">Nouveau prix d'achat (Ariary) *</label>
+                    <input type="number" id="newPurchasePrice" class="form-control" step="0.01" min="0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="newSalePrice">Nouveau prix de vente (Ariary) *</label>
+                    <input type="number" id="newSalePrice" class="form-control" step="0.01" min="0" required>
+                </div>
+                
+                <div class="alert-message">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Cette mise à jour créera une nouvelle entrée de stock avec des prix différents du stock existant.</span>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" id="saveStockUpdateBtn">
+                <i class="fas fa-save"></i> Mettre à jour le stock
+            </button>
+            <button class="btn btn-secondary close-modal">Annuler</button>
+        </div>
+    </div>
+</div>
             <!-- Products Tab -->
             <div id="products" class="tab-content">
                 <div class="table-header">
@@ -2862,7 +3002,47 @@ textarea.form-control {
       }
   
       function setupEventListeners() {
-          // Login
+ 
+ 
+        // Bouton pour ajouter un nouveau lot
+document.getElementById('addNewLotBtn').addEventListener('click', addNewLot);
+
+    // Sauvegarde d'un lot
+    document.getElementById('saveLotBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        saveLot();
+    });
+// Fermeture du modal de lot
+document.querySelectorAll('#editLotModal .close-modal').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.getElementById('editLotModal').style.display = 'none';
+    });
+});
+
+document.getElementById('editLotModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        this.style.display = 'none';
+    }
+});
+
+// Mise à jour du produit (bouton principal)
+document.getElementById('updateProductBtn').addEventListener('click', updateProduct);   
+        // Update stock modal
+document.getElementById('saveStockUpdateBtn').addEventListener('click', saveStockUpdate);
+
+// Close update stock modal
+document.querySelectorAll('#updateStockModal .close-modal').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.getElementById('updateStockModal').style.display = 'none';
+    });
+});
+
+document.getElementById('updateStockModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        this.style.display = 'none';
+    }
+});
+        // Login
           document.getElementById('loginBtn').addEventListener('click', handleLogin);
           
           // Enter key pour le login
@@ -2896,7 +3076,13 @@ textarea.form-control {
                   resetProductForm();
               });
           });
-          
+           // Empêcher le submit des formulaires
+    preventFormSubmit();
+     // Bouton pour ajouter un nouveau lot
+     document.getElementById('addNewLotBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        addNewLot();
+    });
           // Fermer modal en cliquant à l'extérieur
           document.querySelectorAll('.modal').forEach(modal => {
               modal.addEventListener('click', function(e) {
@@ -2954,21 +3140,31 @@ textarea.form-control {
               resetDataBtn.addEventListener('click', resetAllData);
           }
           // Bouton de mise à jour du produit
-    document.getElementById('updateProductBtn').addEventListener('click', updateProduct);
-    // Fermeture du modal d'édition
-    document.querySelectorAll('#editProductModal .close-modal').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.getElementById('editProductModal').style.display = 'none';
-            document.getElementById('editProductForm').reset();
+       // Mise à jour du produit (bouton principal)
+       document.getElementById('updateProductBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        updateProduct();
+    });
+      // Fermeture des modals
+      document.querySelectorAll('.close-modal').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            this.closest('.modal').style.display = 'none';
         });
     });
-     // Fermer le modal d'édition en cliquant à l'extérieur
-     document.getElementById('editProductModal').addEventListener('click', function(e) {
+    // Fermeture du modal d'édition
+
+    
+  // Fermeture en cliquant à l'extérieur
+  document.querySelectorAll('.modal').forEach(modal => {
+    modal.addEventListener('click', function(e) {
         if (e.target === this) {
             this.style.display = 'none';
-            document.getElementById('editProductForm').reset();
         }
     });
+});
+}
+ 
     
     // Soumission du formulaire d'édition avec Enter
     document.getElementById('editProductForm').addEventListener('keypress', function(e) {
@@ -3019,7 +3215,7 @@ document.getElementById('confirmModal').addEventListener('click', function(e) {
         currentConfirmCallback = null;
     }
 });
-      }
+      
   
       function handleLogin() {
           const username = document.getElementById('username').value;
@@ -3208,60 +3404,91 @@ document.getElementById('confirmModal').addEventListener('click', function(e) {
       }
   
       function saveSale() {
-          const productId = document.getElementById('saleProduct').value;
-          const quantity = parseInt(document.getElementById('saleQuantity').value);
-          const salePrice = parseFloat(document.getElementById('salePriceInput').value);
-          
-          if (!productId || isNaN(quantity) || quantity < 1 || isNaN(salePrice)) {
-              showToast('Veuillez remplir tous les champs correctement', 'error');
-              return;
-          }
-          
-          const product = products.find(p => p.id === productId);
-          if (!product) {
-              showToast('Produit non trouvé', 'error');
-              return;
-          }
-          
-          if (product.stockQuantity < quantity) {
-              showToast(`Stock insuffisant. Stock disponible: ${product.stockQuantity}`, 'error');
-              return;
-          }
-          
-          // Update product stock
-          product.stockQuantity -= quantity;
-          
-          // Create sale record
-          const newSale = {
-              id: generateId(),
-              productId,
-              productName: product.name,
-              quantity,
-              purchasePrice: product.purchasePrice,
-              salePrice,
-              total: salePrice * quantity,
-              profit: (salePrice - product.purchasePrice) * quantity,
-              date: new Date().toISOString(),
-              userId: currentUser.username
-          };
-          
-          sales.push(newSale);
-          
-          // Save to localStorage
-          localStorage.setItem('products', JSON.stringify(products));
-          localStorage.setItem('sales', JSON.stringify(sales));
-          
-          document.getElementById('addSaleModal').style.display = 'none';
-          document.getElementById('saleForm').reset();
-          
-          loadDashboardData();
-          loadProductsTable();
-          loadSalesTable();
-          loadReportsData();
-          
-          showToast('Vente enregistrée avec succès', 'success');
-      }
-  
+        const productId = document.getElementById('saleProduct').value;
+        const quantity = parseInt(document.getElementById('saleQuantity').value);
+        const salePrice = parseFloat(document.getElementById('salePriceInput').value);
+        
+        if (!productId || isNaN(quantity) || quantity < 1 || isNaN(salePrice)) {
+            showToast('Veuillez remplir tous les champs correctement', 'error');
+            return;
+        }
+        
+        const product = products.find(p => p.id === productId);
+        if (!product) {
+            showToast('Produit non trouvé', 'error');
+            return;
+        }
+        
+        if (product.stockQuantity < quantity) {
+            showToast(`Stock insuffisant. Stock disponible: ${product.stockQuantity}`, 'error');
+            return;
+        }
+    
+        // Vérifier si le produit a plusieurs prix
+        const dropdown = document.getElementById('saleProduct');
+        const selectedOption = dropdown.options[dropdown.selectedIndex];
+        const hasMultiplePrices = selectedOption.getAttribute('data-has-multiple-prices') === 'true';
+    
+        if (hasMultiplePrices && product.stockHistory && product.stockHistory.length > 1) {
+            // Afficher le modal de sélection de prix
+            showPriceSelectionModal(productId, quantity);
+        } else {
+            // Utiliser les prix courants
+            completeSale(productId, quantity, product.purchasePrice, salePrice);
+        }
+    }
+    
+    // Fonction pour compléter la vente
+    function completeSale(productId, quantity, purchasePrice, salePrice) {
+        const product = products.find(p => p.id === productId);
+        
+        // Mettre à jour le stock
+        product.stockQuantity -= quantity;
+        
+        // Mettre à jour l'historique des stocks (retirer du lot approprié)
+        if (product.stockHistory && product.stockHistory.length > 0) {
+            // Logique simplifiée : retirer du premier lot disponible
+            for (let i = 0; i < product.stockHistory.length; i++) {
+                if (product.stockHistory[i].quantity >= quantity) {
+                    product.stockHistory[i].quantity -= quantity;
+                    if (product.stockHistory[i].quantity === 0) {
+                        product.stockHistory.splice(i, 1);
+                    }
+                    break;
+                }
+            }
+        }
+    
+        // Créer l'enregistrement de vente
+        const newSale = {
+            id: generateId(),
+            productId,
+            productName: product.name,
+            quantity,
+            purchasePrice: purchasePrice,
+            salePrice: salePrice,
+            total: salePrice * quantity,
+            profit: (salePrice - purchasePrice) * quantity,
+            date: new Date().toISOString(),
+            userId: currentUser.username
+        };
+        
+        sales.push(newSale);
+        
+        // Sauvegarder
+        localStorage.setItem('products', JSON.stringify(products));
+        localStorage.setItem('sales', JSON.stringify(sales));
+        
+        document.getElementById('addSaleModal').style.display = 'none';
+        document.getElementById('saleForm').reset();
+        
+        loadDashboardData();
+        loadProductsTable();
+        loadSalesTable();
+        loadReportsData();
+        
+        showToast('Vente enregistrée avec succès', 'success');
+    }
       function populateProductsDropdown() {
           const dropdown = document.getElementById('saleProduct');
           dropdown.innerHTML = '<option value="">Sélectionnez un produit</option>';
@@ -3504,6 +3731,9 @@ document.getElementById('confirmModal').addEventListener('click', function(e) {
                       <button class="btn btn-primary btn-sm" onclick="editProduct('${product.id}')">
                           <i class="fas fa-edit"></i>
                       </button>
+                       <button class="btn btn-info btn-sm" onclick="updateStock('${product.id}')">
+        <i class="fas fa-boxes"></i>
+    </button>
                       <button class="btn btn-danger btn-sm" onclick="deleteProduct('${product.id}')">
                           <i class="fas fa-trash"></i>
                       </button>
@@ -3722,86 +3952,346 @@ document.getElementById('confirmModal').addEventListener('click', function(e) {
           tableBody.appendChild(row);
       }
   
-      function editProduct(productId) {
-        const product = products.find(p => p.id === productId);
-        if (!product) {
-            showToast('Produit non trouvé', 'error');
-            return;
-        }
-    
-        // Remplir le formulaire d'édition avec les données du produit
-        document.getElementById('editProductId').value = product.id;
-        document.getElementById('editProductName').value = product.name;
-        document.getElementById('editProductCategory').value = product.category;
-        document.getElementById('editPurchasePrice').value = product.purchasePrice;
-        document.getElementById('editSalePrice').value = product.salePrice;
-        document.getElementById('editStockQuantity').value = product.stockQuantity;
-    
-        // Configurer le bouton de suppression
-        document.getElementById('deleteProductBtn').onclick = function() {
-            deleteProduct(productId);
-        };
-    
-        // Ouvrir le modal d'édition
-        document.getElementById('editProductModal').style.display = 'flex';
-        
-        // Focus sur le premier champ
-        setTimeout(() => {
-            document.getElementById('editProductName').focus();
-        }, 100);
+ // Fonction pour ouvrir l'édition du produit avec gestion des lots
+function editProduct(productId) {
+    const product = products.find(p => p.id === productId);
+    if (!product) {
+        showToast('Produit non trouvé', 'error');
+        return;
     }
-    
-    function updateProduct() {
-        const productId = document.getElementById('editProductId').value;
-        const name = document.getElementById('editProductName').value.trim();
-        const category = document.getElementById('editProductCategory').value;
-        const purchasePrice = parseFloat(document.getElementById('editPurchasePrice').value);
-        const salePrice = parseFloat(document.getElementById('editSalePrice').value);
-        const stockQuantity = parseInt(document.getElementById('editStockQuantity').value);
-    
-        // Validation des champs requis
-        if (!name || !category || isNaN(purchasePrice) || isNaN(salePrice) || isNaN(stockQuantity)) {
-            showToast('Veuillez remplir tous les champs obligatoires', 'error');
-            return;
-        }
-    
-        if (purchasePrice < 0 || salePrice < 0 || stockQuantity < 0) {
-            showToast('Les valeurs ne peuvent pas être négatives', 'error');
-            return;
-        }
-    
-        const productIndex = products.findIndex(p => p.id === productId);
-        if (productIndex === -1) {
-            showToast('Produit non trouvé', 'error');
-            return;
-        }
-    
-        // Mettre à jour le produit
-        products[productIndex] = {
-            ...products[productIndex],
-            name,
-            category,
-            purchasePrice,
-            salePrice,
-            stockQuantity,
-            updatedAt: new Date().toISOString()
-        };
-    
-        // Sauvegarder dans le localStorage
-        localStorage.setItem('products', JSON.stringify(products));
-    
-        // Fermer le modal
-        document.getElementById('editProductModal').style.display = 'none';
-        document.getElementById('editProductForm').reset();
-    
-        // Mettre à jour l'interface
-        loadProductsTable();
-        loadDashboardData();
-        loadReportsData();
-    
-        showToast('Produit modifié avec succès', 'success');
+
+    // Remplir les informations de base du produit
+    document.getElementById('editProductId').value = product.id;
+    document.getElementById('editProductName').value = product.name;
+    document.getElementById('editProductCategory').value = product.category;
+
+    // Générer l'affichage des lots
+    generateStockLotsDisplay(product);
+
+    // Configurer le bouton de suppression
+    document.getElementById('deleteProductBtn').onclick = function() {
+        deleteProduct(productId);
+    };
+
+    // Ouvrir le modal d'édition
+    document.getElementById('editProductModal').style.display = 'flex';
+}
+
+// Fonction pour générer l'affichage des lots
+// Fonction pour générer l'affichage des lots (version corrigée)
+function generateStockLotsDisplay(product) {
+    const container = document.getElementById('stockLotsContainer');
+    container.innerHTML = '';
+
+    // Initialiser l'historique des lots si nécessaire
+    if (!product.stockHistory || product.stockHistory.length === 0) {
+        product.stockHistory = [{
+            purchasePrice: product.purchasePrice,
+            salePrice: product.salePrice,
+            quantity: product.stockQuantity,
+            addedAt: product.createdAt || new Date().toISOString()
+        }];
     }
-      function resetProductForm() {
+
+    // Afficher le résumé du stock total
+    const totalStock = product.stockHistory.reduce((sum, lot) => sum + lot.quantity, 0);
+    const summaryHTML = `
+        <div style="background: #e9f7ef; padding: 10px; border-radius: 4px; margin-bottom: 15px; border-left: 4px solid #28a745;">
+            <strong>Stock total : ${totalStock} unités</strong><br>
+            <small>Réparti sur ${product.stockHistory.length} lot(s)</small>
+        </div>
+    `;
+    container.innerHTML = summaryHTML;
+
+    // Afficher chaque lot
+    product.stockHistory.forEach((lot, index) => {
+        const lotElement = document.createElement('div');
+        lotElement.className = 'stock-lot-item';
+        lotElement.style.cssText = `
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        `;
+
+        lotElement.innerHTML = `
+            <div style="flex: 1;">
+                <div style="font-weight: bold; margin-bottom: 5px;">
+                    Lot ${index + 1} - ${lot.quantity} unités
+                </div>
+                <div style="font-size: 0.9em; color: #666;">
+                    Achat: ${lot.purchasePrice.toFixed(2)} Ar | 
+                    Vente: ${lot.salePrice.toFixed(2)} Ar
+                </div>
+                <div style="font-size: 0.8em; color: #999;">
+                    Ajouté: ${new Date(lot.addedAt).toLocaleDateString('fr-FR')}
+                </div>
+            </div>
+            <div>
+                <button type="button" class="btn btn-primary btn-sm edit-lot-btn" data-index="${index}">
+                    <i class="fas fa-edit"></i>
+                </button>
+                ${product.stockHistory.length > 1 ? `
+                    <button type="button" class="btn btn-danger btn-sm delete-lot-btn" data-index="${index}" style="margin-left: 5px;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                ` : ''}
+            </div>
+        `;
+
+        container.appendChild(lotElement);
+    });
+
+    // Ajouter les écouteurs d'événements pour les boutons des lots
+    container.querySelectorAll('.edit-lot-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault(); // Empêche le comportement par défaut
+            e.stopPropagation(); // Empêche la propagation
+            const lotIndex = parseInt(this.getAttribute('data-index'));
+            editLot(product.id, lotIndex);
+        });
+    });
+
+    container.querySelectorAll('.delete-lot-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault(); // Empêche le comportement par défaut
+            e.stopPropagation(); // Empêche la propagation
+            const lotIndex = parseInt(this.getAttribute('data-index'));
+            deleteLot(product.id, lotIndex);
+        });
+    });
+}
+function preventFormSubmit() {
+    // Empêcher le submit du formulaire d'édition de produit
+    document.getElementById('editProductForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Empêcher le submit du formulaire d'édition de lot
+    document.getElementById('editLotForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        return false;
+    });
+}
+// Fonction pour éditer un lot spécifique
+// Fonction pour éditer un lot spécifique (version corrigée)
+function editLot(productId, lotIndex) {
+    const product = products.find(p => p.id === productId);
+    if (!product || !product.stockHistory || !product.stockHistory[lotIndex]) {
+        showToast('Lot non trouvé', 'error');
+        return;
+    }
+
+    const lot = product.stockHistory[lotIndex];
+
+    // Remplir le formulaire d'édition de lot
+    document.getElementById('editLotIndex').value = lotIndex;
+    document.getElementById('editLotProductId').value = productId;
+    document.getElementById('editLotQuantity').value = lot.quantity;
+    document.getElementById('editLotPurchasePrice').value = lot.purchasePrice;
+    document.getElementById('editLotSalePrice').value = lot.salePrice;
+
+    // Afficher/masquer le bouton de suppression
+    const deleteBtn = document.getElementById('deleteLotBtn');
+    if (product.stockHistory.length > 1) {
+        deleteBtn.style.display = 'inline-block';
+        deleteBtn.onclick = function(e) {
+            e.preventDefault();
+            deleteLot(productId, lotIndex);
+        };
+    } else {
+        deleteBtn.style.display = 'none';
+    }
+
+    // Mettre à jour le titre du modal
+    document.getElementById('editLotModalTitle').textContent = `Modifier le Lot ${lotIndex + 1}`;
+
+    // Ouvrir le modal d'édition de lot
+    document.getElementById('editLotModal').style.display = 'flex';
+    
+    // Focus sur le premier champ
+    setTimeout(() => {
+        document.getElementById('editLotQuantity').focus();
+    }, 100);
+}
+// Fonction pour sauvegarder les modifications d'un lot
+// Fonction pour sauvegarder les modifications d'un lot (version corrigée)
+function saveLot() {
+    const productId = document.getElementById('editLotProductId').value;
+    const lotIndex = parseInt(document.getElementById('editLotIndex').value);
+    const quantity = parseInt(document.getElementById('editLotQuantity').value);
+    const purchasePrice = parseFloat(document.getElementById('editLotPurchasePrice').value);
+    const salePrice = parseFloat(document.getElementById('editLotSalePrice').value);
+
+    // Validation
+    if (isNaN(quantity) || quantity < 0 || isNaN(purchasePrice) || purchasePrice < 0 || isNaN(salePrice) || salePrice < 0) {
+        showToast('Veuillez remplir tous les champs correctement', 'error');
+        return;
+    }
+
+    const product = products.find(p => p.id === productId);
+    if (!product || !product.stockHistory || !product.stockHistory[lotIndex]) {
+        showToast('Produit ou lot non trouvé', 'error');
+        return;
+    }
+
+    // Mettre à jour le lot
+    product.stockHistory[lotIndex] = {
+        ...product.stockHistory[lotIndex],
+        quantity: quantity,
+        purchasePrice: purchasePrice,
+        salePrice: salePrice,
+        updatedAt: new Date().toISOString()
+    };
+
+    // Recalculer les prix moyens pour le produit
+    updateProductPricesFromLots(product);
+
+    // Sauvegarder
+    localStorage.setItem('products', JSON.stringify(products));
+
+    // Fermer le modal et rafraîchir l'affichage
+    document.getElementById('editLotModal').style.display = 'none';
+    
+    // Régénérer l'affichage des lots dans le modal principal
+    generateStockLotsDisplay(product);
+    
+    showToast('Lot modifié avec succès', 'success');
+}
+// Fonction pour supprimer un lot
+function deleteLot(productId, lotIndex) {
+    const product = products.find(p => p.id === productId);
+    if (!product || !product.stockHistory || !product.stockHistory[lotIndex]) {
+        showToast('Lot non trouvé', 'error');
+        return;
+    }
+
+    if (product.stockHistory.length <= 1) {
+        showToast('Impossible de supprimer le dernier lot', 'error');
+        return;
+    }
+
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer le lot ${lotIndex + 1} ?`)) {
+        return;
+    }
+
+    // Supprimer le lot
+    product.stockHistory.splice(lotIndex, 1);
+
+    // Recalculer les prix moyens
+    updateProductPricesFromLots(product);
+
+    // Sauvegarder
+    localStorage.setItem('products', JSON.stringify(products));
+
+    // Fermer le modal d'édition de lot si ouvert
+    document.getElementById('editLotModal').style.display = 'none';
+
+    // Rafraîchir l'affichage des lots
+    generateStockLotsDisplay(product);
+    
+    showToast('Lot supprimé avec succès', 'success');
+}
+
+// Fonction pour ajouter un nouveau lot
+function addNewLot() {
+    const productId = document.getElementById('editProductId').value;
+    const product = products.find(p => p.id === productId);
+    
+    if (!product) {
+        showToast('Produit non trouvé', 'error');
+        return;
+    }
+
+    // Initialiser l'historique si nécessaire
+    if (!product.stockHistory) {
+        product.stockHistory = [];
+    }
+
+    // Créer un nouveau lot avec des valeurs par défaut
+    const newLot = {
+        quantity: 0,
+        purchasePrice: product.purchasePrice || 0,
+        salePrice: product.salePrice || 0,
+        addedAt: new Date().toISOString()
+    };
+
+    // Ajouter le nouveau lot
+    product.stockHistory.push(newLot);
+
+    // Ouvrir le modal d'édition pour le nouveau lot
+    const newLotIndex = product.stockHistory.length - 1;
+    editLot(productId, newLotIndex);
+}
+
+// Fonction pour recalculer les prix du produit basés sur les lots
+function updateProductPricesFromLots(product) {
+    if (!product.stockHistory || product.stockHistory.length === 0) {
+        return;
+    }
+
+    // Calculer la quantité totale
+    const totalQuantity = product.stockHistory.reduce((sum, lot) => sum + lot.quantity, 0);
+    product.stockQuantity = totalQuantity;
+
+    // Calculer les prix moyens pondérés
+    const totalPurchaseValue = product.stockHistory.reduce((sum, lot) => sum + (lot.purchasePrice * lot.quantity), 0);
+    const totalSaleValue = product.stockHistory.reduce((sum, lot) => sum + (lot.salePrice * lot.quantity), 0);
+
+    if (totalQuantity > 0) {
+        product.purchasePrice = totalPurchaseValue / totalQuantity;
+        product.salePrice = totalSaleValue / totalQuantity;
+    }
+
+    product.updatedAt = new Date().toISOString();
+}
+
+// Fonction pour mettre à jour le produit (informations générales)
+function updateProduct() {
+    const productId = document.getElementById('editProductId').value;
+    const name = document.getElementById('editProductName').value.trim();
+    const category = document.getElementById('editProductCategory').value;
+
+    // Validation des champs de base
+    if (!name || !category) {
+        showToast('Veuillez remplir le nom et la catégorie', 'error');
+        return;
+    }
+
+    const productIndex = products.findIndex(p => p.id === productId);
+    if (productIndex === -1) {
+        showToast('Produit non trouvé', 'error');
+        return;
+    }
+
+    // Mettre à jour les informations de base du produit
+    products[productIndex] = {
+        ...products[productIndex],
+        name,
+        category,
+        updatedAt: new Date().toISOString()
+    };
+
+    // Sauvegarder
+    localStorage.setItem('products', JSON.stringify(products));
+
+    // Fermer le modal
+    document.getElementById('editProductModal').style.display = 'none';
+
+    // Mettre à jour l'interface
+    loadProductsTable();
+    loadDashboardData();
+    loadReportsData();
+
+    showToast('Produit modifié avec succès', 'success');
+}
+    
+    function resetProductForm() {
           document.querySelector('#addProductModal .modal-title').textContent = 'Ajouter un produit';
           document.getElementById('saveProductBtn').textContent = 'Enregistrer';
           document.getElementById('saveProductBtn').onclick = saveProduct;
@@ -5237,6 +5727,212 @@ function importProfileData(event) {
     
     // Réinitialiser l'input
     event.target.value = '';
+}
+// Fonction pour ouvrir le modal de mise à jour de stock
+function updateStock(productId) {
+    const product = products.find(p => p.id === productId);
+    if (!product) {
+        showToast('Produit non trouvé', 'error');
+        return;
+    }
+
+    // Remplir les informations du produit
+    document.getElementById('updateStockProductId').value = product.id;
+    document.getElementById('updateProductName').textContent = product.name;
+    document.getElementById('currentStockInfo').textContent = 
+        `${product.stockQuantity} unités - Achat: ${product.purchasePrice.toFixed(2)} Ar - Vente: ${product.salePrice.toFixed(2)} Ar`;
+
+    // Réinitialiser le formulaire
+    document.getElementById('updateStockForm').reset();
+    
+    // Ouvrir le modal
+    document.getElementById('updateStockModal').style.display = 'flex';
+}
+
+// Fonction pour sauvegarder la mise à jour du stock
+function saveStockUpdate() {
+    const productId = document.getElementById('updateStockProductId').value;
+    const newQuantity = parseInt(document.getElementById('newStockQuantity').value);
+    const newPurchasePrice = parseFloat(document.getElementById('newPurchasePrice').value);
+    const newSalePrice = parseFloat(document.getElementById('newSalePrice').value);
+
+    // Validation
+    if (!productId || isNaN(newQuantity) || newQuantity < 1 || 
+        isNaN(newPurchasePrice) || newPurchasePrice < 0 || 
+        isNaN(newSalePrice) || newSalePrice < 0) {
+        showToast('Veuillez remplir tous les champs correctement', 'error');
+        return;
+    }
+
+    const productIndex = products.findIndex(p => p.id === productId);
+    if (productIndex === -1) {
+        showToast('Produit non trouvé', 'error');
+        return;
+    }
+
+    const product = products[productIndex];
+    
+    // Créer une nouvelle entrée de stock avec les nouveaux prix
+    if (!product.stockHistory) {
+        product.stockHistory = [];
+    }
+
+    // Ajouter l'ancien stock à l'historique s'il n'est pas déjà présent
+    const existingStockEntry = product.stockHistory.find(entry => 
+        entry.purchasePrice === product.purchasePrice && 
+        entry.salePrice === product.salePrice
+    );
+
+    if (existingStockEntry) {
+        existingStockEntry.quantity += product.stockQuantity;
+    } else if (product.stockQuantity > 0) {
+        product.stockHistory.push({
+            purchasePrice: product.purchasePrice,
+            salePrice: product.salePrice,
+            quantity: product.stockQuantity,
+            addedAt: new Date().toISOString()
+        });
+    }
+
+    // Ajouter le nouveau stock à l'historique
+    product.stockHistory.push({
+        purchasePrice: newPurchasePrice,
+        salePrice: newSalePrice,
+        quantity: newQuantity,
+        addedAt: new Date().toISOString()
+    });
+
+    // Mettre à jour le produit avec les nouveaux prix et la quantité totale
+    product.purchasePrice = newPurchasePrice; // Le dernier prix d'achat devient le prix courant
+    product.salePrice = newSalePrice; // Le dernier prix de vente devient le prix courant
+    product.stockQuantity += newQuantity;
+    product.updatedAt = new Date().toISOString();
+
+    // Sauvegarder
+    localStorage.setItem('products', JSON.stringify(products));
+
+    // Fermer le modal
+    document.getElementById('updateStockModal').style.display = 'none';
+    document.getElementById('updateStockForm').reset();
+
+    // Mettre à jour l'interface
+    loadProductsTable();
+    showToast('Stock mis à jour avec succès', 'success');
+}
+
+// Fonction pour choisir le prix lors d'une vente
+function populateProductsDropdown() {
+    const dropdown = document.getElementById('saleProduct');
+    dropdown.innerHTML = '<option value="">Sélectionnez un produit</option>';
+    
+    products.forEach(product => {
+        if (product.stockQuantity > 0) {
+            const option = document.createElement('option');
+            option.value = product.id;
+            
+            let stockInfo = `Stock: ${product.stockQuantity}`;
+            if (product.stockHistory && product.stockHistory.length > 1) {
+                stockInfo += ` (${product.stockHistory.length} lots de prix différents)`;
+            }
+            
+            option.textContent = `${product.name} (${stockInfo})`;
+            option.setAttribute('data-has-multiple-prices', 
+                (product.stockHistory && product.stockHistory.length > 1) ? 'true' : 'false');
+            dropdown.appendChild(option);
+        }
+    });
+    
+    if (dropdown.options.length === 1) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Aucun produit en stock';
+        option.disabled = true;
+        dropdown.appendChild(option);
+    }
+}
+
+// Modal pour choisir le prix lors de la vente
+function showPriceSelectionModal(productId, quantity) {
+    const product = products.find(p => p.id === productId);
+    if (!product || !product.stockHistory || product.stockHistory.length <= 1) {
+        // Si un seul prix, utiliser directement
+        completeSale(productId, quantity, product.purchasePrice, product.salePrice);
+        return;
+    }
+
+    // Créer le modal de sélection de prix
+    let priceOptionsHTML = '';
+    product.stockHistory.forEach((stock, index) => {
+        priceOptionsHTML += `
+            <div class="price-option" style="padding: 10px; border: 1px solid #ddd; margin: 5px 0; border-radius: 4px; cursor: pointer;">
+                <input type="radio" name="priceSelection" value="${index}" id="priceOption${index}">
+                <label for="priceOption${index}" style="margin-left: 8px; cursor: pointer;">
+                    <strong>Lot ${index + 1}:</strong> ${stock.quantity} unités - 
+                    Achat: ${stock.purchasePrice.toFixed(2)} Ar - 
+                    Vente: ${stock.salePrice.toFixed(2)} Ar
+                </label>
+            </div>
+        `;
+    });
+
+    const modalHTML = `
+        <div class="modal" id="priceSelectionModal" style="display: flex;">
+            <div class="modal-content" style="max-width: 500px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">Choisir le lot de stock</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>Sélectionnez le lot à utiliser pour cette vente :</p>
+                    <div id="priceOptionsContainer">
+                        ${priceOptionsHTML}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" id="confirmPriceSelection">
+                        <i class="fas fa-check"></i> Confirmer
+                    </button>
+                    <button class="btn btn-secondary close-modal">Annuler</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Ajouter le modal au DOM
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Configurer les événements
+    const modal = document.getElementById('priceSelectionModal');
+    const confirmBtn = document.getElementById('confirmPriceSelection');
+    
+    confirmBtn.onclick = function() {
+        const selectedOption = document.querySelector('input[name="priceSelection"]:checked');
+        if (!selectedOption) {
+            showToast('Veuillez sélectionner un lot', 'error');
+            return;
+        }
+        
+        const selectedStock = product.stockHistory[parseInt(selectedOption.value)];
+        completeSale(productId, quantity, selectedStock.purchasePrice, selectedStock.salePrice);
+        modal.remove();
+    };
+    
+    // Fermeture du modal
+    modal.querySelectorAll('.close-modal').forEach(btn => {
+        btn.onclick = function() {
+            modal.remove();
+        };
+    });
+    
+    modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.remove();
+        }
+    });
+}
+function resetForms() {
+    document.getElementById('editProductForm').reset();
+    document.getElementById('editLotForm').reset();
 }
         // Make functions available globally for onclick handlers
         window.editProduct = editProduct;
