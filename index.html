@@ -2390,7 +2390,9 @@ textarea.form-control {
 .archive-section.active {
     display: block;
 }
-
+#exportArchiveCSVBtn ,#exportArchiveJSONBtn{
+    display: none;
+}
 /* En-têtes de section */
 .archive-section-header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -3716,41 +3718,41 @@ if (applyArchiveFiltersBtn) {
         exportArchiveJSONBtn.addEventListener('click', exportArchiveToJSON);
     }
     
-    // Boutons d'exportation par section
-    const exportProductsArchiveBtn = document.getElementById('exportProductsArchiveBtn');
-    if (exportProductsArchiveBtn) {
-        exportProductsArchiveBtn.addEventListener('click', function() {
-            exportSectionToCSV('products');
-        });
-    }
-    
-    const exportSalesArchiveBtn = document.getElementById('exportSalesArchiveBtn');
-    if (exportSalesArchiveBtn) {
-        exportSalesArchiveBtn.addEventListener('click', function() {
-            exportSectionToCSV('sales');
-        });
-    }
-    
-    const exportStatsArchiveBtn = document.getElementById('exportStatsArchiveBtn');
-    if (exportStatsArchiveBtn) {
-        exportStatsArchiveBtn.addEventListener('click', function() {
-            exportSectionToCSV('stats');
-        });
-    }
-    
-    const exportHistoryArchiveBtn = document.getElementById('exportHistoryArchiveBtn');
-    if (exportHistoryArchiveBtn) {
-        exportHistoryArchiveBtn.addEventListener('click', function() {
-            exportSectionToCSV('history');
-        });
-    }
-    
-    const exportCategoriesArchiveBtn = document.getElementById('exportCategoriesArchiveBtn');
-    if (exportCategoriesArchiveBtn) {
-        exportCategoriesArchiveBtn.addEventListener('click', function() {
-            exportSectionToCSV('categories');
-        });
-    }
+   // Boutons d'exportation par section
+const exportProductsArchiveBtn = document.getElementById('exportProductsArchiveBtn');
+if (exportProductsArchiveBtn) {
+    exportProductsArchiveBtn.addEventListener('click', function() {
+        exportSectionToPDF('products');
+    });
+}
+
+const exportSalesArchiveBtn = document.getElementById('exportSalesArchiveBtn');
+if (exportSalesArchiveBtn) {
+    exportSalesArchiveBtn.addEventListener('click', function() {
+        exportSectionToPDF('sales');
+    });
+}
+
+const exportStatsArchiveBtn = document.getElementById('exportStatsArchiveBtn');
+if (exportStatsArchiveBtn) {
+    exportStatsArchiveBtn.addEventListener('click', function() {
+        exportSectionToPDF('stats');
+    });
+}
+
+const exportHistoryArchiveBtn = document.getElementById('exportHistoryArchiveBtn');
+if (exportHistoryArchiveBtn) {
+    exportHistoryArchiveBtn.addEventListener('click', function() {
+        exportSectionToPDF('history');
+    });
+}
+
+const exportCategoriesArchiveBtn = document.getElementById('exportCategoriesArchiveBtn');
+if (exportCategoriesArchiveBtn) {
+    exportCategoriesArchiveBtn.addEventListener('click', function() {
+        exportSectionToPDF('categories');
+    });
+}
 
     // Navigation dans les archives
     initializeArchiveNavigation();
@@ -5225,7 +5227,7 @@ function exportToPDF() {
 
         doc.text(`Chiffre d'affaires du mois: ${revenue.toFixed(2)} Ariary`, 20, yPosition);
         yPosition += 6;
-        doc.text(`Bénéfice du mois: ${profit.toFixed(2)} €`, 20, yPosition);
+        doc.text(`Bénéfice du mois: ${profit.toFixed(2)} Ariary`, 20, yPosition);
         yPosition += 6;
         doc.text(`Chiffre d'affaires total: ${totalSales.toFixed(2)} Ariary`, 20, yPosition);
         yPosition += 6;
@@ -5252,9 +5254,9 @@ function exportToPDF() {
                     saleDate.toLocaleDateString('fr-FR'),
                     sale.productName.length > 20 ? sale.productName.substring(0, 20) + '...' : sale.productName,
                     sale.quantity.toString(),
-                    sale.salePrice.toFixed(2) + ' €',
-                    sale.total.toFixed(2) + ' €',
-                    sale.profit.toFixed(2) + ' €'
+                    sale.salePrice.toFixed(2) + ' Ariary',
+                    sale.total.toFixed(2) + ' Ariary',
+                    sale.profit.toFixed(2) + ' Ariary'
                 ];
             });
 
@@ -7028,6 +7030,396 @@ function updateProductsQuickStats() {
     
     const quickAvgMargin = document.getElementById('quick-avg-margin');
     if (quickAvgMargin) quickAvgMargin.textContent = avgMargin.toFixed(1) + '%';
+}
+function exportSectionToPDF(section) {
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Titre principal
+        doc.setFontSize(20);
+        doc.setTextColor(67, 97, 238);
+        doc.text(`ARCHIVE - ${section.toUpperCase()}`, 105, 20, { align: 'center' });
+
+        // Date du rapport
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Généré le: ${new Date().toLocaleDateString('fr-FR')}`, 105, 30, { align: 'center' });
+
+        let yPosition = 45;
+
+        switch(section) {
+            case 'products':
+                exportProductsToPDF(doc, yPosition);
+                break;
+            case 'sales':
+                exportSalesToPDF(doc, yPosition);
+                break;
+            case 'stats':
+                exportStatsToPDF(doc, yPosition);
+                break;
+            case 'history':
+                exportHistoryToPDF(doc, yPosition);
+                break;
+            case 'categories':
+                exportCategoriesToPDF(doc, yPosition);
+                break;
+            default:
+                showToast('Section non reconnue', 'error');
+                return;
+        }
+
+        // Pied de page
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Page ${i} sur ${pageCount}`, 105, doc.internal.pageSize.height - 10, { align: 'center' });
+            doc.text('Gestion de Stock - Archive', 105, doc.internal.pageSize.height - 5, { align: 'center' });
+        }
+
+        // Sauvegarde
+        const fileName = `archive_${section}_${new Date().toISOString().split('T')[0]}.pdf`;
+        const pdfBase64 = doc.output('datauristring').split(',')[1];
+
+        if (window.Android && window.Android.savePdf) {
+            window.Android.savePdf(pdfBase64, fileName);
+        } else {
+            doc.save(fileName);
+        }
+
+        showToast(`Archive ${section} PDF exportée avec succès`, 'success');
+
+    } catch (error) {
+        console.error('Erreur génération PDF:', error);
+        showToast('Erreur lors de la génération du PDF', 'error');
+    }
+}
+
+function exportProductsToPDF(doc, startY) {
+    let yPosition = startY;
+
+    // En-tête
+    doc.setFontSize(14);
+    doc.setTextColor(67, 97, 238);
+    doc.text('LISTE DES PRODUITS', 20, yPosition);
+    yPosition += 10;
+
+    if (products.length === 0) {
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text('Aucun produit enregistré', 20, yPosition);
+        return;
+    }
+
+    // Statistiques rapides
+    doc.setFontSize(10);
+    doc.setTextColor(40, 40, 40);
+    doc.text(`Total produits: ${products.length}`, 20, yPosition);
+    yPosition += 6;
+    doc.text(`Stock total: ${products.reduce((sum, p) => sum + p.stockQuantity, 0)} unités`, 20, yPosition);
+    yPosition += 6;
+    doc.text(`Valeur du stock: ${products.reduce((sum, p) => sum + (p.purchasePrice * p.stockQuantity), 0).toFixed(2)} Ar`, 20, yPosition);
+    yPosition += 10;
+
+    // Tableau des produits
+    const tableHeaders = ['Nom', 'Catégorie', 'Stock', 'Prix Achat', 'Prix Vente'];
+    const tableData = products.map(product => [
+        product.name.length > 25 ? product.name.substring(0, 25) + '...' : product.name,
+        product.category,
+        product.stockQuantity.toString(),
+        product.purchasePrice.toFixed(2) + ' Ar',
+        product.salePrice.toFixed(2) + ' Ar'
+    ]);
+
+    doc.autoTable({
+        startY: yPosition,
+        head: [tableHeaders],
+        body: tableData,
+        theme: 'grid',
+        headStyles: {
+            fillColor: [67, 97, 238],
+            textColor: 255,
+            fontStyle: 'bold'
+        },
+        styles: {
+            fontSize: 8,
+            cellPadding: 2,
+            overflow: 'linebreak'
+        },
+        columnStyles: {
+            0: { cellWidth: 50 },
+            1: { cellWidth: 30 },
+            2: { cellWidth: 20 },
+            3: { cellWidth: 30 },
+            4: { cellWidth: 30 }
+        }
+    });
+}
+
+function exportSalesToPDF(doc, startY) {
+    let yPosition = startY;
+
+    // En-tête
+    doc.setFontSize(14);
+    doc.setTextColor(67, 97, 238);
+    doc.text('HISTORIQUE DES VENTES', 20, yPosition);
+    yPosition += 10;
+
+    if (sales.length === 0) {
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text('Aucune vente enregistrée', 20, yPosition);
+        return;
+    }
+
+    // Statistiques
+    const totalRevenue = sales.reduce((sum, sale) => sum + sale.total, 0);
+    const totalProfit = sales.reduce((sum, sale) => sum + sale.profit, 0);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(40, 40, 40);
+    doc.text(`Total ventes: ${sales.length}`, 20, yPosition);
+    yPosition += 6;
+    doc.text(`Chiffre d'affaires total: ${totalRevenue.toFixed(2)} Ar`, 20, yPosition);
+    yPosition += 6;
+    doc.text(`Bénéfice total: ${totalProfit.toFixed(2)} Ar`, 20, yPosition);
+    yPosition += 10;
+
+    // Tableau des ventes (10 dernières pour éviter les PDF trop longs)
+    const recentSales = sales
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 50);
+
+    const tableHeaders = ['Date', 'Produit', 'Qté', 'Total', 'Bénéfice'];
+    const tableData = recentSales.map(sale => [
+        new Date(sale.date).toLocaleDateString('fr-FR'),
+        sale.productName.length > 20 ? sale.productName.substring(0, 20) + '...' : sale.productName,
+        sale.quantity.toString(),
+        sale.total.toFixed(2) + ' Ar',
+        sale.profit.toFixed(2) + ' Ar'
+    ]);
+
+    doc.autoTable({
+        startY: yPosition,
+        head: [tableHeaders],
+        body: tableData,
+        theme: 'grid',
+        headStyles: {
+            fillColor: [67, 97, 238],
+            textColor: 255,
+            fontStyle: 'bold'
+        },
+        styles: {
+            fontSize: 7,
+            cellPadding: 2,
+            overflow: 'linebreak'
+        },
+        columnStyles: {
+            0: { cellWidth: 25 },
+            1: { cellWidth: 45 },
+            2: { cellWidth: 15 },
+            3: { cellWidth: 25 },
+            4: { cellWidth: 25 }
+        }
+    });
+}
+
+function exportStatsToPDF(doc, startY) {
+    let yPosition = startY;
+
+    // En-tête
+    doc.setFontSize(14);
+    doc.setTextColor(67, 97, 238);
+    doc.text('STATISTIQUES MENSUELLES', 20, yPosition);
+    yPosition += 10;
+
+    const monthlyStats = calculateMonthlyStats();
+    
+    if (monthlyStats.length === 0) {
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text('Aucune statistique disponible', 20, yPosition);
+        return;
+    }
+
+    // Tableau des statistiques
+    const tableHeaders = ['Période', 'CA', 'Coût', 'Bénéfice', 'Marge', 'Top Produit'];
+    const tableData = monthlyStats.map(stat => [
+        stat.period,
+        stat.revenue.toFixed(2) + ' Ar',
+        stat.cost.toFixed(2) + ' Ar',
+        stat.profit.toFixed(2) + ' Ar',
+        stat.margin.toFixed(1) + '%',
+        stat.topProduct.length > 15 ? stat.topProduct.substring(0, 15) + '...' : stat.topProduct
+    ]);
+
+    doc.autoTable({
+        startY: yPosition,
+        head: [tableHeaders],
+        body: tableData,
+        theme: 'grid',
+        headStyles: {
+            fillColor: [67, 97, 238],
+            textColor: 255,
+            fontStyle: 'bold'
+        },
+        styles: {
+            fontSize: 8,
+            cellPadding: 2,
+            overflow: 'linebreak'
+        },
+        columnStyles: {
+            0: { cellWidth: 35 },
+            1: { cellWidth: 25 },
+            2: { cellWidth: 25 },
+            3: { cellWidth: 25 },
+            4: { cellWidth: 20 },
+            5: { cellWidth: 40 }
+        }
+    });
+}
+
+function exportHistoryToPDF(doc, startY) {
+    let yPosition = startY;
+
+    // En-tête
+    doc.setFontSize(14);
+    doc.setTextColor(67, 97, 238);
+    doc.text('HISTORIQUE DES MODIFICATIONS', 20, yPosition);
+    yPosition += 10;
+
+    if (archiveHistory.length === 0) {
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text('Aucun historique disponible', 20, yPosition);
+        return;
+    }
+
+    // Historique récent (50 derniers événements)
+    const recentHistory = archiveHistory
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 50);
+
+    const tableHeaders = ['Date', 'Type', 'Élément', 'Action'];
+    const tableData = recentHistory.map(record => [
+        new Date(record.date).toLocaleDateString('fr-FR'),
+        record.type,
+        record.element.length > 25 ? record.element.substring(0, 25) + '...' : record.element,
+        record.action
+    ]);
+
+    doc.autoTable({
+        startY: yPosition,
+        head: [tableHeaders],
+        body: tableData,
+        theme: 'grid',
+        headStyles: {
+            fillColor: [67, 97, 238],
+            textColor: 255,
+            fontStyle: 'bold'
+        },
+        styles: {
+            fontSize: 7,
+            cellPadding: 2,
+            overflow: 'linebreak'
+        },
+        columnStyles: {
+            0: { cellWidth: 25 },
+            1: { cellWidth: 25 },
+            2: { cellWidth: 50 },
+            3: { cellWidth: 40 }
+        }
+    });
+}
+
+function exportCategoriesToPDF(doc, startY) {
+    let yPosition = startY;
+
+    // En-tête
+    doc.setFontSize(14);
+    doc.setTextColor(67, 97, 238);
+    doc.text('STATISTIQUES PAR CATÉGORIE', 20, yPosition);
+    yPosition += 10;
+
+    const categoryStats = {};
+    
+    // Calculer les statistiques par catégorie
+    products.forEach(product => {
+        if (!categoryStats[product.category]) {
+            categoryStats[product.category] = {
+                productCount: 0,
+                totalStock: 0,
+                stockValue: 0,
+                salesCount: 0,
+                revenue: 0,
+                profit: 0
+            };
+        }
+        
+        categoryStats[product.category].productCount++;
+        categoryStats[product.category].totalStock += product.stockQuantity;
+        categoryStats[product.category].stockValue += product.purchasePrice * product.stockQuantity;
+    });
+    
+    // Ajouter les données de vente par catégorie
+    sales.forEach(sale => {
+        const product = products.find(p => p.id === sale.productId);
+        if (product && categoryStats[product.category]) {
+            categoryStats[product.category].salesCount += sale.quantity;
+            categoryStats[product.category].revenue += sale.total;
+            categoryStats[product.category].profit += sale.profit;
+        }
+    });
+
+    if (Object.keys(categoryStats).length === 0) {
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text('Aucune donnée par catégorie', 20, yPosition);
+        return;
+    }
+
+    // Tableau des catégories
+    const tableHeaders = ['Catégorie', 'Produits', 'Stock', 'Valeur Stock', 'Ventes', 'CA', 'Bénéfice'];
+    const tableData = Object.entries(categoryStats).map(([category, stats]) => {
+        const margin = stats.revenue > 0 ? (stats.profit / stats.revenue * 100) : 0;
+        return [
+            category,
+            stats.productCount.toString(),
+            stats.totalStock.toString(),
+            stats.stockValue.toFixed(2) + ' Ar',
+            stats.salesCount.toString(),
+            stats.revenue.toFixed(2) + ' Ar',
+            stats.profit.toFixed(2) + ' Ar'
+        ];
+    });
+
+    doc.autoTable({
+        startY: yPosition,
+        head: [tableHeaders],
+        body: tableData,
+        theme: 'grid',
+        headStyles: {
+            fillColor: [67, 97, 238],
+            textColor: 255,
+            fontStyle: 'bold'
+        },
+        styles: {
+            fontSize: 7,
+            cellPadding: 2,
+            overflow: 'linebreak'
+        },
+        columnStyles: {
+            0: { cellWidth: 30 },
+            1: { cellWidth: 20 },
+            2: { cellWidth: 20 },
+            3: { cellWidth: 25 },
+            4: { cellWidth: 20 },
+            5: { cellWidth: 25 },
+            6: { cellWidth: 25 }
+        }
+    });
 }
 // Make functions available globally for onclick handlers
 window.editProduct = editProduct;
