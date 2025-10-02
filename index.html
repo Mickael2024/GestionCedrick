@@ -4889,14 +4889,319 @@ function exportSectionToCSV(section) {
 }
 
 function applyArchiveFilters() {
-    // Implémentation des filtres
     const period = document.getElementById('archivePeriod').value;
     const dataType = document.getElementById('archiveDataType').value;
     const category = document.getElementById('archiveCategory').value;
-    
-    // Recharger les données avec les filtres appliqués
-    loadArchiveData();
+    const dateFrom = document.getElementById('archiveDateFrom').value;
+    const dateTo = document.getElementById('archiveDateTo').value;
+
+    // Appliquer les filtres selon la section active
+    const activeSection = document.querySelector('.archive-section.active');
+    if (activeSection) {
+        const sectionId = activeSection.id;
+        
+        switch(sectionId) {
+            case 'archive-products':
+                filterProducts(category);
+                break;
+            case 'archive-sales':
+                filterSales(period, category, dateFrom, dateTo);
+                break;
+            case 'archive-stats':
+                filterStats(period);
+                break;
+            case 'archive-history':
+                filterHistory(period, dataType, dateFrom, dateTo);
+                break;
+            case 'archive-categories':
+                filterCategories();
+                break;
+            default:
+                loadArchiveData(); // Recharger sans filtres
+        }
+    }
+
     showToast('Filtres appliqués', 'success');
+}
+
+function filterProducts(category) {
+    const tableBody = document.getElementById('archiveProductsTable');
+    if (!tableBody) return;
+
+    let filteredProducts = products;
+
+    // Filtre par catégorie
+    if (category !== 'all') {
+        filteredProducts = products.filter(product => product.category === category);
+    }
+
+    // Mettre à jour le tableau
+    tableBody.innerHTML = '';
+
+    if (filteredProducts.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Aucun produit trouvé</td></tr>';
+        return;
+    }
+
+    filteredProducts.forEach(product => {
+        const totalStock = product.stockHistory ? 
+            product.stockHistory.reduce((sum, lot) => sum + lot.quantity, 0) : 
+            product.stockQuantity;
+        
+        const stockValue = product.stockHistory ?
+            product.stockHistory.reduce((sum, lot) => sum + (lot.purchasePrice * lot.quantity), 0) :
+            (product.purchasePrice * product.stockQuantity);
+        
+        const lotsCount = product.stockHistory ? product.stockHistory.length : 1;
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${product.name}</td>
+            <td>${product.category}</td>
+            <td>${totalStock}</td>
+            <td>${product.purchasePrice.toFixed(2)} Ar</td>
+            <td>${product.salePrice.toFixed(2)} Ar</td>
+            <td>${lotsCount} lot(s)</td>
+            <td>${stockValue.toFixed(2)} Ar</td>
+            <td>${new Date(product.createdAt).toLocaleDateString('fr-FR')}</td>
+            <td>${product.updatedAt ? new Date(product.updatedAt).toLocaleDateString('fr-FR') : '-'}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+
+    // Mettre à jour les statistiques rapides
+    updateFilteredProductsStats(filteredProducts);
+}
+
+function filterSales(period, category, dateFrom, dateTo) {
+    const tableBody = document.getElementById('archiveSalesTable');
+    if (!tableBody) return;
+
+    let filteredSales = sales;
+
+    // Filtre par période
+    if (period !== 'all') {
+        const now = new Date();
+        filteredSales = filteredSales.filter(sale => {
+            const saleDate = new Date(sale.date);
+            
+            switch(period) {
+                case 'today':
+                    return saleDate.toDateString() === now.toDateString();
+                case 'week':
+                    const startOfWeek = new Date(now);
+                    startOfWeek.setDate(now.getDate() - now.getDay());
+                    return saleDate >= startOfWeek;
+                case 'month':
+                    return saleDate.getMonth() === now.getMonth() && 
+                           saleDate.getFullYear() === now.getFullYear();
+                case 'year':
+                    return saleDate.getFullYear() === now.getFullYear();
+                case 'custom':
+                    if (dateFrom && dateTo) {
+                        const fromDate = new Date(dateFrom);
+                        const toDate = new Date(dateTo);
+                        toDate.setHours(23, 59, 59, 999);
+                        return saleDate >= fromDate && saleDate <= toDate;
+                    }
+                    return true;
+                default:
+                    return true;
+            }
+        });
+    }
+
+    // Filtre par catégorie
+    if (category !== 'all') {
+        filteredSales = filteredSales.filter(sale => {
+            const product = products.find(p => p.id === sale.productId);
+            return product && product.category === category;
+        });
+    }
+
+    // Trier par date (plus récent en premier)
+    filteredSales = filteredSales.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    // Mettre à jour le tableau
+    tableBody.innerHTML = '';
+
+    if (filteredSales.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Aucune vente trouvée</td></tr>';
+        return;
+    }
+
+    filteredSales.forEach(sale => {
+        const product = products.find(p => p.id === sale.productId);
+        const productCategory = product ? product.category : 'N/A';
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${new Date(sale.date).toLocaleDateString('fr-FR')}</td>
+            <td>${sale.productName}</td>
+            <td>${productCategory}</td>
+            <td>${sale.quantity}</td>
+            <td>${sale.purchasePrice.toFixed(2)} Ar</td>
+            <td>${sale.salePrice.toFixed(2)} Ar</td>
+            <td>${sale.total.toFixed(2)} Ar</td>
+            <td>${sale.profit.toFixed(2)} Ar</td>
+            <td>${sale.userId}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+function filterStats(period) {
+    const tableBody = document.getElementById('archiveStatsTable');
+    if (!tableBody) return;
+
+    let monthlyStats = calculateMonthlyStats();
+
+    // Filtre par période
+    if (period !== 'all') {
+        const now = new Date();
+        monthlyStats = monthlyStats.filter(stat => {
+            const statDate = new Date(stat.period.split(' ')[1], getMonthNumber(stat.period.split(' ')[0]));
+            
+            switch(period) {
+                case 'month':
+                    return statDate.getMonth() === now.getMonth() && 
+                           statDate.getFullYear() === now.getFullYear();
+                case 'year':
+                    return statDate.getFullYear() === now.getFullYear();
+                default:
+                    return true;
+            }
+        });
+    }
+
+    // Mettre à jour le tableau
+    tableBody.innerHTML = '';
+
+    if (monthlyStats.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Aucune statistique trouvée</td></tr>';
+        return;
+    }
+
+    monthlyStats.forEach(stat => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${stat.period}</td>
+            <td>${stat.productsSold}</td>
+            <td>${stat.revenue.toFixed(2)} Ar</td>
+            <td>${stat.cost.toFixed(2)} Ar</td>
+            <td>${stat.profit.toFixed(2)} Ar</td>
+            <td>${stat.margin.toFixed(1)}%</td>
+            <td>${stat.topProduct}</td>
+            <td>${stat.topCategory}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+function filterHistory(period, dataType, dateFrom, dateTo) {
+    const tableBody = document.getElementById('archiveHistoryTable');
+    if (!tableBody) return;
+
+    let filteredHistory = archiveHistory;
+
+    // Filtre par type de données
+    if (dataType !== 'all') {
+        filteredHistory = filteredHistory.filter(record => record.type.toLowerCase() === dataType);
+    }
+
+    // Filtre par période
+    if (period !== 'all') {
+        const now = new Date();
+        filteredHistory = filteredHistory.filter(record => {
+            const recordDate = new Date(record.date);
+            
+            switch(period) {
+                case 'today':
+                    return recordDate.toDateString() === now.toDateString();
+                case 'week':
+                    const startOfWeek = new Date(now);
+                    startOfWeek.setDate(now.getDate() - now.getDay());
+                    return recordDate >= startOfWeek;
+                case 'month':
+                    return recordDate.getMonth() === now.getMonth() && 
+                           recordDate.getFullYear() === now.getFullYear();
+                case 'year':
+                    return recordDate.getFullYear() === now.getFullYear();
+                case 'custom':
+                    if (dateFrom && dateTo) {
+                        const fromDate = new Date(dateFrom);
+                        const toDate = new Date(dateTo);
+                        toDate.setHours(23, 59, 59, 999);
+                        return recordDate >= fromDate && recordDate <= toDate;
+                    }
+                    return true;
+                default:
+                    return true;
+            }
+        });
+    }
+
+    // Trier par date (plus récent en premier)
+    filteredHistory = filteredHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    // Mettre à jour le tableau
+    tableBody.innerHTML = '';
+
+    if (filteredHistory.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Aucun historique trouvé</td></tr>';
+        return;
+    }
+
+    filteredHistory.forEach(record => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${new Date(record.date).toLocaleDateString('fr-FR')}</td>
+            <td>${record.type}</td>
+            <td>${record.element}</td>
+            <td>${record.action}</td>
+            <td>${record.user}</td>
+            <td>${record.details || '-'}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+function filterCategories() {
+    // Pour les catégories, on recharge simplement les données
+    loadArchiveCategories();
+}
+
+function updateFilteredProductsStats(filteredProducts) {
+    const totalProducts = filteredProducts.length;
+    const totalStock = filteredProducts.reduce((sum, product) => sum + product.stockQuantity, 0);
+    const stockValue = filteredProducts.reduce((sum, product) => sum + (product.purchasePrice * product.stockQuantity), 0);
+    
+    const totalMargin = filteredProducts.reduce((sum, product) => {
+        const margin = product.salePrice > 0 ? ((product.salePrice - product.purchasePrice) / product.salePrice * 100) : 0;
+        return sum + margin;
+    }, 0);
+    const avgMargin = totalProducts > 0 ? (totalMargin / totalProducts) : 0;
+
+    const quickTotalProducts = document.getElementById('quick-total-products');
+    if (quickTotalProducts) quickTotalProducts.textContent = totalProducts;
+    
+    const quickTotalStock = document.getElementById('quick-total-stock');
+    if (quickTotalStock) quickTotalStock.textContent = totalStock;
+    
+    const quickStockValue = document.getElementById('quick-stock-value');
+    if (quickStockValue) quickStockValue.textContent = stockValue.toFixed(2) + ' Ar';
+    
+    const quickAvgMargin = document.getElementById('quick-avg-margin');
+    if (quickAvgMargin) quickAvgMargin.textContent = avgMargin.toFixed(1) + '%';
+}
+
+// Fonction utilitaire pour convertir le nom du mois en nombre
+function getMonthNumber(monthName) {
+    const months = {
+        'janvier': 0, 'février': 1, 'mars': 2, 'avril': 3, 'mai': 4, 'juin': 5,
+        'juillet': 6, 'août': 7, 'septembre': 8, 'octobre': 9, 'novembre': 10, 'décembre': 11
+    };
+    return months[monthName.toLowerCase()] || 0;
 }
 // Fonction pour sauvegarder les modifications d'un lot
 function saveLot() {
