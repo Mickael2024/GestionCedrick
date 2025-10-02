@@ -4857,7 +4857,178 @@ function exportArchiveToCSV() {
 }
 
 function exportArchiveToPDF() {
-    showToast('Fonction PDF en développement', 'info');
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Titre principal
+        doc.setFontSize(20);
+        doc.setTextColor(67, 97, 238);
+        doc.text('ARCHIVE COMPLÈTE', 105, 20, { align: 'center' });
+
+        // Date du rapport
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Généré le: ${new Date().toLocaleDateString('fr-FR')}`, 105, 30, { align: 'center' });
+
+        let yPosition = 45;
+
+        // Section Produits
+        doc.setFontSize(16);
+        doc.setTextColor(67, 97, 238);
+        doc.text('PRODUITS', 20, yPosition);
+        yPosition += 10;
+
+        if (products.length > 0) {
+            const tableHeaders = ['Nom', 'Catégorie', 'Stock', 'Prix Achat', 'Prix Vente'];
+            const tableData = products.map(product => [
+                product.name.length > 25 ? product.name.substring(0, 25) + '...' : product.name,
+                product.category,
+                product.stockQuantity.toString(),
+                product.purchasePrice.toFixed(2) + ' Ar',
+                product.salePrice.toFixed(2) + ' Ar'
+            ]);
+
+            doc.autoTable({
+                startY: yPosition,
+                head: [tableHeaders],
+                body: tableData,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [67, 97, 238],
+                    textColor: 255,
+                    fontStyle: 'bold'
+                },
+                styles: {
+                    fontSize: 8,
+                    cellPadding: 2,
+                    overflow: 'linebreak'
+                },
+                margin: { left: 20, right: 20 }
+            });
+
+            yPosition = doc.lastAutoTable.finalY + 15;
+        } else {
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text('Aucun produit', 20, yPosition);
+            yPosition += 10;
+        }
+
+        // Section Ventes (dernières 50 ventes)
+        doc.setFontSize(16);
+        doc.setTextColor(67, 97, 238);
+        doc.text('VENTES', 20, yPosition);
+        yPosition += 10;
+
+        if (sales.length > 0) {
+            const recentSales = sales
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 50);
+
+            const tableHeaders = ['Date', 'Produit', 'Qté', 'Total', 'Bénéfice'];
+            const tableData = recentSales.map(sale => [
+                new Date(sale.date).toLocaleDateString('fr-FR'),
+                sale.productName.length > 20 ? sale.productName.substring(0, 20) + '...' : sale.productName,
+                sale.quantity.toString(),
+                sale.total.toFixed(2) + ' Ar',
+                sale.profit.toFixed(2) + ' Ar'
+            ]);
+
+            doc.autoTable({
+                startY: yPosition,
+                head: [tableHeaders],
+                body: tableData,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [67, 97, 238],
+                    textColor: 255,
+                    fontStyle: 'bold'
+                },
+                styles: {
+                    fontSize: 7,
+                    cellPadding: 2,
+                    overflow: 'linebreak'
+                },
+                margin: { left: 20, right: 20 }
+            });
+
+            yPosition = doc.lastAutoTable.finalY + 15;
+        } else {
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text('Aucune vente', 20, yPosition);
+            yPosition += 10;
+        }
+
+        // Section Statistiques
+        doc.setFontSize(16);
+        doc.setTextColor(67, 97, 238);
+        doc.text('STATISTIQUES', 20, yPosition);
+        yPosition += 10;
+
+        const monthlyStats = calculateMonthlyStats().slice(0, 6); // 6 derniers mois
+        
+        if (monthlyStats.length > 0) {
+            const tableHeaders = ['Période', 'CA', 'Bénéfice', 'Marge'];
+            const tableData = monthlyStats.map(stat => [
+                stat.period,
+                stat.revenue.toFixed(2) + ' Ar',
+                stat.profit.toFixed(2) + ' Ar',
+                stat.margin.toFixed(1) + '%'
+            ]);
+
+            doc.autoTable({
+                startY: yPosition,
+                head: [tableHeaders],
+                body: tableData,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [67, 97, 238],
+                    textColor: 255,
+                    fontStyle: 'bold'
+                },
+                styles: {
+                    fontSize: 8,
+                    cellPadding: 2,
+                    overflow: 'linebreak'
+                },
+                margin: { left: 20, right: 20 }
+            });
+        } else {
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text('Aucune statistique', 20, yPosition);
+        }
+
+        // Pied de page
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Page ${i} sur ${pageCount}`, 105, doc.internal.pageSize.height - 10, { align: 'center' });
+            doc.text('Gestion de Stock - Archive Complète', 105, doc.internal.pageSize.height - 5, { align: 'center' });
+        }
+
+        // Sauvegarde avec condition Android
+        const fileName = `archive_complete_${new Date().toISOString().split('T')[0]}.pdf`;
+        const pdfBase64 = doc.output('datauristring').split(',')[1];
+
+        if (window.Android && window.Android.savePdf) {
+            // Appel du JavaScriptInterface Android pour sauvegarder le PDF
+            window.Android.savePdf(pdfBase64, fileName);
+        } else {
+            // Fallback pour navigateur classique
+            doc.save(fileName);
+        }
+
+        showToast('Archive PDF exportée avec succès', 'success');
+
+    } catch (error) {
+        console.error('Erreur génération PDF:', error);
+        showToast('Erreur lors de la génération du PDF', 'error');
+    }
 }
 
 function exportArchiveToJSON() {
@@ -7402,6 +7573,72 @@ function exportSectionToPDF(section) {
     }
 }
 
+function exportSectionToPDF(section) {
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Titre principal
+        doc.setFontSize(20);
+        doc.setTextColor(67, 97, 238);
+        doc.text(`ARCHIVE - ${section.toUpperCase()}`, 105, 20, { align: 'center' });
+
+        // Date du rapport
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Généré le: ${new Date().toLocaleDateString('fr-FR')}`, 105, 30, { align: 'center' });
+
+        let yPosition = 45;
+
+        switch(section) {
+            case 'products':
+                exportProductsToPDF(doc, yPosition);
+                break;
+            case 'sales':
+                exportSalesToPDF(doc, yPosition);
+                break;
+            case 'stats':
+                exportStatsToPDF(doc, yPosition);
+                break;
+            case 'history':
+                exportHistoryToPDF(doc, yPosition);
+                break;
+            case 'categories':
+                exportCategoriesToPDF(doc, yPosition);
+                break;
+            default:
+                showToast('Section non reconnue', 'error');
+                return;
+        }
+
+        // Pied de page
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Page ${i} sur ${pageCount}`, 105, doc.internal.pageSize.height - 10, { align: 'center' });
+            doc.text('Gestion de Stock - Archive', 105, doc.internal.pageSize.height - 5, { align: 'center' });
+        }
+
+        // Sauvegarde avec condition Android
+        const fileName = `archive_${section}_${new Date().toISOString().split('T')[0]}.pdf`;
+        const pdfBase64 = doc.output('datauristring').split(',')[1];
+
+        if (window.Android && window.Android.savePdf) {
+            window.Android.savePdf(pdfBase64, fileName);
+        } else {
+            doc.save(fileName);
+        }
+
+        showToast(`Archive ${section} PDF exportée avec succès`, 'success');
+
+    } catch (error) {
+        console.error('Erreur génération PDF:', error);
+        showToast('Erreur lors de la génération du PDF', 'error');
+    }
+}
+
 function exportProductsToPDF(doc, startY) {
     let yPosition = startY;
 
@@ -7492,7 +7729,7 @@ function exportSalesToPDF(doc, startY) {
     doc.text(`Bénéfice total: ${totalProfit.toFixed(2)} Ar`, 20, yPosition);
     yPosition += 10;
 
-    // Tableau des ventes (10 dernières pour éviter les PDF trop longs)
+    // Tableau des ventes (50 dernières pour éviter les PDF trop longs)
     const recentSales = sales
         .sort((a, b) => new Date(b.date) - new Date(a.date))
         .slice(0, 50);
