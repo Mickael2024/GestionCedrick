@@ -375,6 +375,8 @@
         }
 
         .modal-body {
+            overflow: auto;
+            height: 300px;
             padding: 20px;
         }
 
@@ -1090,7 +1092,9 @@ textarea.form-control {
         width: 90%;
         margin: 20px auto;
     }
-    
+    #deleteConfirmModal{
+        z-index:1009;
+    }
     .confirm-icon {
         font-size: 3rem;
     }
@@ -2625,7 +2629,7 @@ textarea.form-control {
                             <!-- Section des lots de stock -->
                             <div class="form-group">
                                 <label class="form-label">Gestion des lots de stock</label>
-                                <div id="stockLotsContainer" style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 10px;">
+                                <div id="stockLotsContainer" border: 1px solid #ddd; border-radius: 4px; padding: 10px;">
                                     <!-- Les lots seront générés ici dynamiquement -->
                                 </div>
                             </div>
@@ -2644,12 +2648,19 @@ textarea.form-control {
                                 </button>
                             </div>
                             <div>
+                                <div>
                                 <button type="button" class="btn btn-danger" id="deleteProductBtn">
-                                    <i class="fas fa-trash"></i> Supprimer
+                                    <i class="fas fa-trash"></i>
                                 </button>
+                            </div>
+                           
+                            </div>
+                            <div>
                                 <button type="button" class="btn btn-primary" id="updateProductBtn" style="margin-left: 10px;">
-                                    <i class="fas fa-save"></i> Mettre à jour
+                                    <i class="fas fa-save"></i>
                                 </button>
+                            </div>
+                            <div>
                                 <button type="button" class="btn btn-secondary close-modal" style="margin-left: 10px;">Annuler</button>
                             </div>
                         </div>
@@ -4133,10 +4144,17 @@ function saveProduct() {
         id: generateId(),
         name,
         category,
-        purchasePrice,
-        salePrice,
-        stockQuantity,
-        createdAt: new Date().toISOString()
+        purchasePrice, // Prix de référence
+        salePrice,     // Prix de référence
+        stockQuantity, // Stock total
+        createdAt: new Date().toISOString(),
+        // CORRECTION: Initialiser le premier lot avec les valeurs du formulaire
+        stockHistory: [{
+            purchasePrice: purchasePrice,
+            salePrice: salePrice,
+            quantity: stockQuantity, // Stock initial du premier lot
+            addedAt: new Date().toISOString()
+        }]
     };
     
     products.push(newProduct);
@@ -4148,7 +4166,6 @@ function saveProduct() {
     loadProductsTable();
     showToast('Produit ajouté avec succès', 'success');
 }
-
 function saveSale() {
     const productId = document.getElementById('saleProduct').value;
     const quantity = parseInt(document.getElementById('saleQuantity').value);
@@ -4269,7 +4286,7 @@ function populateProductsDropdown() {
             let stockInfo = `Stock: ${product.stockQuantity}`;
             let hasMultiplePrices = false;
             
-            // Vérifier si le produit a plusieurs lots avec des prix différents
+            // CORRECTION: Vérifier correctement les lots
             if (product.stockHistory && product.stockHistory.length > 1) {
                 const uniquePurchasePrices = new Set();
                 const uniqueSalePrices = new Set();
@@ -4282,9 +4299,10 @@ function populateProductsDropdown() {
                 if (uniquePurchasePrices.size > 1 || uniqueSalePrices.size > 1) {
                     hasMultiplePrices = true;
                     stockInfo += ` (${product.stockHistory.length} lots avec prix différents)`;
+                } else {
+                    stockInfo += ` (${product.stockHistory.length} lots)`;
                 }
             } else if (product.stockHistory && product.stockHistory.length === 1) {
-                // Un seul lot mais montrer quand même l'info
                 stockInfo += ` (1 lot - Prix: ${product.stockHistory[0].salePrice.toFixed(2)} Ar)`;
             }
             
@@ -4356,46 +4374,49 @@ function saveSale() {
     }
 }
 function showLotSelectionModal(productId, quantity, salePrice) {
-    const product = products.find(p => p.id === productId);
-    if (!product || !product.stockHistory || product.stockHistory.length <= 1) {
-        // Si un seul lot, utiliser directement
-        const selectedLot = product.stockHistory[0];
-        completeSale(productId, quantity, selectedLot.purchasePrice, salePrice);
-        return;
-    }
-
-    // Créer le modal de sélection de lot
-    let lotOptionsHTML = '';
-    product.stockHistory.forEach((lot, index) => {
-        if (lot.quantity > 0) {
-            // CORRECTION : Utiliser le prix de vente du LOT, pas du formulaire
-            const lotSalePrice = lot.salePrice; // Prix de vente spécifique du lot
-            const profitPerUnit = lotSalePrice - lot.purchasePrice;
-            const totalProfit = profitPerUnit * quantity;
-            
-            lotOptionsHTML += `
-                <div class="price-option" style="padding: 12px; border: 1px solid #ddd; margin: 8px 0; border-radius: 6px; cursor: pointer; transition: all 0.3s ease;">
-                    <input type="radio" name="lotSelection" value="${index}" id="lotOption${index}" style="margin-right: 10px;">
-                    <label for="lotOption${index}" style="cursor: pointer; width: 100%;">
-                        <div style="font-weight: bold; margin-bottom: 5px;">
-                            Lot ${index + 1} - ${lot.quantity} unités disponibles
-                        </div>
-                        <div style="font-size: 0.9em; color: #666;">
-                            <div>Prix d'achat: <strong>${lot.purchasePrice.toFixed(2)} Ar</strong></div>
-                            <div>Prix de vente du lot: <strong>${lotSalePrice.toFixed(2)} Ar</strong></div>
-                            <div style="color: ${profitPerUnit >= 0 ? '#28a745' : '#dc3545'};">
-                                Bénéfice unitaire: <strong>${profitPerUnit.toFixed(2)} Ar</strong>
-                            </div>
-                            <div style="color: ${totalProfit >= 0 ? '#28a745' : '#dc3545'};">
-                                Bénéfice total: <strong>${totalProfit.toFixed(2)} Ar</strong>
-                            </div>
-                        </div>
-                    </label>
-                </div>
-            `;
+        const product = products.find(p => p.id === productId);
+        if (!product || !product.stockHistory || product.stockHistory.length <= 1) {
+            // Si un seul lot, utiliser directement
+            const selectedLot = product.stockHistory[0];
+            completeSale(productId, quantity, selectedLot.purchasePrice, selectedLot.salePrice);
+            return;
         }
-    });
-
+    
+        // Créer le modal de sélection de lot
+        let lotOptionsHTML = '';
+        product.stockHistory.forEach((lot, index) => {
+            if (lot.quantity > 0) {
+                const lotSalePrice = lot.salePrice;
+                const profitPerUnit = lotSalePrice - lot.purchasePrice;
+                const totalProfit = profitPerUnit * quantity;
+                
+                // CORRECTION: Identifier clairement le lot initial
+                const isInitialLot = index === 0;
+                const lotType = isInitialLot ? 'Lot Initial' : `Lot ${index + 1}`;
+                
+                lotOptionsHTML += `
+                    <div class="price-option" style="padding: 12px; border: 1px solid #ddd; margin: 8px 0; border-radius: 6px; cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="lotSelection" value="${index}" id="lotOption${index}" style="margin-right: 10px;">
+                        <label for="lotOption${index}" style="cursor: pointer; width: 100%;">
+                            <div style="font-weight: bold; margin-bottom: 5px;">
+                                ${lotType} - ${lot.quantity} unités disponibles
+                                ${isInitialLot ? '<span style="color: #28a745; font-size: 0.8em;">(Stock initial)</span>' : ''}
+                            </div>
+                            <div style="font-size: 0.9em; color: #666;">
+                                <div>Prix d'achat: <strong>${lot.purchasePrice.toFixed(2)} Ar</strong></div>
+                                <div>Prix de vente du lot: <strong>${lotSalePrice.toFixed(2)} Ar</strong></div>
+                                <div style="color: ${profitPerUnit >= 0 ? '#28a745' : '#dc3545'};">
+                                    Bénéfice unitaire: <strong>${profitPerUnit.toFixed(2)} Ar</strong>
+                                </div>
+                                <div style="color: ${totalProfit >= 0 ? '#28a745' : '#dc3545'};">
+                                    Bénéfice total: <strong>${totalProfit.toFixed(2)} Ar</strong>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                `;
+            }
+        });
     const modalHTML = `
         <div class="modal" id="lotSelectionModal" style="display: flex;">
             <div class="modal-content" style="max-width: 600px;">
@@ -4490,6 +4511,7 @@ function showLotSelectionModal(productId, quantity, salePrice) {
         }
     });
 }
+
 function completeSale(productId, quantity, purchasePrice, salePrice, lotIndex = null) {
     const product = products.find(p => p.id === productId);
     
@@ -5035,7 +5057,7 @@ function generateStockLotsDisplay(product) {
     const container = document.getElementById('stockLotsContainer');
     container.innerHTML = '';
 
-    // Initialiser l'historique des lots si nécessaire
+    // CORRECTION: Si pas d'historique, créer le lot initial
     if (!product.stockHistory || product.stockHistory.length === 0) {
         product.stockHistory = [{
             purchasePrice: product.purchasePrice,
@@ -5055,7 +5077,7 @@ function generateStockLotsDisplay(product) {
     `;
     container.innerHTML = summaryHTML;
 
-    // Afficher chaque lot
+    // Afficher chaque lot dans l'ordre (lot 1, lot 2, lot 3...)
     product.stockHistory.forEach((lot, index) => {
         const lotElement = document.createElement('div');
         lotElement.className = 'stock-lot-item';
@@ -5070,40 +5092,48 @@ function generateStockLotsDisplay(product) {
             align-items: center;
         `;
 
-     // Dans la fonction generateStockLotsDisplay, modifiez l'affichage pour montrer clairement les différences de prix
-lotElement.innerHTML = `
-<div style="flex: 1;">
-    <div style="font-weight: bold; margin-bottom: 5px;">
-        Lot ${index + 1} - ${lot.quantity} unités
-    </div>
-    <div style="font-size: 0.9em; color: #666;">
-        <strong>Prix d'achat:</strong> ${lot.purchasePrice.toFixed(2)} Ar | 
-        <strong>Prix de vente:</strong> ${lot.salePrice.toFixed(2)} Ar
-    </div>
-    <div style="font-size: 0.8em; color: #999;">
-        Marge: ${((lot.salePrice - lot.purchasePrice) / lot.purchasePrice * 100).toFixed(1)}% |
-        Ajouté: ${new Date(lot.addedAt).toLocaleDateString('fr-FR')}
-    </div>
-</div>
-<div>
-    <button type="button" class="btn btn-primary btn-sm edit-lot-btn" data-index="${index}">
-        <i class="fas fa-edit"></i>
-    </button>
-    ${product.stockHistory.length > 1 ? `
-        <button type="button" class="btn btn-danger btn-sm delete-lot-btn" data-index="${index}" style="margin-left: 5px;">
-            <i class="fas fa-trash"></i>
-        </button>
-    ` : ''}
-</div>
-`;
+        // CORRECTION: Afficher clairement l'ordre des lots
+        const isInitialLot = index === 0;
+        const lotType = isInitialLot ? 'Lot Initial' : `Lot ${index + 1}`;
+        
+        lotElement.innerHTML = `
+            <div style="flex: 1;">
+                <div style="font-weight: bold; margin-bottom: 5px;">
+                    ${lotType} - ${lot.quantity} unités
+                    ${isInitialLot ? '<span style="color: #28a745; font-size: 0.8em;">(Stock initial)</span>' : ''}
+                </div>
+                <div style="font-size: 0.9em; color: #666;">
+                    <strong>Prix d'achat:</strong> ${lot.purchasePrice.toFixed(2)} Ar | 
+                    <strong>Prix de vente:</strong> ${lot.salePrice.toFixed(2)} Ar
+                </div>
+                <div style="font-size: 0.8em; color: #999;">
+                    Marge: ${((lot.salePrice - lot.purchasePrice) / lot.purchasePrice * 100).toFixed(1)}% |
+                    Ajouté: ${new Date(lot.addedAt).toLocaleDateString('fr-FR')}
+                </div>
+            </div>
+            <div style='display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;'>
+                <button type="button" class="btn btn-primary btn-sm edit-lot-btn" data-index="${index}">
+                    <i class="fas fa-edit"></i>
+                </button>
+                ${product.stockHistory.length > 1 && !isInitialLot ? `
+                    <button type="button" class="btn btn-danger btn-sm delete-lot-btn" data-index="${index}" style="margin-left: 5px;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                ` : ''}
+            </div>
+        `;
+
         container.appendChild(lotElement);
     });
 
     // Ajouter les écouteurs d'événements pour les boutons des lots
     container.querySelectorAll('.edit-lot-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
-            e.preventDefault(); // Empêche le comportement par défaut
-            e.stopPropagation(); // Empêche la propagation
+            e.preventDefault();
+            e.stopPropagation();
             const lotIndex = parseInt(this.getAttribute('data-index'));
             editLot(product.id, lotIndex);
         });
@@ -5111,14 +5141,13 @@ lotElement.innerHTML = `
 
     container.querySelectorAll('.delete-lot-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
-            e.preventDefault(); // Empêche le comportement par défaut
-            e.stopPropagation(); // Empêche la propagation
+            e.preventDefault();
+            e.stopPropagation();
             const lotIndex = parseInt(this.getAttribute('data-index'));
             deleteLot(product.id, lotIndex);
         });
     });
 }
-
 
 // Fonction pour éditer un lot spécifique
 function editLot(productId, lotIndex) {
@@ -6610,9 +6639,14 @@ function saveStockUpdate() {
 
     const product = products[productIndex];
     
-    // Initialiser l'historique si nécessaire
+    // CORRECTION: Initialiser l'historique si nécessaire
     if (!product.stockHistory) {
-        product.stockHistory = [];
+        product.stockHistory = [{
+            purchasePrice: product.purchasePrice,
+            salePrice: product.salePrice,
+            quantity: product.stockQuantity,
+            addedAt: new Date().toISOString()
+        }];
     }
 
     // Ajouter le nouveau lot avec ses propres prix
@@ -6625,11 +6659,9 @@ function saveStockUpdate() {
 
     product.stockHistory.push(newLot);
 
-    // Mettre à jour le stock total seulement
-    product.stockQuantity += newQuantity;
-    
-    // NE PAS mettre à jour les prix du produit - garder les prix des lots individuels
-    // Les prix du produit servent seulement de référence générale
+    // CORRECTION: Mettre à jour le stock total en additionnant tous les lots
+    const totalStock = product.stockHistory.reduce((sum, lot) => sum + lot.quantity, 0);
+    product.stockQuantity = totalStock;
     
     product.updatedAt = new Date().toISOString();
 
@@ -6642,7 +6674,7 @@ function saveStockUpdate() {
 
     // Mettre à jour l'interface
     loadProductsTable();
-    showToast('Stock mis à jour avec succès avec nouveau lot', 'success');
+    showToast('Nouveau lot ajouté avec succès', 'success');
 }
 // Fonction pour choisir le prix lors d'une vente
 function showPriceSelectionModal(productId, quantity) {
