@@ -2777,6 +2777,7 @@ textarea.form-control {
                         <button class="btn btn-primary" id="addSaleBtn">
                             <i class="fas fa-plus"></i> Nouvelle vente
                         </button>
+                        
                     </div>
                     <table>
                         <thead>
@@ -2852,6 +2853,9 @@ textarea.form-control {
                     <div class="table-title">Gestion des produits</div>
                     <button class="btn btn-primary" id="addProductBtn">
                         <i class="fas fa-plus"></i> Ajouter un produit
+                    </button>
+                    <button class="btn btn-success" id="addNewCategoryBtn">
+                        <i class="fas fa-tags"></i> Nouvelle catégorie
                     </button>
                 </div>
                 <table>
@@ -3757,7 +3761,7 @@ textarea.form-control {
         setupEventListeners();
         initializeProfile();
         initializeChat();
-        
+        setupCategoryManagement();
         // Load initial data
         loadDashboardData();
         loadProductsTable();
@@ -7248,11 +7252,16 @@ function exportArchiveToJSON() {
         products: products,
         sales: sales,
         history: archiveHistory,
+        customCategories: JSON.parse(localStorage.getItem('customCategories')) || [], // ← AJOUT IMPORTANT
+        adminProfile: JSON.parse(localStorage.getItem('adminProfile')) || {},
+        users: JSON.parse(localStorage.getItem('users')) || [],
+        currentUser: JSON.parse(localStorage.getItem('currentUser')) || null,
         summary: {
             totalProducts: products.length,
             totalSales: sales.length,
             totalRevenue: sales.reduce((sum, sale) => sum + sale.total, 0),
-            totalProfit: sales.reduce((sum, sale) => sum + sale.profit, 0)
+            totalProfit: sales.reduce((sum, sale) => sum + sale.profit, 0),
+            customCategoriesCount: (JSON.parse(localStorage.getItem('customCategories')) || []).length // ← STATS
         }
     };
     
@@ -7265,7 +7274,6 @@ function exportArchiveToJSON() {
     
     showToast('Archive JSON exportée avec succès', 'success');
 }
-
 function loadArchiveCategories() {
     const tableBody = document.getElementById('archiveCategoriesTable');
     if (!tableBody) return;
@@ -8006,6 +8014,173 @@ Ensuite, envoyez ce fichier à votre email.
     }
     
     console.log('📦 SAUVEGARDE COMPLÈTE:', allData);
+}
+// Fonction individuelle pour gérer les nouvelles catégories
+function setupCategoryManagement() {
+    console.log('Initialisation de la gestion des catégories...');
+    
+    // Variables pour les catégories
+    let customCategories = JSON.parse(localStorage.getItem('customCategories')) || [];
+    
+    // Écouteur pour le bouton "Nouvelle catégorie"
+    document.getElementById('addNewCategoryBtn').addEventListener('click', function() {
+        openCategoryModal();
+    });
+    
+    // Fonction pour ouvrir le modal de catégorie
+    function openCategoryModal() {
+        // Créer le modal dynamiquement
+        const modalHTML = `
+            <div id="categoryModal" class="modal" style="display: flex;">
+                <div class="modal-content" style="max-width: 400px;">
+                    <div class="modal-header">
+                        <h3 class="modal-title">
+                            <i class="fas fa-tags"></i> Nouvelle catégorie
+                        </h3>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="categoryForm">
+                            <div class="form-group">
+                                <label class="form-label" for="categoryName">Nom de la catégorie *</label>
+                                <input type="text" id="categoryName" class="form-control" 
+                                       placeholder="Ex: Écouteurs, Souris, Claviers..." required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="categoryDescription">Description (optionnel)</label>
+                                <textarea id="categoryDescription" class="form-control" rows="3" 
+                                          placeholder="Description de la catégorie..."></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" id="saveCategoryBtn">
+                            <i class="fas fa-save"></i> Créer la catégorie
+                        </button>
+                        <button class="btn btn-secondary" id="closeCategoryModal">Annuler</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Ajouter le modal au DOM
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        // Écouteurs pour le modal
+        document.getElementById('saveCategoryBtn').addEventListener('click', saveCategory);
+        document.getElementById('closeCategoryModal').addEventListener('click', closeCategoryModal);
+        
+        // Fermer en cliquant à l'extérieur
+        document.getElementById('categoryModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCategoryModal();
+            }
+        });
+        
+        // Fermer avec la croix
+        document.querySelector('#categoryModal .close-modal').addEventListener('click', closeCategoryModal);
+        
+        // Focus sur le champ nom
+        document.getElementById('categoryName').focus();
+        
+        // Entrée pour sauvegarder
+        document.getElementById('categoryName').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                saveCategory();
+            }
+        });
+    }
+    
+    // Fonction pour sauvegarder une catégorie
+    function saveCategory() {
+        const name = document.getElementById('categoryName').value.trim();
+        const description = document.getElementById('categoryDescription').value.trim();
+        
+        if (!name) {
+            showToast('Veuillez entrer un nom pour la catégorie', 'error');
+            return;
+        }
+        
+        // Vérifier si la catégorie existe déjà
+        const existingCategory = customCategories.find(cat => 
+            cat.name.toLowerCase() === name.toLowerCase()
+        );
+        
+        if (existingCategory) {
+            showToast('Cette catégorie existe déjà', 'error');
+            return;
+        }
+        
+        // Créer la nouvelle catégorie
+        const newCategory = {
+            id: 'cat_' + Date.now(),
+            name: name,
+            description: description,
+            createdAt: new Date().toISOString(),
+            productCount: 0
+        };
+        
+        customCategories.push(newCategory);
+        localStorage.setItem('customCategories', JSON.stringify(customCategories));
+        
+        showToast(`Catégorie "${name}" créée avec succès`, 'success');
+        
+        // Fermer le modal
+        closeCategoryModal();
+        
+        // Mettre à jour les dropdowns si nécessaire
+        updateCategoryDropdowns();
+    }
+    
+    // Fonction pour fermer le modal
+    function closeCategoryModal() {
+        const modal = document.getElementById('categoryModal');
+        if (modal) {
+            modal.remove();
+        }
+    }
+    
+    // Fonction pour mettre à jour les dropdowns de catégories
+    function updateCategoryDropdowns() {
+        updateCategoryDropdown('productCategory');
+        updateCategoryDropdown('editProductCategory');
+    }
+    
+    // Fonction pour mettre à jour un dropdown spécifique
+    function updateCategoryDropdown(dropdownId) {
+        const dropdown = document.getElementById(dropdownId);
+        if (!dropdown) return;
+        
+        // Sauvegarder la valeur sélectionnée
+        const selectedValue = dropdown.value;
+        
+        // Garder seulement les options par défaut
+        const defaultOptions = Array.from(dropdown.options).filter(opt => 
+            ['ordinateur', 'telephone', 'tablette', 'accessoire', ''].includes(opt.value)
+        );
+        
+        dropdown.innerHTML = '';
+        defaultOptions.forEach(opt => dropdown.add(opt));
+        
+        // Ajouter les catégories personnalisées
+        customCategories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = category.name;
+            dropdown.add(option);
+        });
+        
+        // Restaurer la sélection si possible
+        if (selectedValue && dropdown.querySelector(`option[value="${selectedValue}"]`)) {
+            dropdown.value = selectedValue;
+        }
+    }
+    
+    // Initialiser les dropdowns au chargement
+    setTimeout(updateCategoryDropdowns, 100);
+    
+    console.log('Gestion des catégories initialisée avec', customCategories.length, 'catégories personnalisées');
 }
 // Make functions available globally for onclick handlers
 window.editProduct = editProduct;
