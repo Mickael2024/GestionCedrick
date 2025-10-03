@@ -8502,73 +8502,70 @@ function updateBackupStatus() {
     }
 }
 function backupToEmail() {
-    // Récupérer TOUTES les données du localStorage
+    // Récupérer toutes les données du localStorage
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    const sales = JSON.parse(localStorage.getItem('sales') || '[]');
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    const adminProfile = JSON.parse(localStorage.getItem('adminProfile') || '{}');
+    const archiveHistory = JSON.parse(localStorage.getItem('archiveHistory') || '[]');
+
     const allData = {
-        // Données principales
-        products: JSON.parse(localStorage.getItem('products') || '[]'),
-        sales: JSON.parse(localStorage.getItem('sales') || '[]'),
-        users: JSON.parse(localStorage.getItem('users') || '[]'),
-        currentUser: JSON.parse(localStorage.getItem('currentUser') || 'null'),
-        
-        // Profil et configuration
-        adminProfile: JSON.parse(localStorage.getItem('adminProfile') || '{}'),
-        archiveHistory: JSON.parse(localStorage.getItem('archiveHistory') || '[]'),
-        
-        // Métadonnées
+        products,
+        sales,
+        users,
+        currentUser,
+        adminProfile,
+        archiveHistory,
         backupDate: new Date().toISOString(),
         backupVersion: '1.0',
         totalStats: {
             productsCount: products.length,
             salesCount: sales.length,
-            totalRevenue: sales.reduce((sum, sale) => sum + sale.total, 0),
-            totalProfit: sales.reduce((sum, sale) => sum + sale.profit, 0),
-            lowStockProducts: products.filter(p => p.stockQuantity < 5).length
+            totalRevenue: sales.reduce((sum, sale) => sum + (sale.total || 0), 0),
+            totalProfit: sales.reduce((sum, sale) => sum + (sale.profit || 0), 0),
+            lowStockProducts: products.filter(p => (p.stockQuantity || 0) < 5).length
         }
     };
 
-    // Créer le fichier de sauvegarde
+    // Convertir en JSON string
     const jsonString = JSON.stringify(allData, null, 2);
-    
-    // MÉTHODE SPÉCIALE POUR WEBVIEW ANDROID
+
+    // Encoder en Base64 pour Android WebView
+    const base64Data = btoa(unescape(encodeURIComponent(jsonString)));
+
+    // Nom de fichier
+    const fileName = `sauvegarde_stock_${new Date().toISOString().split('T')[0]}.json`;
+
+    // Vérifier si on est dans WebView Android
     if (window.Android && window.Android.saveBackup) {
-        // Appel direct à l'interface Android
-        window.Android.saveBackup(jsonString, `sauvegarde_stock_${new Date().toISOString().split('T')[0]}.json`);
+        window.Android.saveBackup(base64Data, fileName);
         showToast(`✅ Sauvegarde envoyée à l'application Android`, 'success');
     } else {
-        // Fallback pour navigateur normal
+        // Fallback navigateur normal
         try {
             const blob = new Blob([jsonString], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
-            
             const a = document.createElement('a');
             a.href = url;
-            a.download = `sauvegarde_complete_stock_${new Date().toISOString().split('T')[0]}.json`;
+            a.download = fileName;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            
+
             showToast(`✅ Sauvegarde COMPLÈTE téléchargée!`, 'success');
         } catch (error) {
-            // Méthode alternative si le téléchargement échoue
             showToast('❌ Erreur téléchargement. Utilisez la méthode manuelle:', 'error');
             setTimeout(() => {
-                const backupInfo = `
-📦 SAUVEGARDE MANUELLE REQUISE
-
-Copiez ce texte et sauvegardez-le dans un fichier .json:
-
-${jsonString}
-
-Ensuite, envoyez ce fichier à votre email.
-                `;
-                alert(backupInfo);
+                alert(`📦 SAUVEGARDE MANUELLE REQUISE\n\nCopiez ce texte et sauvegardez-le dans un fichier .json:\n\n${jsonString}\n\nEnsuite, envoyez ce fichier à votre email.`);
             }, 1000);
         }
     }
-    
+
     console.log('📦 SAUVEGARDE COMPLÈTE:', allData);
 }
+
 // Make functions available globally for onclick handlers
 window.editProduct = editProduct;
 window.deleteProduct = deleteProduct;
