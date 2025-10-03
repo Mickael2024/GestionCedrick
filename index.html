@@ -2477,516 +2477,7 @@ textarea.form-control {
     color: #4361ee;
     font-weight: bold;
 }
-/* ===== STYLES POUR LA SAUVEGARDE ===== */
-.backup-option {
-    background: var(--white);
-    border: 1px solid var(--gray-300);
-    border-radius: var(--border-radius-lg);
-    padding: var(--spacing-lg);
-    margin-bottom: var(--spacing-md);
-}
 
-.backup-option h5 {
-    color: var(--gray-800);
-    margin-bottom: var(--spacing-sm);
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-}
-
-.backup-option h5 i {
-    color: var(--primary);
-}
-
-/* ===== STYLES POUR LES LOTS DE STOCK ===== */
-.stock-lot-item {
-    transition: all 0.3s ease;
-    border-left: 4px solid var(--primary) !important;
-}
-
-.stock-lot-item:hover {
-    background: var(--gray-50) !important;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-/* Lot initial - couleur différente */
-.stock-lot-item:first-child {
-    border-left-color: var(--success) !important;
-}
-
-/* ===== MODAL DE SÉLECTION DE LOT ===== */
-.price-option {
-    transition: all 0.3s ease;
-}
-
-.price-option:hover {
-    background: var(--gray-50);
-    border-color: var(--primary) !important;
-}
-
-.price-option input[type="radio"]:checked + label {
-    font-weight: bold;
-}
-
-/* Indicateur de frappe */
-.typing-indicator {
-    display: flex;
-    gap: 4px;
-    padding: 10px;
-}
-
-.typing-indicator span {
-    height: 8px;
-    width: 8px;
-    background: var(--gray-500);
-    border-radius: 50%;
-    animation: typing 1.4s infinite ease-in-out;
-}
-
-.typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
-.typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
-
-@keyframes typing {
-    0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
-    40% { transform: scale(1); opacity: 1; }
-}
-
-/* ===== STYLES POUR LE CHAT IA ===== */
-.chat-modal .modal-content {
-    display: flex;
-    flex-direction: column;
-}
-
-.chat-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: var(--spacing-md);
-    background: var(--gray-100);
-}
-
-.chat-messages {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-}
-
-.message {
-    display: flex;
-    gap: var(--spacing-sm);
-    max-width: 85%;
-}
-
-.message.user-message {
-    align-self: flex-end;
-    flex-direction: row-reverse;
-}
-
-.message.ai-message {
-    align-self: flex-start;
-}
-
-.message-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--primary);
-    color: var(--white);
-    flex-shrink: 0;
-}
-
-.user-message .message-avatar {
-    background: var(--success);
-}
-
-.message-content {
-    background: var(--white);
-    padding: var(--spacing-md);
-    border-radius: var(--border-radius-lg);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.user-message .message-content {
-    background: var(--primary);
-    color: var(--white);
-}
-
-.message-text {
-    line-height: 1.5;
-}
-
-.message-text ul {
-    margin: var(--spacing-sm) 0;
-    padding-left: var(--spacing-lg);
-}
-
-.message-text li {
-    margin-bottom: var(--spacing-xs);
-}
-
-.message-time {
-    font-size: var(--font-size-xs);
-    color: var(--gray-500);
-    margin-top: var(--spacing-xs);
-    text-align: right;
-}
-
-.user-message .message-time {
-    color: rgba(255,255,255,0.8);
-}
-
-.chat-footer {
-    padding: var(--spacing-md);
-    border-top: 1px solid var(--gray-300);
-    background: var(--white);
-}
-
-.chat-input-container {
-    display: flex;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-sm);
-}
-
-.chat-input {
-    flex: 1;
-    padding: var(--spacing-md);
-    border: 1px solid var(--gray-300);
-    border-radius: var(--border-radius);
-    font-size: var(--font-size-base);
-}
-
-.chat-input:focus {
-    outline: none;
-    border-color: var(--primary);
-}
-
-.chat-status {
-    font-size: var(--font-size-sm);
-    color: var(--gray-600);
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-}
-
-/* ===== STYLES POUR L'ARCHIVE ===== */
-.archive-navigation {
-    display: grid;
-    gap: 1px;
-    background: var(--gray-200);
-}
-
-.archive-nav-item {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-    padding: var(--spacing-lg);
-    background: var(--white);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border-left: 4px solid transparent;
-}
-
-.archive-nav-item:hover {
-    background: var(--gray-50);
-    transform: translateX(4px);
-}
-
-.archive-nav-item.active {
-    background: var(--primary);
-    color: var(--white);
-    border-left-color: var(--secondary);
-}
-
-.archive-nav-item.active .archive-nav-subtitle {
-    color: rgba(255,255,255,0.8);
-}
-
-.archive-nav-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: var(--border-radius);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-    color: var(--white);
-    font-size: var(--font-size-xl);
-}
-
-.archive-nav-content {
-    flex: 1;
-}
-
-.archive-nav-title {
-    font-weight: 600;
-    font-size: var(--font-size-lg);
-    margin-bottom: var(--spacing-xs);
-}
-
-.archive-nav-subtitle {
-    color: var(--gray-600);
-    font-size: var(--font-size-sm);
-    margin-bottom: var(--spacing-xs);
-}
-
-.archive-nav-stats {
-    font-weight: 600;
-    color: var(--primary);
-}
-
-.archive-nav-item.active .archive-nav-stats {
-    color: var(--white);
-}
-
-.archive-nav-badge {
-    color: var(--gray-400);
-    font-size: var(--font-size-lg);
-}
-
-.archive-section {
-    display: none;
-}
-
-.archive-section.active {
-    display: block;
-}
-
-.quick-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-xl);
-}
-
-.quick-stat-card {
-    background: var(--white);
-    padding: var(--spacing-lg);
-    border-radius: var(--border-radius-lg);
-    border: 1px solid var(--gray-200);
-    text-align: center;
-}
-
-.quick-stat-value {
-    font-size: 2rem;
-    font-weight: bold;
-    color: var(--primary);
-    margin-bottom: var(--spacing-xs);
-}
-
-.quick-stat-label {
-    color: var(--gray-600);
-    margin-bottom: var(--spacing-sm);
-}
-
-.quick-stat-trend {
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-}
-
-.trend-up { color: var(--success); }
-.trend-down { color: var(--danger); }
-
-/* ===== STYLES POUR LE PROFIL ===== */
-.profile-header {
-    text-align: center;
-    margin-bottom: var(--spacing-2xl);
-    padding-bottom: var(--spacing-lg);
-    border-bottom: 1px solid var(--gray-300);
-}
-
-.profile-container {
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.profile-section {
-    background: var(--white);
-    border-radius: var(--border-radius-lg);
-    padding: var(--spacing-xl);
-    margin-bottom: var(--spacing-xl);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.profile-section h3 {
-    color: var(--gray-800);
-    margin-bottom: var(--spacing-lg);
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-}
-
-.profile-section h3 i {
-    color: var(--primary);
-}
-
-.profile-photo-container {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xl);
-    margin-bottom: var(--spacing-lg);
-}
-
-.profile-photo {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background: var(--gray-200);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-    border: 4px solid var(--white);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.profile-photo img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.photo-placeholder {
-    font-size: 3rem;
-    color: var(--gray-500);
-}
-
-.photo-actions {
-    display: flex;
-    gap: var(--spacing-sm);
-    flex-wrap: wrap;
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-lg);
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--spacing-md);
-}
-
-.stat-card {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-    padding: var(--spacing-lg);
-    background: var(--gray-100);
-    border-radius: var(--border-radius);
-    border-left: 4px solid var(--primary);
-}
-
-.stat-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: var(--border-radius);
-    background: var(--primary);
-    color: var(--white);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: var(--font-size-xl);
-}
-
-.stat-value {
-    font-size: var(--font-size-2xl);
-    font-weight: bold;
-    color: var(--gray-800);
-    line-height: 1;
-}
-
-.stat-label {
-    color: var(--gray-600);
-    font-size: var(--font-size-sm);
-}
-
-.form-actions {
-    display: flex;
-    gap: var(--spacing-md);
-    justify-content: flex-end;
-    margin-top: var(--spacing-xl);
-    padding-top: var(--spacing-lg);
-    border-top: 1px solid var(--gray-300);
-}
-
-/* ===== STYLES RESPONSIVE ===== */
-@media (max-width: 768px) {
-    .profile-photo-container {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .archive-nav-item {
-        padding: var(--spacing-md);
-    }
-    
-    .archive-nav-icon {
-        width: 40px;
-        height: 40px;
-        font-size: var(--font-size-lg);
-    }
-    
-    .quick-stats {
-        grid-template-columns: 1fr;
-    }
-    
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .form-actions {
-        flex-direction: column;
-    }
-    
-    .chat-input-container {
-        flex-direction: column;
-    }
-    
-    .message {
-        max-width: 95%;
-    }
-}
-
-/* ===== ANIMATIONS ===== */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.archive-section.active {
-    animation: fadeIn 0.3s ease;
-}
-
-.stock-lot-item {
-    animation: fadeIn 0.2s ease;
-}
-
-/* ===== ÉTATS DES LOTS ===== */
-.lot-warning {
-    border-left-color: var(--warning) !important;
-    background: #fffbf0 !important;
-}
-
-.lot-danger {
-    border-left-color: var(--danger) !important;
-    background: #fef2f2 !important;
-}
-
-.lot-success {
-    border-left-color: var(--success) !important;
-    background: #f0f9ff !important;
-}
     </style>
 </head>
 <body>
@@ -8877,54 +8368,6 @@ function exportCategoriesToPDF(doc, startY) {
 }
 // Sauvegarde COMPLÈTE par email
 // Sauvegarde COMPLÈTE par email - VERSION UNIVERSELLE
-function backupToEmail() {
-    // Récupérer TOUTES les données du localStorage
-    const allData = {
-        // Données principales
-        products: JSON.parse(localStorage.getItem('products') || '[]'),
-        sales: JSON.parse(localStorage.getItem('sales') || '[]'),
-        users: JSON.parse(localStorage.getItem('users') || '[]'),
-        currentUser: JSON.parse(localStorage.getItem('currentUser') || 'null'),
-        
-        // Profil et configuration
-        adminProfile: JSON.parse(localStorage.getItem('adminProfile') || '{}'),
-        archiveHistory: JSON.parse(localStorage.getItem('archiveHistory') || '[]'),
-        
-        // Sauvegardes automatiques
-        auto_backup: JSON.parse(localStorage.getItem('auto_backup') || 'null'),
-        last_backup: JSON.parse(localStorage.getItem('last_backup') || 'null'),
-        
-        // Métadonnées
-        backupDate: new Date().toISOString(),
-        backupVersion: '1.0',
-        totalStats: {
-            productsCount: products.length,
-            salesCount: sales.length,
-            totalRevenue: sales.reduce((sum, sale) => sum + sale.total, 0),
-            totalProfit: sales.reduce((sum, sale) => sum + sale.profit, 0),
-            lowStockProducts: products.filter(p => p.stockQuantity < 5).length
-        }
-    };
-
-    // Créer le fichier de sauvegarde
-    const jsonString = JSON.stringify(allData, null, 2);
-    const blob = new Blob([jsonString], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    
-    // Télécharger le fichier - MÉTHODE UNIVERSELLE
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `sauvegarde_complete_stock_${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    // Afficher le résumé
-    showToast(`✅ Sauvegarde COMPLÈTE réussie! ${allData.products.length} produits, ${allData.sales.length} ventes sauvegardés.`, 'success');
-    
-    console.log('📦 SAUVEGARDE COMPLÈTE:', allData);
-}
 // Restauration COMPLÈTE depuis fichier
 function restoreFromFile(event) {
     const file = event.target.files[0];
@@ -9052,12 +8495,79 @@ function updateBackupStatus() {
     if (lastBackup) {
         try {
             const backupData = JSON.parse(lastBackup);
-            document.getElementById('lastBackupDate').textContent = 
-                new Date(backupData.backupDate).toLocaleString('fr-FR');
+            document.getElementById('lastBackupDate').textContent = new Date(backupData.backupDate).toLocaleString('fr-FR');
         } catch (e) {
             document.getElementById('lastBackupDate').textContent = 'Inconnue';
         }
     }
+}
+function backupToEmail() {
+    // Récupérer TOUTES les données du localStorage
+    const allData = {
+        // Données principales
+        products: JSON.parse(localStorage.getItem('products') || '[]'),
+        sales: JSON.parse(localStorage.getItem('sales') || '[]'),
+        users: JSON.parse(localStorage.getItem('users') || '[]'),
+        currentUser: JSON.parse(localStorage.getItem('currentUser') || 'null'),
+        
+        // Profil et configuration
+        adminProfile: JSON.parse(localStorage.getItem('adminProfile') || '{}'),
+        archiveHistory: JSON.parse(localStorage.getItem('archiveHistory') || '[]'),
+        
+        // Métadonnées
+        backupDate: new Date().toISOString(),
+        backupVersion: '1.0',
+        totalStats: {
+            productsCount: products.length,
+            salesCount: sales.length,
+            totalRevenue: sales.reduce((sum, sale) => sum + sale.total, 0),
+            totalProfit: sales.reduce((sum, sale) => sum + sale.profit, 0),
+            lowStockProducts: products.filter(p => p.stockQuantity < 5).length
+        }
+    };
+
+    // Créer le fichier de sauvegarde
+    const jsonString = JSON.stringify(allData, null, 2);
+    
+    // MÉTHODE SPÉCIALE POUR WEBVIEW ANDROID
+    if (window.Android && window.Android.saveBackup) {
+        // Appel direct à l'interface Android
+        window.Android.saveBackup(jsonString, `sauvegarde_stock_${new Date().toISOString().split('T')[0]}.json`);
+        showToast(`✅ Sauvegarde envoyée à l'application Android`, 'success');
+    } else {
+        // Fallback pour navigateur normal
+        try {
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `sauvegarde_complete_stock_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast(`✅ Sauvegarde COMPLÈTE téléchargée!`, 'success');
+        } catch (error) {
+            // Méthode alternative si le téléchargement échoue
+            showToast('❌ Erreur téléchargement. Utilisez la méthode manuelle:', 'error');
+            setTimeout(() => {
+                const backupInfo = `
+📦 SAUVEGARDE MANUELLE REQUISE
+
+Copiez ce texte et sauvegardez-le dans un fichier .json:
+
+${jsonString}
+
+Ensuite, envoyez ce fichier à votre email.
+                `;
+                alert(backupInfo);
+            }, 1000);
+        }
+    }
+    
+    console.log('📦 SAUVEGARDE COMPLÈTE:', allData);
 }
 // Make functions available globally for onclick handlers
 window.editProduct = editProduct;
