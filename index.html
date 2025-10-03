@@ -2477,6 +2477,732 @@ textarea.form-control {
     color: #4361ee;
     font-weight: bold;
 }
+/* ==================================================
+   OVERLAY DES STOCKS - STYLES RESPONSIVES
+   ================================================== */
+
+   .stock-overlay-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 10000;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.stock-overlay-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 95%;
+    height: 90%;
+    max-width: 1400px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: stockModalAppear 0.3s ease-out;
+}
+
+@keyframes stockModalAppear {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -48%) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* ==================== HEADER ==================== */
+.stock-overlay-header {
+    padding: 20px 25px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.stock-overlay-title {
+    margin: 0;
+    font-size: clamp(1.2rem, 4vw, 1.5rem);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+}
+
+.stock-overlay-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.stock-overlay-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+/* ==================== BODY ==================== */
+.stock-overlay-body {
+    flex: 1;
+    padding: 25px;
+    overflow-y: auto;
+    background: #f8fafc;
+}
+
+/* ==================== CARTES DE RÉSUMÉ ==================== */
+.stock-summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stock-summary-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    padding: 25px 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stock-summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: inherit;
+}
+
+.stock-summary-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.stock-summary-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.stock-summary-info {
+    flex: 1;
+}
+
+.stock-summary-value {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.2;
+    margin-bottom: 4px;
+}
+
+.stock-summary-label {
+    color: #64748b;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* ==================== FILTRES ==================== */
+.stock-filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+    padding: 25px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
+}
+
+.stock-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stock-filter-group label {
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.9rem;
+}
+
+.stock-filter-select {
+    padding: 12px 15px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    background: white;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    min-width: 100%;
+}
+
+.stock-filter-select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.stock-filter-btn {
+    padding: 12px 20px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+    min-height: 48px;
+}
+
+.stock-filter-btn:hover {
+    background: #5a6fd8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* ==================== TABLEAU ==================== */
+.stock-table-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.stock-overview-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px; /* Largeur minimale pour le scroll horizontal */
+}
+
+.stock-overview-table th {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    padding: 16px 20px;
+    text-align: left;
+    font-weight: 700;
+    color: #374151;
+    border-bottom: 2px solid #e2e8f0;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.stock-overview-table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.9rem;
+    transition: background 0.2s ease;
+}
+
+.stock-overview-table tr:hover {
+    background: #f8fafc;
+}
+
+.stock-overview-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Statuts de stock */
+.stock-status-normal {
+    color: #10b981;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.stock-status-low {
+    color: #f59e0b;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.stock-status-out {
+    color: #ef4444;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ==================== FOOTER ==================== */
+.stock-overlay-footer {
+    padding: 20px 25px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.stock-export-btn {
+    padding: 12px 24px;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.stock-export-btn:hover {
+    background: #0da271;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.stock-print-btn {
+    padding: 12px 24px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.stock-print-btn:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.stock-close-btn {
+    padding: 12px 24px;
+    background: #6b7280;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.stock-close-btn:hover {
+    background: #4b5563;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+}
+
+/* ==================================================
+   RESPONSIVE DESIGN - BREAKPOINTS
+   ================================================== */
+
+/* Tablettes (768px - 1024px) */
+@media (max-width: 1024px) {
+    .stock-overlay-content {
+        width: 98%;
+        height: 95%;
+    }
+    
+    .stock-overlay-body {
+        padding: 20px;
+    }
+    
+    .stock-summary-cards {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    
+    .stock-filters {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        padding: 20px;
+    }
+    
+    .stock-overlay-footer {
+        justify-content: center;
+    }
+    
+    .stock-overview-table {
+        font-size: 0.85rem;
+    }
+    
+    .stock-overview-table th,
+    .stock-overview-table td {
+        padding: 12px 15px;
+    }
+}
+
+/* Mobiles Paysage (576px - 768px) */
+@media (max-width: 768px) {
+    .stock-overlay-modal {
+        padding: 5px;
+    }
+    
+    .stock-overlay-content {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+    }
+    
+    .stock-overlay-header {
+        padding: 15px 20px;
+    }
+    
+    .stock-overlay-body {
+        padding: 15px;
+    }
+    
+    .stock-summary-cards {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .stock-summary-card {
+        padding: 20px 15px;
+    }
+    
+    .stock-summary-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+    
+    .stock-filters {
+        padding: 15px;
+        gap: 12px;
+    }
+    
+    .stock-overlay-footer {
+        padding: 15px 20px;
+        gap: 10px;
+    }
+    
+    .stock-export-btn,
+    .stock-print-btn,
+    .stock-close-btn {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+        flex: 1;
+        min-width: 120px;
+    }
+}
+
+/* Mobiles Portrait (320px - 576px) */
+@media (max-width: 576px) {
+    .stock-overlay-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+        padding: 15px;
+    }
+    
+    .stock-overlay-title {
+        font-size: 1.3rem;
+    }
+    
+    .stock-overlay-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+    }
+    
+    .stock-overlay-body {
+        padding: 10px;
+    }
+    
+    .stock-summary-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+        padding: 15px;
+    }
+    
+    .stock-summary-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 1.1rem;
+    }
+    
+    .stock-summary-value {
+        font-size: 1.4rem;
+    }
+    
+    .stock-filters {
+        padding: 12px;
+        border-radius: 8px;
+    }
+    
+    .stock-filter-select {
+        padding: 10px 12px;
+    }
+    
+    .stock-filter-btn {
+        min-height: 44px;
+        font-size: 0.9rem;
+    }
+    
+    .stock-overlay-footer {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .stock-export-btn,
+    .stock-print-btn,
+    .stock-close-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Très petits mobiles (< 320px) */
+@media (max-width: 320px) {
+    .stock-overlay-body {
+        padding: 8px;
+    }
+    
+    .stock-summary-cards {
+        gap: 8px;
+    }
+    
+    .stock-summary-card {
+        padding: 12px 10px;
+    }
+    
+    .stock-summary-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .stock-summary-value {
+        font-size: 1.2rem;
+    }
+    
+    .stock-filters {
+        padding: 10px;
+        gap: 8px;
+    }
+}
+
+/* ==================== SCROLL PERSONNALISÉ ==================== */
+.stock-overlay-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.stock-overlay-body::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.stock-overlay-body::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.stock-overlay-body::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* ==================== TABLEAU SCROLL HORIZONTAL ==================== */
+.stock-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.stock-table-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.stock-table-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.stock-table-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.stock-table-container::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* ==================== IMPRESSION ==================== */
+@media print {
+    .stock-overlay-modal {
+        position: static;
+        background: white;
+        display: block !important;
+    }
+    
+    .stock-overlay-content {
+        position: static;
+        transform: none;
+        width: 100%;
+        height: auto;
+        box-shadow: none;
+        border-radius: 0;
+    }
+    
+    .stock-overlay-close,
+    .stock-overlay-footer,
+    .stock-filters {
+        display: none !important;
+    }
+    
+    .stock-overlay-body {
+        overflow: visible;
+        padding: 0;
+    }
+    
+    .stock-summary-cards {
+        break-inside: avoid;
+    }
+    
+    .stock-table-container {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+}
+
+/* ==================== ACCESSIBILITÉ ==================== */
+@media (prefers-reduced-motion: reduce) {
+    .stock-overlay-content {
+        animation: none;
+    }
+    
+    .stock-summary-card,
+    .stock-filter-btn,
+    .stock-export-btn,
+    .stock-print-btn,
+    .stock-close-btn {
+        transition: none;
+    }
+}
+
+/* Mode sombre du système */
+@media (prefers-color-scheme: dark) {
+    .stock-overlay-content {
+        background: #1e293b;
+        color: #f1f5f9;
+    }
+    
+    .stock-overlay-body {
+        background: #0f172a;
+    }
+    
+    .stock-summary-card {
+        background: #334155;
+        border-color: #475569;
+        color: #f1f5f9;
+    }
+    
+    .stock-summary-value {
+        color: #f8fafc;
+    }
+    
+    .stock-summary-label {
+        color: #cbd5e1;
+    }
+    
+    .stock-filters {
+        background: #334155;
+        border-color: #475569;
+    }
+    
+    .stock-filter-select {
+        background: #1e293b;
+        border-color: #475569;
+        color: #f1f5f9;
+    }
+    
+    .stock-table-container {
+        background: #334155;
+        border-color: #475569;
+    }
+    
+    .stock-overview-table th {
+        background: #475569;
+        color: #f1f5f9;
+        border-color: #64748b;
+    }
+    
+    .stock-overview-table td {
+        border-color: #475569;
+        color: black;
+    }
+    
+    .stock-overview-table tr:hover {
+        background: #475569;
+    }
+    
+    .stock-overlay-footer {
+        background: #1e293b;
+        border-color: #334155;
+    }
+}
 
     </style>
 </head>
@@ -2538,6 +3264,8 @@ textarea.form-control {
 
         <!-- Main Content -->
         <main class="container">
+            <!-- Modal Unique de Visualisation des Stocks -->
+
             <!-- Modal de confirmation de suppression -->
             <div id="deleteConfirmModal" class="modal">
                 <div class="modal-content" style="max-width: 400px;">
@@ -2777,7 +3505,9 @@ textarea.form-control {
                         <button class="btn btn-primary" id="addSaleBtn">
                             <i class="fas fa-plus"></i> Nouvelle vente
                         </button>
-                        
+                        <button class="btn btn-info" onclick="stockOverview.open()">
+                            <i class="fas fa-boxes"></i> Vue d'ensemble des stocks
+                        </button>
                     </div>
                     <table>
                         <thead>
@@ -3059,7 +3789,7 @@ textarea.form-control {
                     </button>
                     
                     <input type="file" id="inspectFile" accept=".json" style="display: none;" onchange="inspectBackupFile(event)">
-                    <button class="btn btn-info" onclick="document.getElementById('inspectFile').click()">
+                    <button class="btn btn-info" onclick="document.getElementById('inspectFile').click()" style="display: none;">
                         <i class="fas fa-search"></i> Inspecter
                     </button>
                 </div>
@@ -4344,75 +5074,100 @@ textarea.form-control {
         showToast('Vente enregistrée avec succès', 'success');
     }
 
-   function populateProductsDropdown() {
-    const dropdown = document.getElementById('saleProduct');
-    dropdown.innerHTML = '<option value="">Sélectionnez un produit</option>';
-    
-    let hasProducts = false;
-    
-    // Grouper les produits par catégorie
-    const productsByCategory = {};
-    
-    products.forEach(product => {
-        if (product.stockQuantity > 0) {
-            if (!productsByCategory[product.category]) {
-                productsByCategory[product.category] = [];
-            }
-            productsByCategory[product.category].push(product);
-        }
-    });
-    
-    // Créer les options groupées par catégorie
-    Object.keys(productsByCategory).sort().forEach(category => {
-        // Ajouter l'optgroup pour la catégorie
-        const optgroup = document.createElement('optgroup');
-        optgroup.label = `📁 ${category}`;
+    function populateProductsDropdown() {
+        const dropdown = document.getElementById('saleProduct');
+        dropdown.innerHTML = '<option value="">Sélectionnez un produit</option>';
         
-        productsByCategory[category].forEach(product => {
-            const option = document.createElement('option');
-            option.value = product.id;
-            
-            let stockInfo = `Stock: ${product.stockQuantity}`;
-            let hasMultiplePrices = false;
-            
-            if (product.stockHistory && product.stockHistory.length > 1) {
-                const uniquePurchasePrices = new Set();
-                const uniqueSalePrices = new Set();
-                
-                product.stockHistory.forEach(lot => {
-                    uniquePurchasePrices.add(lot.purchasePrice);
-                    uniqueSalePrices.add(lot.salePrice);
-                });
-                
-                if (uniquePurchasePrices.size > 1 || uniqueSalePrices.size > 1) {
-                    hasMultiplePrices = true;
-                    stockInfo += ` (${product.stockHistory.length} lots avec prix différents)`;
-                } else {
-                    stockInfo += ` (${product.stockHistory.length} lots)`;
+        let hasProducts = false;
+        
+        // Charger les catégories personnalisées
+        const customCategories = JSON.parse(localStorage.getItem('customCategories')) || [];
+        
+        // Grouper les produits par catégorie
+        const productsByCategory = {};
+        
+        products.forEach(product => {
+            if (product.stockQuantity > 0) {
+                if (!productsByCategory[product.category]) {
+                    productsByCategory[product.category] = [];
                 }
-            } else if (product.stockHistory && product.stockHistory.length === 1) {
-                stockInfo += ` (1 lot - Prix: ${formatAriary(product.stockHistory[0].salePrice, 2)})`;
+                productsByCategory[product.category].push(product);
             }
-            
-            option.textContent = `${product.name} - ${stockInfo}`;
-            option.setAttribute('data-has-multiple-prices', hasMultiplePrices.toString());
-            
-            optgroup.appendChild(option);
-            hasProducts = true;
         });
         
-        dropdown.appendChild(optgroup);
-    });
-    
-    if (!hasProducts) {
-        const option = document.createElement('option');
-        option.value = '';
-        option.textContent = 'Aucun produit en stock';
-        option.disabled = true;
-        dropdown.appendChild(option);
+        // Fonction pour obtenir le nom d'une catégorie
+        function getCategoryName(categoryId) {
+            // Catégories par défaut
+            const defaultCategories = {
+                'ordinateur': 'Ordinateur',
+                'telephone': 'Téléphone',
+                'tablette': 'Tablette',
+                'accessoire': 'Accessoire'
+            };
+            
+            // Vérifier si c'est une catégorie par défaut
+            if (defaultCategories[categoryId]) {
+                return defaultCategories[categoryId];
+            }
+            
+            // Sinon, chercher dans les catégories personnalisées
+            const customCategory = customCategories.find(cat => cat.id === categoryId);
+            return customCategory ? customCategory.name : categoryId;
+        }
+        
+        // Créer les options groupées par catégorie
+        Object.keys(productsByCategory).sort().forEach(categoryId => {
+            const categoryName = getCategoryName(categoryId); // ← CORRECTION ICI
+            
+            // Ajouter l'optgroup pour la catégorie
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = `📁 ${categoryName}`; // ← AFFICHER LE NOM AU LIEU DE L'ID
+            
+            productsByCategory[categoryId].forEach(product => {
+                const option = document.createElement('option');
+                option.value = product.id;
+                
+                let stockInfo = `Stock: ${product.stockQuantity}`;
+                let hasMultiplePrices = false;
+                
+                if (product.stockHistory && product.stockHistory.length > 1) {
+                    const uniquePurchasePrices = new Set();
+                    const uniqueSalePrices = new Set();
+                    
+                    product.stockHistory.forEach(lot => {
+                        uniquePurchasePrices.add(lot.purchasePrice);
+                        uniqueSalePrices.add(lot.salePrice);
+                    });
+                    
+                    if (uniquePurchasePrices.size > 1 || uniqueSalePrices.size > 1) {
+                        hasMultiplePrices = true;
+                        stockInfo += ` (${product.stockHistory.length} lots avec prix différents)`;
+                    } else {
+                        stockInfo += ` (${product.stockHistory.length} lots)`;
+                    }
+                } else if (product.stockHistory && product.stockHistory.length === 1) {
+                    stockInfo += ` (1 lot - Prix: ${formatAriary(product.stockHistory[0].salePrice, 2)})`;
+                }
+                
+                option.textContent = `${product.name} - ${stockInfo}`;
+                option.setAttribute('data-has-multiple-prices', hasMultiplePrices.toString());
+                
+                optgroup.appendChild(option);
+                hasProducts = true;
+            });
+            
+            dropdown.appendChild(optgroup);
+        });
+        
+        if (!hasProducts) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'Aucun produit en stock';
+            option.disabled = true;
+            dropdown.appendChild(option);
+        }
     }
-}
-    function showLotSelectionModal(productId, quantity, salePrice) {
+function showLotSelectionModal(productId, quantity, salePrice) {
         const product = products.find(p => p.id === productId);
         if (!product || !product.stockHistory || product.stockHistory.length <= 1) {
             const selectedLot = product.stockHistory[0];
@@ -4742,7 +5497,7 @@ textarea.form-control {
     // MODIFICATION FORMAT MONÉTAIRE
     row.innerHTML = `
         <td>${product.name}</td>
-        <td>${product.category}</td>
+       <td>${getCategoryName(product.category)}</td>
         <td>${formatAriary(product.purchasePrice, 2)}</td>
         <td>${formatAriary(product.salePrice, 2)}</td>
         <td class="${stockClass}">${stockText}</td>
@@ -4762,7 +5517,27 @@ textarea.form-control {
     tableBody.appendChild(row);
 });
 }
-
+// Fonction pour obtenir le nom d'une catégorie à partir de son ID
+function getCategoryName(categoryId) {
+    // Catégories par défaut
+    const defaultCategories = {
+        'ordinateur': 'Ordinateur',
+        'telephone': 'Téléphone',
+        'tablette': 'Tablette',
+        'accessoire': 'Accessoire'
+    };
+    
+    // Vérifier si c'est une catégorie par défaut
+    if (defaultCategories[categoryId]) {
+        return defaultCategories[categoryId];
+    }
+    
+    // Sinon, chercher dans les catégories personnalisées
+    const customCategories = JSON.parse(localStorage.getItem('customCategories')) || [];
+    const customCategory = customCategories.find(cat => cat.id === categoryId);
+    
+    return customCategory ? customCategory.name : categoryId; // Retourne l'ID si pas trouvé
+}
 function loadSalesTable() {
 const tableBody = document.getElementById('salesTable');
 if (!tableBody) return;
@@ -8182,6 +8957,437 @@ function setupCategoryManagement() {
     
     console.log('Gestion des catégories initialisée avec', customCategories.length, 'catégories personnalisées');
 }
+// ==================================================
+// FONCTION UNIQUE - OVERLAY DE VISUALISATION DES STOCKS
+// ==================================================
+
+function initializeStockOverview() {
+    console.log('🔄 Initialisation de l\'overlay des stocks...');
+    
+    // Variables privées à cette fonction
+    let stockOverviewInitialized = false;
+    
+    // ==================== FONCTIONS INTERNES ====================
+    
+    function openStockOverview() {
+        if (!stockOverviewInitialized) {
+            createStockOverlay();
+            setupStockOverlayEvents();
+            stockOverviewInitialized = true;
+        }
+        
+        loadStockOverviewData();
+        document.getElementById('stockOverviewModal').style.display = 'block';
+        document.body.style.overflow = 'hidden'; // Bloquer le scroll de la page
+    }
+    
+    function closeStockOverview() {
+        document.getElementById('stockOverviewModal').style.display = 'none';
+        document.body.style.overflow = ''; // Rétablir le scroll
+    }
+    
+    function createStockOverlay() {
+        const overlayHTML = `
+            <div id="stockOverviewModal" class="stock-overlay-modal">
+                <div class="stock-overlay-content">
+                    <div class="stock-overlay-header">
+                        <h2 class="stock-overlay-title">
+                            <i class="fas fa-boxes"></i> Vue d'ensemble des stocks
+                        </h2>
+                        <button class="stock-overlay-close">&times;</button>
+                    </div>
+                    
+                    <div class="stock-overlay-body">
+                        <!-- Résumé global -->
+                        <div class="stock-summary-cards">
+                            <div class="stock-summary-card">
+                                <div class="stock-summary-icon" style="background: #4361ee;">
+                                    <i class="fas fa-box"></i>
+                                </div>
+                                <div class="stock-summary-info">
+                                    <div class="stock-summary-value" id="stockTotalProducts">0</div>
+                                    <div class="stock-summary-label">Produits total</div>
+                                </div>
+                            </div>
+                            
+                            <div class="stock-summary-card">
+                                <div class="stock-summary-icon" style="background: #4cc9f0;">
+                                    <i class="fas fa-warehouse"></i>
+                                </div>
+                                <div class="stock-summary-info">
+                                    <div class="stock-summary-value" id="stockTotalQuantity">0</div>
+                                    <div class="stock-summary-label">Stock total</div>
+                                </div>
+                            </div>
+                            
+                            <div class="stock-summary-card">
+                                <div class="stock-summary-icon" style="background: #f72585;">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="stock-summary-info">
+                                    <div class="stock-summary-value" id="stockLowStockCount">0</div>
+                                    <div class="stock-summary-label">Stock faible</div>
+                                </div>
+                            </div>
+                            
+                            <div class="stock-summary-card">
+                                <div class="stock-summary-icon" style="background: #7209b7;">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                </div>
+                                <div class="stock-summary-info">
+                                    <div class="stock-summary-value" id="stockTotalValue">0 Ar</div>
+                                    <div class="stock-summary-label">Valeur totale</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Filtres -->
+                        <div class="stock-filters">
+                            <div class="stock-filter-group">
+                                <label>Filtrer par catégorie:</label>
+                                <select id="stockCategoryFilter" class="stock-filter-select">
+                                    <option value="all">Toutes les catégories</option>
+                                </select>
+                            </div>
+                            
+                            <div class="stock-filter-group">
+                                <label>Filtrer par statut:</label>
+                                <select id="stockStatusFilter" class="stock-filter-select">
+                                    <option value="all">Tous les statuts</option>
+                                    <option value="normal">Stock normal</option>
+                                    <option value="low">Stock faible</option>
+                                    <option value="out">Rupture</option>
+                                </select>
+                            </div>
+                            
+                            <button class="stock-filter-btn" id="stockApplyFilters">
+                                <i class="fas fa-filter"></i> Appliquer
+                            </button>
+                            
+                            <button class="stock-filter-btn" id="stockResetFilters" style="background: #6c757d;">
+                                <i class="fas fa-redo"></i> Réinitialiser
+                            </button>
+                        </div>
+
+                        <!-- Tableau des stocks -->
+                        <div class="stock-table-container">
+                            <table class="stock-overview-table">
+                                <thead>
+                                    <tr>
+                                        <th>Produit</th>
+                                        <th>Catégorie</th>
+                                        <th>Stock actuel</th>
+                                        <th>Stock minimum</th>
+                                        <th>Statut</th>
+                                        <th>Prix d'achat</th>
+                                        <th>Valeur stock</th>
+                                        <th>Dernière mise à jour</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stockOverviewTableBody">
+                                    <tr>
+                                        <td colspan="8" style="text-align: center; padding: 40px;">
+                                            <i class="fas fa-spinner fa-spin"></i> Chargement des données...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="stock-overlay-footer">
+                        <button class="stock-export-btn" id="stockExportBtn">
+                            <i class="fas fa-file-pdf"></i> Exporter PDF
+                        </button>
+                        <button class="stock-print-btn" id="stockPrintBtn" style="background: #17a2b8;">
+                            <i class="fas fa-print"></i> Imprimer
+                        </button>
+                        <button class="stock-close-btn" id="stockCloseBtn">
+                            <i class="fas fa-times"></i> Fermer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', overlayHTML);
+        console.log('✅ Overlay des stocks créé');
+    }
+    
+    function setupStockOverlayEvents() {
+        // Fermeture
+        document.getElementById('stockCloseBtn').addEventListener('click', closeStockOverview);
+        document.querySelector('.stock-overlay-close').addEventListener('click', closeStockOverview);
+        
+        // Fermer en cliquant à l'extérieur
+        document.getElementById('stockOverviewModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeStockOverview();
+            }
+        });
+        
+        // Filtres
+        document.getElementById('stockApplyFilters').addEventListener('click', loadStockOverviewTable);
+        document.getElementById('stockResetFilters').addEventListener('click', resetStockFilters);
+        
+        // Changement de filtre (rechargement automatique)
+        document.getElementById('stockCategoryFilter').addEventListener('change', loadStockOverviewTable);
+        document.getElementById('stockStatusFilter').addEventListener('change', loadStockOverviewTable);
+        
+        // Export et impression
+        document.getElementById('stockExportBtn').addEventListener('click', exportStockReport);
+        document.getElementById('stockPrintBtn').addEventListener('click', printStockReport);
+        
+        // Échap pour fermer
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('stockOverviewModal').style.display === 'block') {
+                closeStockOverview();
+            }
+        });
+        
+        console.log('✅ Événements de l\'overlay configurés');
+    }
+    
+    function loadStockOverviewData() {
+        updateStockSummary();
+        populateStockCategoryFilter();
+        loadStockOverviewTable();
+    }
+    
+    function updateStockSummary() {
+        const totalProducts = products.length;
+        const totalQuantity = products.reduce((sum, product) => sum + product.stockQuantity, 0);
+        const lowStockCount = products.filter(p => p.stockQuantity > 0 && p.stockQuantity < 5).length;
+        const outOfStockCount = products.filter(p => p.stockQuantity === 0).length;
+        const totalValue = products.reduce((sum, product) => 
+            sum + (product.purchasePrice * product.stockQuantity), 0);
+
+        document.getElementById('stockTotalProducts').textContent = totalProducts.toLocaleString();
+        document.getElementById('stockTotalQuantity').textContent = totalQuantity.toLocaleString();
+        document.getElementById('stockLowStockCount').textContent = lowStockCount.toLocaleString();
+        document.getElementById('stockTotalValue').textContent = formatAriary(totalValue, 2);
+        
+        // Mettre en évidence les stocks faibles
+        if (lowStockCount > 0 || outOfStockCount > 0) {
+            document.getElementById('stockLowStockCount').style.color = '#dc3545';
+            document.getElementById('stockLowStockCount').innerHTML = 
+                `${lowStockCount} <small style="opacity: 0.7;">(+${outOfStockCount} rupture)</small>`;
+        }
+    }
+    
+    function populateStockCategoryFilter() {
+        const filter = document.getElementById('stockCategoryFilter');
+        const currentValue = filter.value;
+        
+        filter.innerHTML = '<option value="all">Toutes les catégories</option>';
+        
+        const customCategories = JSON.parse(localStorage.getItem('customCategories')) || [];
+        const allCategories = [...new Set(products.map(p => p.category))];
+        
+        allCategories.forEach(categoryId => {
+            const categoryName = getCategoryName(categoryId);
+            const option = document.createElement('option');
+            option.value = categoryId;
+            option.textContent = categoryName;
+            filter.appendChild(option);
+        });
+        
+        // Restaurer la sélection précédente
+        if (currentValue && filter.querySelector(`option[value="${currentValue}"]`)) {
+            filter.value = currentValue;
+        }
+    }
+    
+    function resetStockFilters() {
+        document.getElementById('stockCategoryFilter').value = 'all';
+        document.getElementById('stockStatusFilter').value = 'all';
+        loadStockOverviewTable();
+    }
+    
+    function loadStockOverviewTable() {
+        const tbody = document.getElementById('stockOverviewTableBody');
+        
+        // Afficher un indicateur de chargement
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 20px;">
+                    <i class="fas fa-spinner fa-spin"></i> Application des filtres...
+                </td>
+            </tr>
+        `;
+        
+        // Simuler un délai pour l'UX
+        setTimeout(() => {
+            const categoryFilter = document.getElementById('stockCategoryFilter').value;
+            const statusFilter = document.getElementById('stockStatusFilter').value;
+            
+            let filteredProducts = [...products];
+            
+            // Appliquer les filtres
+            if (categoryFilter !== 'all') {
+                filteredProducts = filteredProducts.filter(p => p.category === categoryFilter);
+            }
+            
+            if (statusFilter !== 'all') {
+                filteredProducts = filteredProducts.filter(p => {
+                    if (statusFilter === 'normal') return p.stockQuantity >= 5;
+                    if (statusFilter === 'low') return p.stockQuantity > 0 && p.stockQuantity < 5;
+                    if (statusFilter === 'out') return p.stockQuantity === 0;
+                    return true;
+                });
+            }
+            
+            // Trier par stock (faible en premier)
+            filteredProducts.sort((a, b) => a.stockQuantity - b.stockQuantity);
+            
+            renderStockTable(filteredProducts);
+        }, 300);
+    }
+    
+    function renderStockTable(productsList) {
+        const tbody = document.getElementById('stockOverviewTableBody');
+        
+        if (productsList.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 40px;">
+                        <i class="fas fa-search" style="font-size: 3rem; color: #ccc; margin-bottom: 10px;"></i>
+                        <div>Aucun produit trouvé avec les filtres actuels</div>
+                        <button class="stock-filter-btn" onclick="resetStockFilters()" style="margin-top: 10px;">
+                            <i class="fas fa-redo"></i> Réinitialiser les filtres
+                        </button>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        let tableHTML = '';
+        
+        productsList.forEach(product => {
+            // Déterminer le statut
+            let status, statusClass, statusIcon;
+            if (product.stockQuantity === 0) {
+                status = 'Rupture';
+                statusClass = 'stock-status-out';
+                statusIcon = 'fas fa-times-circle';
+            } else if (product.stockQuantity < 5) {
+                status = 'Stock faible';
+                statusClass = 'stock-status-low';
+                statusIcon = 'fas fa-exclamation-triangle';
+            } else {
+                status = 'Normal';
+                statusClass = 'stock-status-normal';
+                statusIcon = 'fas fa-check-circle';
+            }
+            
+            const stockValue = product.purchasePrice * product.stockQuantity;
+            const lastUpdate = product.updatedAt || product.createdAt;
+            const lastUpdateDate = new Date(lastUpdate).toLocaleDateString('fr-FR');
+            
+            tableHTML += `
+                <tr>
+                    <td><strong>${product.name}</strong></td>
+                    <td>${getCategoryName(product.category)}</td>
+                    <td><strong>${product.stockQuantity}</strong> unités</td>
+                    <td>5 unités</td>
+                    <td class="${statusClass}">
+                        <i class="${statusIcon}"></i> ${status}
+                    </td>
+                    <td>${formatAriary(product.purchasePrice, 2)}</td>
+                    <td><strong>${formatAriary(stockValue, 2)}</strong></td>
+                    <td>${lastUpdateDate}</td>
+                </tr>
+            `;
+        });
+        
+        tbody.innerHTML = tableHTML;
+    }
+    
+    function exportStockReport() {
+        try {
+            // Utiliser la fonction d'export PDF existante ou créer une version spécifique
+            const filteredProducts = getCurrentFilteredProducts();
+            exportStockToPDF(filteredProducts);
+            showToast('📊 Rapport des stocks exporté en PDF', 'success');
+        } catch (error) {
+            console.error('Erreur export stocks:', error);
+            showToast('❌ Erreur lors de l\'export', 'error');
+        }
+    }
+    
+    function printStockReport() {
+        const originalDisplay = document.getElementById('stockOverviewModal').style.display;
+        document.getElementById('stockOverviewModal').style.display = 'none';
+        
+        setTimeout(() => {
+            window.print();
+            document.getElementById('stockOverviewModal').style.display = originalDisplay;
+        }, 500);
+    }
+    
+    function getCurrentFilteredProducts() {
+        const categoryFilter = document.getElementById('stockCategoryFilter').value;
+        const statusFilter = document.getElementById('stockStatusFilter').value;
+        
+        let filteredProducts = [...products];
+        
+        if (categoryFilter !== 'all') {
+            filteredProducts = filteredProducts.filter(p => p.category === categoryFilter);
+        }
+        
+        if (statusFilter !== 'all') {
+            filteredProducts = filteredProducts.filter(p => {
+                if (statusFilter === 'normal') return p.stockQuantity >= 5;
+                if (statusFilter === 'low') return p.stockQuantity > 0 && p.stockQuantity < 5;
+                if (statusFilter === 'out') return p.stockQuantity === 0;
+                return true;
+            });
+        }
+        
+        return filteredProducts;
+    }
+    
+    function exportStockToPDF(filteredProducts) {
+        // Votre logique d'export PDF ici
+        // Vous pouvez adapter la fonction exportToPDF existante
+        console.log('Export PDF des stocks:', filteredProducts.length, 'produits');
+        showToast('Fonction d\'export PDF à implémenter', 'info');
+    }
+    
+    // ==================== API PUBLIQUE ====================
+    
+    return {
+        // Ouvrir l'overlay des stocks
+        open: openStockOverview,
+        
+        // Fermer l'overlay des stocks
+        close: closeStockOverview,
+        
+        // Rafraîchir les données
+        refresh: loadStockOverviewData,
+        
+        // Exporter le rapport
+        exportReport: exportStockReport,
+        
+        // Statut d'initialisation
+        isInitialized: () => stockOverviewInitialized
+    };
+}
+function openStockOverview() {
+    stockOverview.open();
+}
+// ==================================================
+// INITIALISATION ET UTILISATION
+// ==================================================
+
+// Créer une instance unique
+const stockOverview = initializeStockOverview();
+
+// Utilisation :
+// stockOverview.open() - Pour ouvrir l'overlay
+// stockOverview.close() - Pour fermer l'overlay  
+// stockOverview.refresh() - Pour rafraîchir les données
 // Make functions available globally for onclick handlers
 window.editProduct = editProduct;
 window.deleteProduct = deleteProduct;
