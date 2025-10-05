@@ -5138,9 +5138,28 @@ textarea.form-control {
         initializeArchiveNavigation();
     }
 
+    function setupExpensesEventListeners() {
+        // Bouton d'exportation PDF des dépenses
+        const exportExpensesPDFBtn = document.getElementById('exportExpensesPDFBtn');
+        if (exportExpensesPDFBtn) {
+            exportExpensesPDFBtn.addEventListener('click', exportExpensesPDF);
+        }
+        
+        // Bouton d'exportation CSV des dépenses (pour future implémentation)
+        const exportExpensesCSVBtn = document.getElementById('exportExpensesCSVBtn');
+        if (exportExpensesCSVBtn) {
+            exportExpensesCSVBtn.addEventListener('click', function() {
+                showToast('Export CSV des dépenses - Fonctionnalité à venir', 'info');
+            });
+        }
+    }
+
     function setupEventListeners() {
         // Archive - CORRECTION : Vérifier si les éléments existent avant d'ajouter des écouteurs
         setupArchiveEventListeners();
+        
+        // Expenses - Event listeners pour l'onglet Dépenses
+        setupExpensesEventListeners();
         
         // Bouton pour ajouter un nouveau lot
         document.getElementById('addNewLotBtn').addEventListener('click', addNewLot);
@@ -8087,6 +8106,230 @@ function exportArchiveToPDF() {
     } catch (error) {
         console.error('Erreur génération PDF:', error);
         showToast('Erreur lors de la génération du PDF', 'error');
+    }
+}
+
+function exportExpensesPDF() {
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Titre principal
+        doc.setFontSize(20);
+        doc.setTextColor(67, 97, 238);
+        doc.text('RAPPORT DES DÉPENSES ET BÉNÉFICES', 105, 20, { align: 'center' });
+
+        // Date du rapport
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Généré le: ${new Date().toLocaleDateString('fr-FR')}`, 105, 30, { align: 'center' });
+
+        let yPosition = 45;
+
+        // Calculer les métriques globales
+        const globalMetrics = calculateGlobalMetrics();
+        
+        // Section Résumé Financier
+        doc.setFontSize(16);
+        doc.setTextColor(67, 97, 238);
+        doc.text('RÉSUMÉ FINANCIER GLOBAL', 20, yPosition);
+        yPosition += 15;
+
+        doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Dépenses Totales: ${formatAriary(globalMetrics.totalExpenses, 0)}`, 20, yPosition);
+        yPosition += 8;
+        doc.text(`Revenus Totaux: ${formatAriary(globalMetrics.totalRevenue, 0)}`, 20, yPosition);
+        yPosition += 8;
+        doc.text(`Bénéfice Net: ${formatAriary(globalMetrics.totalProfit, 0)}`, 20, yPosition);
+        yPosition += 8;
+        doc.text(`Marge Globale: ${globalMetrics.globalMargin.toFixed(1)}%`, 20, yPosition);
+        yPosition += 20;
+
+        // Section Dépenses par Catégorie
+        doc.setFontSize(16);
+        doc.setTextColor(67, 97, 238);
+        doc.text('DÉPENSES PAR CATÉGORIE', 20, yPosition);
+        yPosition += 10;
+
+        const categoryExpenses = calculateCategoryExpenses();
+        
+        if (Object.keys(categoryExpenses).length > 0) {
+            const categoryHeaders = ['Catégorie', 'Dépenses', 'Revenus', 'Bénéfice', 'Marge %'];
+            const categoryData = Object.entries(categoryExpenses).map(([category, data]) => {
+                const margin = data.revenue > 0 ? (data.profit / data.revenue * 100) : 0;
+                return [
+                    category,
+                    formatAriary(data.expenses, 0),
+                    formatAriary(data.revenue, 0),
+                    formatAriary(data.profit, 0),
+                    margin.toFixed(1) + '%'
+                ];
+            });
+
+            doc.autoTable({
+                startY: yPosition,
+                head: [categoryHeaders],
+                body: categoryData,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [67, 97, 238],
+                    textColor: 255,
+                    fontStyle: 'bold'
+                },
+                styles: {
+                    fontSize: 9,
+                    cellPadding: 3,
+                    overflow: 'linebreak'
+                },
+                margin: { left: 20, right: 20 }
+            });
+
+            yPosition = doc.lastAutoTable.finalY + 20;
+        }
+
+        // Nouvelle page si nécessaire
+        if (yPosition > 250) {
+            doc.addPage();
+            yPosition = 20;
+        }
+
+        // Section Évolution Mensuelle
+        doc.setFontSize(16);
+        doc.setTextColor(67, 97, 238);
+        doc.text('ÉVOLUTION MENSUELLE', 20, yPosition);
+        yPosition += 10;
+
+        const monthlyData = calculateMonthlyExpenses();
+        
+        if (Object.keys(monthlyData).length > 0) {
+            const monthlyHeaders = ['Mois', 'Dépenses', 'Revenus', 'Bénéfice', 'ROI %'];
+            const monthlyTableData = Object.entries(monthlyData).map(([month, data]) => [
+                month,
+                formatAriary(data.expenses, 0),
+                formatAriary(data.revenue, 0),
+                formatAriary(data.profit, 0),
+                data.roi.toFixed(1) + '%'
+            ]);
+
+            doc.autoTable({
+                startY: yPosition,
+                head: [monthlyHeaders],
+                body: monthlyTableData,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [255, 107, 107],
+                    textColor: 255,
+                    fontStyle: 'bold'
+                },
+                styles: {
+                    fontSize: 9,
+                    cellPadding: 3,
+                    overflow: 'linebreak'
+                },
+                margin: { left: 20, right: 20 }
+            });
+
+            yPosition = doc.lastAutoTable.finalY + 20;
+        }
+
+        // Nouvelle page si nécessaire
+        if (yPosition > 220) {
+            doc.addPage();
+            yPosition = 20;
+        }
+
+        // Section Analyse des Investissements
+        doc.setFontSize(16);
+        doc.setTextColor(67, 97, 238);
+        doc.text('TOP 10 PRODUITS - ANALYSE ROI', 20, yPosition);
+        yPosition += 10;
+
+        const stockAnalysis = calculateStockAnalysis();
+        
+        if (stockAnalysis.productAnalysis.length > 0) {
+            const investmentHeaders = ['Produit', 'Investissement', 'Stock Actuel', 'Vendu', 'ROI %', 'Performance'];
+            const investmentData = stockAnalysis.productAnalysis.slice(0, 10).map(product => [
+                product.name.length > 20 ? product.name.substring(0, 20) + '...' : product.name,
+                formatAriary(product.investment, 0),
+                formatAriary(product.currentStock, 0),
+                formatAriary(product.sold, 0),
+                product.roi.toFixed(1) + '%',
+                product.performance
+            ]);
+
+            doc.autoTable({
+                startY: yPosition,
+                head: [investmentHeaders],
+                body: investmentData,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [46, 213, 115],
+                    textColor: 255,
+                    fontStyle: 'bold'
+                },
+                styles: {
+                    fontSize: 8,
+                    cellPadding: 2,
+                    overflow: 'linebreak'
+                },
+                margin: { left: 20, right: 20 }
+            });
+
+            yPosition = doc.lastAutoTable.finalY + 20;
+        }
+
+        // Section KPIs
+        if (yPosition > 250) {
+            doc.addPage();
+            yPosition = 20;
+        }
+
+        doc.setFontSize(16);
+        doc.setTextColor(67, 97, 238);
+        doc.text('INDICATEURS DE PERFORMANCE', 20, yPosition);
+        yPosition += 15;
+
+        const kpis = calculateKPIs();
+        
+        doc.setFontSize(10);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Produits Actifs: ${kpis.activeProducts}`, 20, yPosition);
+        doc.text(`Ventes Totales: ${kpis.totalSalesCount}`, 110, yPosition);
+        yPosition += 8;
+        doc.text(`Ticket Moyen: ${formatAriary(kpis.averageTicket, 0)}`, 20, yPosition);
+        doc.text(`CA Journalier: ${formatAriary(kpis.dailyRevenue, 0)}`, 110, yPosition);
+        yPosition += 8;
+        doc.text(`Stock Faible: ${kpis.lowStockCount} produits`, 20, yPosition);
+        doc.text(`Jours d'Activité: ${kpis.activeDays}`, 110, yPosition);
+
+        // Pied de page
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Page ${i} sur ${pageCount}`, 105, doc.internal.pageSize.height - 10, { align: 'center' });
+            doc.text('Gestion de Stock - Rapport des Dépenses', 105, doc.internal.pageSize.height - 5, { align: 'center' });
+        }
+
+        // Sauvegarde avec condition Android
+        const fileName = `rapport_depenses_${new Date().toISOString().split('T')[0]}.pdf`;
+        const pdfBase64 = doc.output('datauristring').split(',')[1];
+
+        if (window.Android && window.Android.savePdf) {
+            // Appel du JavaScriptInterface Android pour sauvegarder le PDF
+            window.Android.savePdf(pdfBase64, fileName);
+        } else {
+            // Fallback pour navigateur classique
+            doc.save(fileName);
+        }
+
+        showToast('Rapport des dépenses exporté en PDF avec succès', 'success');
+
+    } catch (error) {
+        console.error('Erreur génération PDF des dépenses:', error);
+        showToast('Erreur lors de la génération du PDF des dépenses', 'error');
     }
 }
 function saveProfile(event) {
