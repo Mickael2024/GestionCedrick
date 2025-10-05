@@ -262,6 +262,129 @@
             color: var(--gray);
         }
 
+        /* Styles pour l'onglet Dépenses */
+        .financial-card {
+            transition: all 0.3s ease;
+        }
+
+        .financial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .metric-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .metric-box:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .metric-box h6 {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-box h4 {
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .kpi-box {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .kpi-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .kpi-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .kpi-content h6 {
+            margin: 0;
+            color: #6c757d;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .kpi-content h4 {
+            margin: 5px 0 0 0;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .progress {
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            transition: width 0.6s ease;
+        }
+
+        /* Badges de performance */
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-success { background-color: #28a745; color: white; }
+        .badge-info { background-color: #17a2b8; color: white; }
+        .badge-warning { background-color: #ffc107; color: #212529; }
+        .badge-danger { background-color: #dc3545; color: white; }
+        .badge-secondary { background-color: #6c757d; color: white; }
+
+        /* Responsive pour l'onglet Dépenses */
+        @media (max-width: 768px) {
+            .metric-box {
+                margin-bottom: 15px;
+            }
+            
+            .kpi-box {
+                flex-direction: column;
+                text-align: center;
+                padding: 15px;
+            }
+            
+            .kpi-icon {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
+
         /* Table */
         .table-container {
             background-color: var(--white);
@@ -3401,6 +3524,7 @@ textarea.form-control {
                     <li><a href="#products" class="nav-link">Produits</a></li>
                     <li><a href="#sales" class="nav-link">Ventes</a></li>
                     <li><a href="#reports" class="nav-link">Rapports</a></li>
+                    <li><a href="#expenses" class="nav-link">Dépenses</a></li>
                     <li><a href="#archive" class="nav-link">Archive</a></li>
                     <li><a href="#profile" class="nav-link">Profil</a></li>
                 </ul>
@@ -3831,6 +3955,276 @@ textarea.form-control {
                             <!-- Statistics will be populated here -->
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- Expenses Tab -->
+            <div id="expenses" class="tab-content">
+                <div class="table-header">
+                    <div class="table-title">
+                        <i class="fas fa-chart-line"></i> Analyse des Dépenses et Bénéfices
+                    </div>
+                    <div class="export-buttons">
+                        <button class="btn btn-success" id="exportExpensesCSVBtn">
+                            <i class="fas fa-file-csv"></i> Exporter CSV
+                        </button>
+                        <button class="btn btn-danger" id="exportExpensesPDFBtn">
+                            <i class="fas fa-file-pdf"></i> Exporter PDF
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Résumé Financier Global -->
+                <div class="row" style="margin-bottom: 30px;">
+                    <div class="col-md-3">
+                        <div class="card financial-card">
+                            <div class="card-header" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white;">
+                                <h5><i class="fas fa-shopping-cart"></i> Dépenses Totales</h5>
+                            </div>
+                            <div class="card-body">
+                                <h3 id="totalExpenses" class="text-danger">0 Ar</h3>
+                                <p class="text-muted">Prix d'achat cumulé</p>
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar bg-danger" id="expensesProgress" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="card financial-card">
+                            <div class="card-header" style="background: linear-gradient(135deg, #2ed573 0%, #1e90ff 100%); color: white;">
+                                <h5><i class="fas fa-coins"></i> Revenus Totaux</h5>
+                            </div>
+                            <div class="card-body">
+                                <h3 id="totalRevenue" class="text-success">0 Ar</h3>
+                                <p class="text-muted">Chiffre d'affaires</p>
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar bg-success" id="revenueProgress" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="card financial-card">
+                            <div class="card-header" style="background: linear-gradient(135deg, #ffa726 0%, #ff7043 100%); color: white;">
+                                <h5><i class="fas fa-chart-pie"></i> Bénéfice Net</h5>
+                            </div>
+                            <div class="card-body">
+                                <h3 id="totalProfit" class="text-warning">0 Ar</h3>
+                                <p class="text-muted">Profit réalisé</p>
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar bg-warning" id="profitProgress" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="card financial-card">
+                            <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                                <h5><i class="fas fa-percentage"></i> Marge Globale</h5>
+                            </div>
+                            <div class="card-body">
+                                <h3 id="globalMargin" class="text-info">0%</h3>
+                                <p class="text-muted">Rentabilité moyenne</p>
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar bg-info" id="marginProgress" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Détails par Catégorie -->
+                <div class="row" style="margin-bottom: 30px;">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-tags"></i> Dépenses par Catégorie</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-container">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Catégorie</th>
+                                                <th>Dépenses</th>
+                                                <th>Revenus</th>
+                                                <th>Bénéfice</th>
+                                                <th>Marge</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="expensesByCategoryTable">
+                                            <!-- Données dynamiques -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-calendar-alt"></i> Évolution Mensuelle</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-container">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Mois</th>
+                                                <th>Dépenses</th>
+                                                <th>Revenus</th>
+                                                <th>Bénéfice</th>
+                                                <th>ROI</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="monthlyExpensesTable">
+                                            <!-- Données dynamiques -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analyse Détaillée des Stocks -->
+                <div class="row" style="margin-bottom: 30px;">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-warehouse"></i> Analyse des Investissements en Stock</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="metric-box">
+                                            <h6>Valeur Stock Actuel</h6>
+                                            <h4 id="currentStockValue" class="text-primary">0 Ar</h4>
+                                            <small class="text-muted">Investissement immobilisé</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="metric-box">
+                                            <h6>Stock Vendu</h6>
+                                            <h4 id="soldStockValue" class="text-success">0 Ar</h4>
+                                            <small class="text-muted">Valeur écoulée</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="metric-box">
+                                            <h6>Rotation Stock</h6>
+                                            <h4 id="stockRotation" class="text-info">0%</h4>
+                                            <small class="text-muted">Taux de rotation</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="table-container" style="margin-top: 20px;">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Produit</th>
+                                                <th>Investissement</th>
+                                                <th>Stock Actuel</th>
+                                                <th>Vendu</th>
+                                                <th>ROI Produit</th>
+                                                <th>Performance</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="productInvestmentTable">
+                                            <!-- Données dynamiques -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Indicateurs de Performance -->
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-tachometer-alt"></i> Indicateurs de Performance</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <div class="kpi-box">
+                                            <div class="kpi-icon bg-primary">
+                                                <i class="fas fa-shopping-bag"></i>
+                                            </div>
+                                            <div class="kpi-content">
+                                                <h6>Produits Actifs</h6>
+                                                <h4 id="activeProducts">0</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="kpi-box">
+                                            <div class="kpi-icon bg-success">
+                                                <i class="fas fa-chart-line"></i>
+                                            </div>
+                                            <div class="kpi-content">
+                                                <h6>Ventes Totales</h6>
+                                                <h4 id="totalSalesCount">0</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="kpi-box">
+                                            <div class="kpi-icon bg-warning">
+                                                <i class="fas fa-coins"></i>
+                                            </div>
+                                            <div class="kpi-content">
+                                                <h6>Ticket Moyen</h6>
+                                                <h4 id="averageTicket">0 Ar</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="kpi-box">
+                                            <div class="kpi-icon bg-info">
+                                                <i class="fas fa-calendar-day"></i>
+                                            </div>
+                                            <div class="kpi-content">
+                                                <h6>CA Journalier</h6>
+                                                <h4 id="dailyRevenue">0 Ar</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="kpi-box">
+                                            <div class="kpi-icon bg-danger">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                            </div>
+                                            <div class="kpi-content">
+                                                <h6>Stock Faible</h6>
+                                                <h4 id="lowStockCount">0</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="kpi-box">
+                                            <div class="kpi-icon bg-secondary">
+                                                <i class="fas fa-clock"></i>
+                                            </div>
+                                            <div class="kpi-content">
+                                                <h6>Jours Activité</h6>
+                                                <h4 id="activeDays">0</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -5076,6 +5470,8 @@ textarea.form-control {
             loadSalesTable();
         } else if (tabId === 'reports') {
             loadReportsData();
+        } else if (tabId === 'expenses') {
+            loadExpensesData();
         } else if (tabId === 'profile') {
             updateProfileStats();
         } else if (tabId === 'archive') {
@@ -5770,6 +6166,377 @@ function loadReportsData() {
 loadTopProducts();
 loadStockAlerts();
 loadStatisticsTable();
+}
+
+function loadExpensesData() {
+    console.log('🔄 Chargement des données de dépenses...');
+    
+    // S'assurer que les données sont chargées
+    if (!products || products.length === 0) {
+        const savedProducts = localStorage.getItem('products');
+        if (savedProducts) {
+            try {
+                products = JSON.parse(savedProducts);
+            } catch (e) {
+                console.error('Erreur lors du chargement des produits:', e);
+                products = [];
+            }
+        }
+    }
+    
+    if (!sales || sales.length === 0) {
+        const savedSales = localStorage.getItem('sales');
+        if (savedSales) {
+            try {
+                sales = JSON.parse(savedSales);
+            } catch (e) {
+                console.error('Erreur lors du chargement des ventes:', e);
+                sales = [];
+            }
+        }
+    }
+
+    // Calculer les métriques globales
+    const globalMetrics = calculateGlobalMetrics();
+    updateGlobalMetricsDisplay(globalMetrics);
+    
+    // Calculer les dépenses par catégorie
+    const categoryExpenses = calculateCategoryExpenses();
+    updateCategoryExpensesTable(categoryExpenses);
+    
+    // Calculer l'évolution mensuelle
+    const monthlyData = calculateMonthlyExpenses();
+    updateMonthlyExpensesTable(monthlyData);
+    
+    // Calculer l'analyse des stocks
+    const stockAnalysis = calculateStockAnalysis();
+    updateStockAnalysisDisplay(stockAnalysis);
+    
+    // Calculer les KPIs
+    const kpis = calculateKPIs();
+    updateKPIsDisplay(kpis);
+    
+    console.log('✅ Données de dépenses chargées');
+}
+
+// Fonction pour calculer les métriques globales
+function calculateGlobalMetrics() {
+    let totalExpenses = 0;
+    let totalRevenue = 0;
+    let totalProfit = 0;
+    
+    // Calculer les dépenses totales (prix d'achat * quantité en stock + quantité vendue)
+    products.forEach(product => {
+        // Stock actuel
+        const currentStockValue = product.purchasePrice * product.stockQuantity;
+        totalExpenses += currentStockValue;
+        
+        // Stock vendu
+        const productSales = sales.filter(sale => sale.productId === product.id);
+        const soldQuantity = productSales.reduce((sum, sale) => sum + sale.quantity, 0);
+        const soldStockValue = product.purchasePrice * soldQuantity;
+        totalExpenses += soldStockValue;
+    });
+    
+    // Calculer les revenus et profits des ventes
+    sales.forEach(sale => {
+        totalRevenue += sale.total;
+        totalProfit += sale.profit;
+    });
+    
+    const globalMargin = totalRevenue > 0 ? (totalProfit / totalRevenue * 100) : 0;
+    
+    return {
+        totalExpenses,
+        totalRevenue,
+        totalProfit,
+        globalMargin
+    };
+}
+
+// Fonction pour mettre à jour l'affichage des métriques globales
+function updateGlobalMetricsDisplay(metrics) {
+    document.getElementById('totalExpenses').textContent = formatAriary(metrics.totalExpenses, 0);
+    document.getElementById('totalRevenue').textContent = formatAriary(metrics.totalRevenue, 0);
+    document.getElementById('totalProfit').textContent = formatAriary(metrics.totalProfit, 0);
+    document.getElementById('globalMargin').textContent = metrics.globalMargin.toFixed(1) + '%';
+    
+    // Mettre à jour les barres de progression
+    const maxValue = Math.max(metrics.totalExpenses, metrics.totalRevenue);
+    if (maxValue > 0) {
+        document.getElementById('expensesProgress').style.width = (metrics.totalExpenses / maxValue * 100) + '%';
+        document.getElementById('revenueProgress').style.width = (metrics.totalRevenue / maxValue * 100) + '%';
+        document.getElementById('profitProgress').style.width = (Math.abs(metrics.totalProfit) / maxValue * 100) + '%';
+        document.getElementById('marginProgress').style.width = Math.min(metrics.globalMargin, 100) + '%';
+    }
+}
+
+// Fonction pour calculer les dépenses par catégorie
+function calculateCategoryExpenses() {
+    const categoryData = {};
+    
+    // Fonction pour obtenir le nom lisible d'une catégorie
+    function getCategoryDisplayName(categoryId) {
+        const defaultCategories = {
+            'ordinateur': 'Ordinateur',
+            'telephone': 'Téléphone',
+            'tablette': 'Tablette',
+            'accessoire': 'Accessoire'
+        };
+        
+        if (defaultCategories[categoryId]) {
+            return defaultCategories[categoryId];
+        }
+        
+        const customCategories = JSON.parse(localStorage.getItem('customCategories')) || [];
+        const customCategory = customCategories.find(cat => cat.id === categoryId);
+        
+        return customCategory ? customCategory.name : categoryId;
+    }
+    
+    // Calculer pour chaque produit
+    products.forEach(product => {
+        const categoryName = getCategoryDisplayName(product.category);
+        
+        if (!categoryData[categoryName]) {
+            categoryData[categoryName] = {
+                expenses: 0,
+                revenue: 0,
+                profit: 0
+            };
+        }
+        
+        // Dépenses (stock actuel + stock vendu)
+        const currentStockValue = product.purchasePrice * product.stockQuantity;
+        const productSales = sales.filter(sale => sale.productId === product.id);
+        const soldQuantity = productSales.reduce((sum, sale) => sum + sale.quantity, 0);
+        const soldStockValue = product.purchasePrice * soldQuantity;
+        
+        categoryData[categoryName].expenses += currentStockValue + soldStockValue;
+        
+        // Revenus et profits des ventes
+        productSales.forEach(sale => {
+            categoryData[categoryName].revenue += sale.total;
+            categoryData[categoryName].profit += sale.profit;
+        });
+    });
+    
+    return categoryData;
+}
+
+// Fonction pour mettre à jour le tableau des dépenses par catégorie
+function updateCategoryExpensesTable(categoryData) {
+    const tableBody = document.getElementById('expensesByCategoryTable');
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = '';
+    
+    Object.entries(categoryData).forEach(([category, data]) => {
+        const margin = data.revenue > 0 ? (data.profit / data.revenue * 100) : 0;
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><strong>${category}</strong></td>
+            <td class="text-danger">${formatAriary(data.expenses, 0)}</td>
+            <td class="text-success">${formatAriary(data.revenue, 0)}</td>
+            <td class="${data.profit >= 0 ? 'text-success' : 'text-danger'}">${formatAriary(data.profit, 0)}</td>
+            <td class="${margin >= 0 ? 'text-success' : 'text-danger'}">${margin.toFixed(1)}%</td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+// Fonction pour calculer l'évolution mensuelle
+function calculateMonthlyExpenses() {
+    const monthlyData = {};
+    const now = new Date();
+    
+    // Générer les 6 derniers mois
+    for (let i = 5; i >= 0; i--) {
+        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const monthKey = date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+        
+        monthlyData[monthKey] = {
+            expenses: 0,
+            revenue: 0,
+            profit: 0,
+            roi: 0
+        };
+        
+        // Calculer les ventes du mois
+        const monthSales = sales.filter(sale => {
+            const saleDate = new Date(sale.date);
+            return saleDate.getMonth() === date.getMonth() && 
+                   saleDate.getFullYear() === date.getFullYear();
+        });
+        
+        monthSales.forEach(sale => {
+            const product = products.find(p => p.id === sale.productId);
+            if (product) {
+                const saleExpense = product.purchasePrice * sale.quantity;
+                monthlyData[monthKey].expenses += saleExpense;
+                monthlyData[monthKey].revenue += sale.total;
+                monthlyData[monthKey].profit += sale.profit;
+            }
+        });
+        
+        // Calculer le ROI
+        if (monthlyData[monthKey].expenses > 0) {
+            monthlyData[monthKey].roi = (monthlyData[monthKey].profit / monthlyData[monthKey].expenses * 100);
+        }
+    }
+    
+    return monthlyData;
+}
+
+// Fonction pour mettre à jour le tableau mensuel
+function updateMonthlyExpensesTable(monthlyData) {
+    const tableBody = document.getElementById('monthlyExpensesTable');
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = '';
+    
+    Object.entries(monthlyData).forEach(([month, data]) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><strong>${month}</strong></td>
+            <td class="text-danger">${formatAriary(data.expenses, 0)}</td>
+            <td class="text-success">${formatAriary(data.revenue, 0)}</td>
+            <td class="${data.profit >= 0 ? 'text-success' : 'text-danger'}">${formatAriary(data.profit, 0)}</td>
+            <td class="${data.roi >= 0 ? 'text-success' : 'text-danger'}">${data.roi.toFixed(1)}%</td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+// Fonction pour calculer l'analyse des stocks
+function calculateStockAnalysis() {
+    let currentStockValue = 0;
+    let soldStockValue = 0;
+    let totalInvestment = 0;
+    
+    const productAnalysis = [];
+    
+    products.forEach(product => {
+        const currentValue = product.purchasePrice * product.stockQuantity;
+        currentStockValue += currentValue;
+        
+        const productSales = sales.filter(sale => sale.productId === product.id);
+        const soldQuantity = productSales.reduce((sum, sale) => sum + sale.quantity, 0);
+        const soldValue = product.purchasePrice * soldQuantity;
+        soldStockValue += soldValue;
+        
+        const totalProductInvestment = currentValue + soldValue;
+        totalInvestment += totalProductInvestment;
+        
+        const productRevenue = productSales.reduce((sum, sale) => sum + sale.total, 0);
+        const productProfit = productSales.reduce((sum, sale) => sum + sale.profit, 0);
+        const productROI = totalProductInvestment > 0 ? (productProfit / totalProductInvestment * 100) : 0;
+        
+        let performance = 'Faible';
+        if (productROI > 50) performance = 'Excellente';
+        else if (productROI > 25) performance = 'Bonne';
+        else if (productROI > 10) performance = 'Moyenne';
+        
+        productAnalysis.push({
+            name: product.name,
+            investment: totalProductInvestment,
+            currentStock: currentValue,
+            sold: soldValue,
+            roi: productROI,
+            performance: performance
+        });
+    });
+    
+    const stockRotation = totalInvestment > 0 ? (soldStockValue / totalInvestment * 100) : 0;
+    
+    return {
+        currentStockValue,
+        soldStockValue,
+        stockRotation,
+        productAnalysis: productAnalysis.sort((a, b) => b.roi - a.roi)
+    };
+}
+
+// Fonction pour mettre à jour l'affichage de l'analyse des stocks
+function updateStockAnalysisDisplay(stockAnalysis) {
+    document.getElementById('currentStockValue').textContent = formatAriary(stockAnalysis.currentStockValue, 0);
+    document.getElementById('soldStockValue').textContent = formatAriary(stockAnalysis.soldStockValue, 0);
+    document.getElementById('stockRotation').textContent = stockAnalysis.stockRotation.toFixed(1) + '%';
+    
+    // Mettre à jour le tableau des investissements par produit
+    const tableBody = document.getElementById('productInvestmentTable');
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = '';
+    
+    stockAnalysis.productAnalysis.slice(0, 10).forEach(product => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><strong>${product.name}</strong></td>
+            <td class="text-danger">${formatAriary(product.investment, 0)}</td>
+            <td class="text-primary">${formatAriary(product.currentStock, 0)}</td>
+            <td class="text-success">${formatAriary(product.sold, 0)}</td>
+            <td class="${product.roi >= 0 ? 'text-success' : 'text-danger'}">${product.roi.toFixed(1)}%</td>
+            <td>
+                <span class="badge ${getPerformanceBadgeClass(product.performance)}">
+                    ${product.performance}
+                </span>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+// Fonction pour obtenir la classe CSS du badge de performance
+function getPerformanceBadgeClass(performance) {
+    switch(performance) {
+        case 'Excellente': return 'badge-success';
+        case 'Bonne': return 'badge-info';
+        case 'Moyenne': return 'badge-warning';
+        case 'Faible': return 'badge-danger';
+        default: return 'badge-secondary';
+    }
+}
+
+// Fonction pour calculer les KPIs
+function calculateKPIs() {
+    const activeProducts = products.length;
+    const totalSalesCount = sales.length;
+    const averageTicket = totalSalesCount > 0 ? (sales.reduce((sum, sale) => sum + sale.total, 0) / totalSalesCount) : 0;
+    
+    // CA journalier (moyenne des 30 derniers jours)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const recentSales = sales.filter(sale => new Date(sale.date) >= thirtyDaysAgo);
+    const dailyRevenue = recentSales.reduce((sum, sale) => sum + sale.total, 0) / 30;
+    
+    // Stock faible
+    const lowStockCount = products.filter(product => product.stockQuantity < 5).length;
+    
+    // Jours d'activité
+    const firstSaleDate = sales.length > 0 ? new Date(Math.min(...sales.map(sale => new Date(sale.date)))) : new Date();
+    const activeDays = Math.ceil((new Date() - firstSaleDate) / (1000 * 60 * 60 * 24));
+    
+    return {
+        activeProducts,
+        totalSalesCount,
+        averageTicket,
+        dailyRevenue,
+        lowStockCount,
+        activeDays
+    };
+}
+
+// Fonction pour mettre à jour l'affichage des KPIs
+function updateKPIsDisplay(kpis) {
+    document.getElementById('activeProducts').textContent = kpis.activeProducts;
+    document.getElementById('totalSalesCount').textContent = kpis.totalSalesCount;
+    document.getElementById('averageTicket').textContent = formatAriary(kpis.averageTicket, 0);
+    document.getElementById('dailyRevenue').textContent = formatAriary(kpis.dailyRevenue, 0);
+    document.getElementById('lowStockCount').textContent = kpis.lowStockCount;
+    document.getElementById('activeDays').textContent = kpis.activeDays;
 }
 
 function loadTopProducts() {
