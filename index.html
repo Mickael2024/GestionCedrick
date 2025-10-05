@@ -5070,6 +5070,8 @@ textarea.form-control {
             loadDashboardData();
         } else if (tabId === 'products') {
             loadProductsTable();
+            // S'assurer que les dropdowns de catégories sont à jour
+            setTimeout(updateAllCategoryDropdowns, 100);
         } else if (tabId === 'sales') {
             loadSalesTable();
         } else if (tabId === 'reports') {
@@ -5666,7 +5668,51 @@ function showLotSelectionModal(productId, quantity, salePrice) {
     
     tableBody.appendChild(row);
 });
+
+// Mettre à jour les dropdowns de catégories après le chargement des produits
+updateAllCategoryDropdowns();
 }
+// Fonction globale pour mettre à jour tous les dropdowns de catégories
+function updateAllCategoryDropdowns() {
+    console.log('🔄 Mise à jour globale des dropdowns de catégories...');
+    
+    const dropdownIds = ['productCategory', 'editProductCategory'];
+    
+    dropdownIds.forEach(dropdownId => {
+        const dropdown = document.getElementById(dropdownId);
+        if (!dropdown) return;
+        
+        // Recharger les catégories personnalisées depuis localStorage
+        const currentCustomCategories = JSON.parse(localStorage.getItem('customCategories')) || [];
+        console.log('🔄 Rechargement des catégories pour dropdown:', dropdownId, '- Trouvées:', currentCustomCategories.length);
+        
+        // Sauvegarder la valeur sélectionnée
+        const selectedValue = dropdown.value;
+        
+        // Garder seulement les options par défaut
+        const defaultOptions = Array.from(dropdown.options).filter(opt => 
+            ['ordinateur', 'telephone', 'tablette', 'accessoire', ''].includes(opt.value)
+        );
+        
+        dropdown.innerHTML = '';
+        defaultOptions.forEach(opt => dropdown.add(opt));
+        
+        // Ajouter les catégories personnalisées
+        currentCustomCategories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = category.name;
+            dropdown.add(option);
+            console.log('➕ Ajout catégorie au dropdown:', category.name, '(ID:', category.id + ')');
+        });
+        
+        // Restaurer la sélection si possible
+        if (selectedValue && dropdown.querySelector(`option[value="${selectedValue}"]`)) {
+            dropdown.value = selectedValue;
+        }
+    });
+}
+
 // Fonction pour obtenir le nom d'une catégorie à partir de son ID
 function getCategoryName(categoryId) {
     // Catégories par défaut
@@ -7832,6 +7878,31 @@ function switchArchiveSection(targetSection) {
 }
 
 function updateArchiveNavStats() {
+    // S'assurer que les données sont chargées
+    if (!products || products.length === 0) {
+        const savedProducts = localStorage.getItem('products');
+        if (savedProducts) {
+            try {
+                products = JSON.parse(savedProducts);
+            } catch (e) {
+                console.error('Erreur lors du chargement des produits:', e);
+                products = [];
+            }
+        }
+    }
+    
+    if (!sales || sales.length === 0) {
+        const savedSales = localStorage.getItem('sales');
+        if (savedSales) {
+            try {
+                sales = JSON.parse(savedSales);
+            } catch (e) {
+                console.error('Erreur lors du chargement des ventes:', e);
+                sales = [];
+            }
+        }
+    }
+
     // Produits
     const navProductsStats = document.getElementById('nav-products-stats');
     if (navProductsStats) {
@@ -7869,6 +7940,23 @@ function updateArchiveNavStats() {
 }
 
 function loadArchiveSectionData(section) {
+    // Forcer le rechargement des données avant de charger la section
+    try {
+        const productsData = localStorage.getItem('products');
+        products = productsData ? JSON.parse(productsData) : [];
+    } catch (e) {
+        console.error('Erreur parsing products:', e);
+        products = [];
+    }
+    
+    try {
+        const salesData = localStorage.getItem('sales');
+        sales = salesData ? JSON.parse(salesData) : [];
+    } catch (e) {
+        console.error('Erreur parsing sales:', e);
+        sales = [];
+    }
+    
     switch(section) {
         case 'archive-products':
             loadArchiveProducts();
@@ -7891,6 +7979,19 @@ function loadArchiveSectionData(section) {
 function calculateMonthlyStats() {
     const stats = [];
     const now = new Date();
+    
+    // S'assurer que les ventes sont chargées
+    if (!sales || sales.length === 0) {
+        const savedSales = localStorage.getItem('sales');
+        if (savedSales) {
+            try {
+                sales = JSON.parse(savedSales);
+            } catch (e) {
+                console.error('Erreur lors du chargement des ventes:', e);
+                sales = [];
+            }
+        }
+    }
     
     // Générer les 12 derniers mois
     for (let i = 11; i >= 0; i--) {
@@ -7947,6 +8048,23 @@ function calculateMonthlyStats() {
 }
 
 function loadArchiveData() {
+    // Forcer le rechargement des données depuis localStorage
+    try {
+        const productsData = localStorage.getItem('products');
+        products = productsData ? JSON.parse(productsData) : [];
+    } catch (e) {
+        console.error('Erreur parsing products:', e);
+        products = [];
+    }
+    
+    try {
+        const salesData = localStorage.getItem('sales');
+        sales = salesData ? JSON.parse(salesData) : [];
+    } catch (e) {
+        console.error('Erreur parsing sales:', e);
+        sales = [];
+    }
+    
     updateArchiveSummary();
     loadArchiveProducts();
     loadArchiveSales();
@@ -8200,17 +8318,62 @@ function exportArchiveToJSON() {
     showToast('Archive JSON exportée avec succès', 'success');
 }
 function loadArchiveCategories() {
+    console.log('🔄 loadArchiveCategories() appelée');
     const tableBody = document.getElementById('archiveCategoriesTable');
-    if (!tableBody) return;
+    if (!tableBody) {
+        console.log('❌ Élément archiveCategoriesTable non trouvé');
+        return;
+    }
     
     tableBody.innerHTML = '';
 
     const categoryStats = {};
     
+    // S'assurer que les produits sont chargés depuis le localStorage
+    if (!products || products.length === 0) {
+        console.log('⚠️ Tableau products vide, rechargement depuis localStorage...');
+        const savedProducts = localStorage.getItem('products');
+        console.log('📦 Données products dans localStorage:', savedProducts ? 'Trouvées' : 'Aucune');
+        if (savedProducts) {
+            try {
+                products = JSON.parse(savedProducts);
+                console.log('✅ Products chargés:', products.length, 'produits');
+            } catch (e) {
+                console.error('❌ Erreur lors du chargement des produits:', e);
+                products = [];
+            }
+        }
+    } else {
+        console.log('✅ Products déjà disponibles:', products.length, 'produits');
+    }
+    
+    // Fonction pour obtenir le nom lisible d'une catégorie
+    function getCategoryDisplayName(categoryId) {
+        // Catégories par défaut
+        const defaultCategories = {
+            'ordinateur': 'Ordinateur',
+            'telephone': 'Téléphone',
+            'tablette': 'Tablette',
+            'accessoire': 'Accessoire'
+        };
+        
+        if (defaultCategories[categoryId]) {
+            return defaultCategories[categoryId];
+        }
+        
+        // Catégories personnalisées
+        const customCategories = JSON.parse(localStorage.getItem('customCategories')) || [];
+        const customCategory = customCategories.find(cat => cat.id === categoryId);
+        
+        return customCategory ? customCategory.name : categoryId;
+    }
+    
     // Calculer les statistiques par catégorie
     products.forEach(product => {
-        if (!categoryStats[product.category]) {
-            categoryStats[product.category] = {
+        const categoryDisplayName = getCategoryDisplayName(product.category);
+        
+        if (!categoryStats[categoryDisplayName]) {
+            categoryStats[categoryDisplayName] = {
                 productCount: 0,
                 totalStock: 0,
                 stockValue: 0,
@@ -8220,22 +8383,42 @@ function loadArchiveCategories() {
             };
         }
         
-        categoryStats[product.category].productCount++;
-        categoryStats[product.category].totalStock += product.stockQuantity;
-        categoryStats[product.category].stockValue += product.purchasePrice * product.stockQuantity;
+        categoryStats[categoryDisplayName].productCount++;
+        categoryStats[categoryDisplayName].totalStock += product.stockQuantity;
+        categoryStats[categoryDisplayName].stockValue += product.purchasePrice * product.stockQuantity;
     });
+    
+    // S'assurer que les ventes sont chargées depuis le localStorage
+    if (!sales || sales.length === 0) {
+        const savedSales = localStorage.getItem('sales');
+        if (savedSales) {
+            try {
+                sales = JSON.parse(savedSales);
+            } catch (e) {
+                console.error('Erreur lors du chargement des ventes:', e);
+                sales = [];
+            }
+        }
+    }
     
     // Ajouter les données de vente par catégorie
     sales.forEach(sale => {
         const product = products.find(p => p.id === sale.productId);
-        if (product && categoryStats[product.category]) {
-            categoryStats[product.category].salesCount += sale.quantity;
-            categoryStats[product.category].revenue += sale.total;
-            categoryStats[product.category].profit += sale.profit;
+        if (product) {
+            const categoryDisplayName = getCategoryDisplayName(product.category);
+            if (categoryStats[categoryDisplayName]) {
+                categoryStats[categoryDisplayName].salesCount += sale.quantity;
+                categoryStats[categoryDisplayName].revenue += sale.total;
+                categoryStats[categoryDisplayName].profit += sale.profit;
+            }
         }
     });
     
+    console.log('📊 Catégories trouvées:', Object.keys(categoryStats));
+    console.log('📊 Statistiques par catégorie:', categoryStats);
+    
     if (Object.keys(categoryStats).length === 0) {
+        console.log('❌ Aucune catégorie trouvée - affichage du message vide');
         tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Aucune donnée par catégorie</td></tr>';
         return;
     }
@@ -8248,12 +8431,13 @@ function loadArchiveCategories() {
             <td>${category}</td>
             <td>${stats.productCount}</td>
             <td>${stats.totalStock}</td>
-     <td>${formatAriary(stats.stockValue, 2)}</td>
-<td>${stats.salesCount}</td>
-<td>${formatAriary(stats.revenue, 2)}</td>
-<td>${formatAriary(stats.profit, 2)}</td>
+            <td>${formatAriary(stats.stockValue, 2)}</td>
+            <td>${stats.salesCount}</td>
+            <td>${formatAriary(stats.revenue, 2)}</td>
+            <td>${formatAriary(stats.profit, 2)}</td>
             <td>${margin.toFixed(1)}%</td>
         `;
+        console.log('➕ Ajout de la ligne pour catégorie:', category);
         tableBody.appendChild(row);
     });
 }
@@ -9077,6 +9261,10 @@ function setupCategoryManagement() {
         const dropdown = document.getElementById(dropdownId);
         if (!dropdown) return;
         
+        // Recharger les catégories personnalisées depuis localStorage
+        const currentCustomCategories = JSON.parse(localStorage.getItem('customCategories')) || [];
+        console.log('🔄 Rechargement des catégories pour dropdown:', dropdownId, '- Trouvées:', currentCustomCategories.length);
+        
         // Sauvegarder la valeur sélectionnée
         const selectedValue = dropdown.value;
         
@@ -9089,11 +9277,12 @@ function setupCategoryManagement() {
         defaultOptions.forEach(opt => dropdown.add(opt));
         
         // Ajouter les catégories personnalisées
-        customCategories.forEach(category => {
+        currentCustomCategories.forEach(category => {
             const option = document.createElement('option');
             option.value = category.id;
             option.textContent = category.name;
             dropdown.add(option);
+            console.log('➕ Ajout catégorie au dropdown:', category.name, '(ID:', category.id + ')');
         });
         
         // Restaurer la sélection si possible
