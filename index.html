@@ -11106,7 +11106,7 @@ async function processRestoreData(backupData) {
         
         if (backupData.users) {
             localStorage.setItem('users', JSON.stringify(backupData.users));
-            users = backupData.users;
+            users = backupData.users;   
             console.log(`👥 ${backupData.users.length} utilisateurs restaurés`);
         }
         
@@ -11207,12 +11207,12 @@ function restoreFromFile(event) {
     event.target.value = '';
 }
 // Vérifier le contenu d'une sauvegarde
- function inspectBackupFile(event) {
+async function inspectBackupFile(event) {
     const file = event.target.files[0];
     if (!file) return;
     
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = async function(e) {
         try {
             const backupData = JSON.parse(e.target.result);
             
