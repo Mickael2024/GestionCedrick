@@ -124,4 +124,3 @@ window.refreshAllDropdowns = function() {
     }
 };
 
-console.log('✅ Correctif des dropdowns chargé avec succès!');

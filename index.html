@@ -3490,6 +3490,158 @@ textarea.form-control {
     }
 }
 
+/* ===== MODALS MODERNES DE CONFIRMATION ===== */
+.modern-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.modern-modal.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modern-modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 0;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    transform: scale(0.7) translateY(-50px);
+    transition: all 0.3s ease;
+}
+
+.modern-modal.show .modern-modal-content {
+    transform: scale(1) translateY(0);
+}
+
+.modern-modal-header {
+    padding: 24px 24px 16px;
+    border-bottom: 1px solid #e9ecef;
+    text-align: center;
+}
+
+.modern-modal-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+}
+
+.modern-modal-icon.warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.modern-modal-icon.danger {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.modern-modal-icon.info {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.modern-modal-icon.success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.modern-modal-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #212529;
+    margin: 0 0 8px;
+}
+
+.modern-modal-body {
+    padding: 0 24px 24px;
+    text-align: center;
+}
+
+.modern-modal-message {
+    color: #6c757d;
+    font-size: 16px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.modern-modal-footer {
+    padding: 16px 24px 24px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.modern-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 100px;
+}
+
+.modern-btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.modern-btn-primary:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+}
+
+.modern-btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.modern-btn-danger:hover {
+    background: #c82333;
+    transform: translateY(-1px);
+}
+
+.modern-btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.modern-btn-secondary:hover {
+    background: #545b62;
+    transform: translateY(-1px);
+}
+
+.modern-btn-outline {
+    background: transparent;
+    border: 2px solid #dee2e6;
+    color: #6c757d;
+}
+
+.modern-btn-outline:hover {
+    background: #f8f9fa;
+    border-color: #adb5bd;
+}
+
     </style>
 </head>
 <body>
@@ -4342,7 +4494,7 @@ textarea.form-control {
                 </p>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <input type="file" id="restoreFile" accept=".json" style="display: none;" onchange="restoreFromFile(event)">
-                    <button class="btn btn-warning" onclick="document.getElementById('restoreFile').click()">
+                    <button class="btn btn-warning" onclick="triggerFileRestore()">
                         <i class="fas fa-upload"></i> Restaurer TOUT
                     </button>
                     
@@ -4805,7 +4957,7 @@ textarea.form-control {
                                     <i class="fas fa-money-bill-wave"></i>
                                 </div>
                                 <div class="stat-info">
-                                    <div class="stat-value" id="totalRevenue">0 Ar</div>
+                                    <div class="stat-value" id="totalRevenuee">0 Ar</div>
                                     <div class="stat-label">Chiffre d'affaires</div>
                                 </div>
                             </div>
@@ -5514,6 +5666,8 @@ textarea.form-control {
             updateProfileStats();
         } else if (tabId === 'archive') {
             loadArchiveData();
+            // Mettre à jour le dropdown des catégories d'archive
+            setTimeout(updateArchiveCategoryDropdown, 100);
         }
     }
 
@@ -5990,9 +6144,10 @@ function showLotSelectionModal(productId, quantity, salePrice) {
         });
     }
 
-    function cancelSale(saleId) {
+    async function cancelSale(saleId) {
         // Demander confirmation avant d'annuler
-        if (!confirm('Êtes-vous sûr de vouloir annuler cette vente ? Cette action est irréversible.')) {
+        const confirmed = await confirmDelete('Êtes-vous sûr de vouloir annuler cette vente ? Cette action est irréversible.');
+        if (!confirmed) {
             return;
         }
 
@@ -6366,6 +6521,7 @@ function calculateGlobalMetrics() {
 function updateGlobalMetricsDisplay(metrics) {
     document.getElementById('totalExpenses').textContent = formatAriary(metrics.totalExpenses, 0);
     document.getElementById('totalRevenue').textContent = formatAriary(metrics.totalRevenue, 0);
+    document.getElementById('totalRevenuee').textContent = formatAriary(metrics.totalRevenue, 0);
     document.getElementById('totalProfit').textContent = formatAriary(metrics.totalProfit, 0);
     document.getElementById('globalMargin').textContent = metrics.globalMargin.toFixed(1) + '%';
     
@@ -7000,7 +7156,7 @@ generateStockLotsDisplay(product);
 showToast('Lot modifié avec succès', 'success');
 }
 
-function deleteLot(productId, lotIndex) {
+async function deleteLot(productId, lotIndex) {
 const product = products.find(p => p.id === productId);
 if (!product || !product.stockHistory || !product.stockHistory[lotIndex]) {
     showToast('Lot non trouvé', 'error');
@@ -7012,7 +7168,8 @@ if (product.stockHistory.length <= 1) {
     return;
 }
 
-if (!confirm(`Êtes-vous sûr de vouloir supprimer le lot ${lotIndex + 1} ?`)) {
+const confirmed = await confirmDelete(`Êtes-vous sûr de vouloir supprimer le lot ${lotIndex + 1} ?`);
+if (!confirmed) {
     return;
 }
 
@@ -7329,8 +7486,9 @@ try {
 }
 }
 
-function resetMonthData() {
-if (confirm('Êtes-vous sûr de vouloir réinitialiser les données du mois ? Cette action est irréversible.')) {
+async function resetMonthData() {
+const confirmed = await confirmAction('Êtes-vous sûr de vouloir réinitialiser les données du mois ? Cette action est irréversible.');
+if (confirmed) {
     const now = new Date();
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
@@ -7348,6 +7506,428 @@ if (confirm('Êtes-vous sûr de vouloir réinitialiser les données du mois ? Ce
     
     showToast('Données du mois réinitialisées', 'success');
 }
+}
+
+// ===== SYSTÈME DE MODALS MODERNES =====
+
+function showModernConfirm(options) {
+    return new Promise((resolve) => {
+        const {
+            title = 'Confirmation',
+            message = 'Êtes-vous sûr ?',
+            type = 'warning', // warning, danger, info, success
+            confirmText = 'Confirmer',
+            cancelText = 'Annuler',
+            confirmClass = 'modern-btn-primary',
+            icon = '⚠️'
+        } = options;
+
+        // Supprimer les modals existants
+        const existingModal = document.querySelector('.modern-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // Créer le modal
+        const modal = document.createElement('div');
+        modal.className = 'modern-modal';
+        modal.innerHTML = `
+            <div class="modern-modal-content">
+                <div class="modern-modal-header">
+                    <div class="modern-modal-icon ${type}">
+                        ${icon}
+                    </div>
+                    <h3 class="modern-modal-title">${title}</h3>
+                </div>
+                <div class="modern-modal-body">
+                    <p class="modern-modal-message">${message}</p>
+                </div>
+                <div class="modern-modal-footer">
+                    <button class="modern-btn modern-btn-outline" id="modernModalCancel">
+                        ${cancelText}
+                    </button>
+                    <button class="modern-btn ${confirmClass}" id="modernModalConfirm">
+                        ${confirmText}
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Afficher le modal avec animation
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 10);
+
+        // Gérer les événements
+        const confirmBtn = modal.querySelector('#modernModalConfirm');
+        const cancelBtn = modal.querySelector('#modernModalCancel');
+
+        const closeModal = (result) => {
+            modal.classList.remove('show');
+            setTimeout(() => {
+                if (modal.parentNode) {
+                    modal.remove();
+                }
+            }, 300);
+            resolve(result);
+        };
+
+        confirmBtn.addEventListener('click', () => closeModal(true));
+        cancelBtn.addEventListener('click', () => closeModal(false));
+
+        // Fermer en cliquant à l'extérieur
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal(false);
+            }
+        });
+
+        // Fermer avec Escape
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                closeModal(false);
+                document.removeEventListener('keydown', handleEscape);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+    });
+}
+
+function showModernAlert(options) {
+    return new Promise((resolve) => {
+        const {
+            title = 'Information',
+            message = '',
+            type = 'info', // warning, danger, info, success
+            buttonText = 'OK',
+            buttonClass = 'modern-btn-primary',
+            icon = 'ℹ️'
+        } = options;
+
+        // Supprimer les modals existants
+        const existingModal = document.querySelector('.modern-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // Créer le modal
+        const modal = document.createElement('div');
+        modal.className = 'modern-modal';
+        modal.innerHTML = `
+            <div class="modern-modal-content">
+                <div class="modern-modal-header">
+                    <div class="modern-modal-icon ${type}">
+                        ${icon}
+                    </div>
+                    <h3 class="modern-modal-title">${title}</h3>
+                </div>
+                <div class="modern-modal-body">
+                    <p class="modern-modal-message">${message}</p>
+                </div>
+                <div class="modern-modal-footer">
+                    <button class="modern-btn ${buttonClass}" id="modernModalOk">
+                        ${buttonText}
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Afficher le modal avec animation
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 10);
+
+        // Gérer les événements
+        const okBtn = modal.querySelector('#modernModalOk');
+
+        const closeModal = () => {
+            modal.classList.remove('show');
+            setTimeout(() => {
+                if (modal.parentNode) {
+                    modal.remove();
+                }
+            }, 300);
+            resolve();
+        };
+
+        okBtn.addEventListener('click', closeModal);
+
+        // Fermer en cliquant à l'extérieur
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Fermer avec Escape
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+                document.removeEventListener('keydown', handleEscape);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+    });
+}
+
+// Fonctions de raccourci pour les types courants
+function confirmDelete(message = 'Cette action est irréversible.') {
+    return showModernConfirm({
+        title: 'Supprimer',
+        message: message,
+        type: 'danger',
+        confirmText: 'Supprimer',
+        cancelText: 'Annuler',
+        confirmClass: 'modern-btn-danger',
+        icon: '🗑️'
+    });
+}
+
+function confirmAction(message = 'Êtes-vous sûr de vouloir continuer ?') {
+    return showModernConfirm({
+        title: 'Confirmation',
+        message: message,
+        type: 'warning',
+        confirmText: 'Confirmer',
+        cancelText: 'Annuler',
+        confirmClass: 'modern-btn-primary',
+        icon: '⚠️'
+    });
+}
+
+function showInfo(message, title = 'Information') {
+    return showModernAlert({
+        title: title,
+        message: message,
+        type: 'info',
+        buttonText: 'OK',
+        buttonClass: 'modern-btn-primary',
+        icon: 'ℹ️'
+    });
+}
+
+function showSuccess(message, title = 'Succès') {
+    return showModernAlert({
+        title: title,
+        message: message,
+        type: 'success',
+        buttonText: 'OK',
+        buttonClass: 'modern-btn-primary',
+        icon: '✅'
+    });
+}
+
+function showModernPrompt(options) {
+    return new Promise((resolve) => {
+        const {
+            title = 'Saisie',
+            message = '',
+            placeholder = '',
+            defaultValue = '',
+            type = 'info',
+            confirmText = 'OK',
+            cancelText = 'Annuler',
+            isTextarea = false,
+            icon = '📝'
+        } = options;
+
+        // Supprimer les modals existants
+        const existingModal = document.querySelector('.modern-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // Créer le modal
+        const modal = document.createElement('div');
+        modal.className = 'modern-modal';
+        
+        const inputElement = isTextarea 
+            ? `<textarea class="form-control" id="modernPromptInput" placeholder="${placeholder}" rows="10" style="min-height: 200px; font-family: monospace; font-size: 12px;">${defaultValue}</textarea>`
+            : `<input type="text" class="form-control" id="modernPromptInput" placeholder="${placeholder}" value="${defaultValue}">`;
+        
+        modal.innerHTML = `
+            <div class="modern-modal-content">
+                <div class="modern-modal-header">
+                    <div class="modern-modal-icon ${type}">
+                        ${icon}
+                    </div>
+                    <h3 class="modern-modal-title">${title}</h3>
+                </div>
+                <div class="modern-modal-body">
+                    <p class="modern-modal-message">${message}</p>
+                    <div style="margin-top: 15px;">
+                        ${inputElement}
+                    </div>
+                </div>
+                <div class="modern-modal-footer">
+                    <button class="modern-btn modern-btn-outline" id="modernPromptCancel">
+                        ${cancelText}
+                    </button>
+                    <button class="modern-btn modern-btn-primary" id="modernPromptConfirm">
+                        ${confirmText}
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Afficher le modal avec animation
+        setTimeout(() => {
+            modal.classList.add('show');
+            // Focus sur l'input
+            const input = modal.querySelector('#modernPromptInput');
+            if (input) {
+                input.focus();
+                if (!isTextarea) {
+                    input.select();
+                }
+            }
+        }, 10);
+
+        // Gérer les événements
+        const confirmBtn = modal.querySelector('#modernPromptConfirm');
+        const cancelBtn = modal.querySelector('#modernPromptCancel');
+        const input = modal.querySelector('#modernPromptInput');
+
+        const closeModal = (result) => {
+            modal.classList.remove('show');
+            setTimeout(() => {
+                if (modal.parentNode) {
+                    modal.remove();
+                }
+            }, 300);
+            resolve(result);
+        };
+
+        confirmBtn.addEventListener('click', () => {
+            closeModal(input.value);
+        });
+        
+        cancelBtn.addEventListener('click', () => {
+            closeModal(null);
+        });
+
+        // Entrée pour confirmer (sauf pour textarea)
+        if (!isTextarea) {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    closeModal(input.value);
+                }
+            });
+        }
+
+        // Fermer en cliquant à l'extérieur
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal(null);
+            }
+        });
+
+        // Fermer avec Escape
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                closeModal(null);
+                document.removeEventListener('keydown', handleEscape);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+    });
+}
+
+function showModernConfirm(options) {
+    return new Promise((resolve) => {
+        const {
+            title = 'Confirmation',
+            message = '',
+            type = 'warning',
+            confirmText = 'Confirmer',
+            cancelText = 'Annuler',
+            confirmClass = 'modern-btn-primary',
+            icon = '❓'
+        } = options;
+
+        // Supprimer les modals existants
+        const existingModal = document.querySelector('.modern-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // Créer le modal
+        const modal = document.createElement('div');
+        modal.className = 'modern-modal';
+        
+        modal.innerHTML = `
+            <div class="modern-modal-content">
+                <div class="modern-modal-header">
+                    <div class="modern-modal-icon ${type}">
+                        ${icon}
+                    </div>
+                    <h3 class="modern-modal-title">${title}</h3>
+                </div>
+                <div class="modern-modal-body">
+                    <p class="modern-modal-message" style="white-space: pre-line;">${message}</p>
+                </div>
+                <div class="modern-modal-footer">
+                    <button class="modern-btn modern-btn-outline" id="modernConfirmCancel">
+                        ${cancelText}
+                    </button>
+                    <button class="modern-btn ${confirmClass}" id="modernConfirmOk">
+                        ${confirmText}
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Afficher le modal avec animation
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 10);
+
+        // Gérer les événements
+        const confirmBtn = modal.querySelector('#modernConfirmOk');
+        const cancelBtn = modal.querySelector('#modernConfirmCancel');
+
+        const closeModal = (result) => {
+            modal.classList.remove('show');
+            setTimeout(() => {
+                if (modal.parentNode) {
+                    modal.remove();
+                }
+            }, 300);
+            resolve(result);
+        };
+
+        confirmBtn.addEventListener('click', () => {
+            closeModal(true);
+        });
+        
+        cancelBtn.addEventListener('click', () => {
+            closeModal(false);
+        });
+
+        // Fermer en cliquant à l'extérieur
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal(false);
+            }
+        });
+
+        // Fermer avec Escape
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                closeModal(false);
+                document.removeEventListener('keydown', handleEscape);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+    });
 }
 
 function showToast(message, type) {
@@ -8012,13 +8592,14 @@ function handlePhotoUpload(event) {
     event.target.value = '';
 }
 
-function removeProfilePhoto() {
+async function removeProfilePhoto() {
     if (!profileData.profilePhoto) {
         showToast('Aucune photo à supprimer', 'warning');
         return;
     }
     
-    if (confirm('Êtes-vous sûr de vouloir supprimer votre photo de profil ?')) {
+    const confirmed = await confirmDelete('Êtes-vous sûr de vouloir supprimer votre photo de profil ?');
+    if (confirmed) {
         profileData.profilePhoto = null;
         saveProfileData();
         displayProfilePhoto();
@@ -8469,8 +9050,9 @@ function saveProfileData() {
     }
 }
 
-function resetProfileForm() {
-    if (confirm('Êtes-vous sûr de vouloir annuler les modifications ?')) {
+async function resetProfileForm() {
+    const confirmed = await confirmAction('Êtes-vous sûr de vouloir annuler les modifications ?');
+    if (confirmed) {
         populateProfileForm();
         showToast('Modifications annulées', 'info');
     }
@@ -8498,6 +9080,7 @@ function updateProfileStats() {
     // Chiffre d'affaires total
     const totalRevenue = sales.reduce((sum, sale) => sum + sale.total, 0);
     document.getElementById('totalRevenue').textContent = formatAriary(totalRevenue, 2);
+    document.getElementById('totalRevenuee').textContent = formatAriary(totalRevenue, 2);
 }
 
 function debounce(func, wait) {
@@ -9181,6 +9764,234 @@ function loadArchiveData() {
         // Par défaut, charger les produits
         switchArchiveSection('archive-products');
     }
+}
+
+function applyArchiveFilters() {
+    try {
+        console.log('🔍 Application des filtres d\'archive...');
+        
+        // Récupérer les valeurs des filtres
+        const period = document.getElementById('archivePeriod')?.value || 'all';
+        const dataType = document.getElementById('archiveDataType')?.value || 'all';
+        const category = document.getElementById('archiveCategory')?.value || 'all';
+        const dateFrom = document.getElementById('archiveDateFrom')?.value;
+        const dateTo = document.getElementById('archiveDateTo')?.value;
+        
+        console.log('📋 Filtres sélectionnés:', { period, dataType, category, dateFrom, dateTo });
+        
+        // Calculer la plage de dates selon la période
+        let startDate = null;
+        let endDate = new Date();
+        
+        switch (period) {
+            case 'today':
+                startDate = new Date();
+                startDate.setHours(0, 0, 0, 0);
+                break;
+            case 'week':
+                startDate = new Date();
+                startDate.setDate(startDate.getDate() - 7);
+                break;
+            case 'month':
+                startDate = new Date();
+                startDate.setMonth(startDate.getMonth() - 1);
+                break;
+            case 'year':
+                startDate = new Date();
+                startDate.setFullYear(startDate.getFullYear() - 1);
+                break;
+            case 'custom':
+                if (dateFrom) startDate = new Date(dateFrom);
+                if (dateTo) endDate = new Date(dateTo + 'T23:59:59');
+                break;
+        }
+        
+        // Filtrer les données selon les critères
+        let filteredProducts = [...products];
+        let filteredSales = [...sales];
+        
+        // Filtre par catégorie
+        if (category !== 'all') {
+            filteredProducts = filteredProducts.filter(product => 
+                product.category === category
+            );
+            
+            // Filtrer les ventes par produits de cette catégorie
+            const categoryProductIds = filteredProducts.map(p => p.id);
+            filteredSales = filteredSales.filter(sale => 
+                categoryProductIds.includes(sale.productId)
+            );
+        }
+        
+        // Filtre par date pour les ventes
+        if (startDate) {
+            filteredSales = filteredSales.filter(sale => {
+                const saleDate = new Date(sale.date);
+                return saleDate >= startDate && saleDate <= endDate;
+            });
+        }
+        
+        console.log('📊 Résultats filtrés:', {
+            produits: filteredProducts.length,
+            ventes: filteredSales.length
+        });
+        
+        // Appliquer les filtres selon le type de données
+        switch (dataType) {
+            case 'products':
+                loadFilteredArchiveProducts(filteredProducts);
+                switchArchiveSection('archive-products');
+                break;
+            case 'sales':
+                loadFilteredArchiveSales(filteredSales);
+                switchArchiveSection('archive-sales');
+                break;
+            case 'stats':
+                loadFilteredArchiveStats(filteredProducts, filteredSales);
+                switchArchiveSection('archive-stats');
+                break;
+            default:
+                // Charger toutes les données filtrées
+                loadFilteredArchiveProducts(filteredProducts);
+                loadFilteredArchiveSales(filteredSales);
+                loadFilteredArchiveStats(filteredProducts, filteredSales);
+                break;
+        }
+        
+        // Message de confirmation
+        const message = `Filtres appliqués: ${filteredProducts.length} produits, ${filteredSales.length} ventes`;
+        showToast(message, 'success');
+        
+    } catch (error) {
+        console.error('❌ Erreur lors de l\'application des filtres:', error);
+        showToast('Erreur lors de l\'application des filtres', 'error');
+    }
+}
+
+function loadFilteredArchiveProducts(filteredProducts) {
+    const tableBody = document.getElementById('archiveProductsTable');
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = '';
+    
+    if (filteredProducts.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Aucun produit trouvé avec ces filtres</td></tr>';
+        return;
+    }
+    
+    filteredProducts.forEach(product => {
+        const row = document.createElement('tr');
+        const categoryName = getCategoryDisplayName(product.category);
+        
+        row.innerHTML = `
+            <td>${product.name}</td>
+            <td>${categoryName}</td>
+            <td>${product.stockQuantity}</td>
+            <td>${formatAriary(product.purchasePrice)}</td>
+            <td>${formatAriary(product.salePrice)}</td>
+            <td>${new Date(product.dateAdded).toLocaleDateString('fr-FR')}</td>
+        `;
+        
+        tableBody.appendChild(row);
+    });
+}
+
+function loadFilteredArchiveSales(filteredSales) {
+    const tableBody = document.getElementById('archiveSalesTable');
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = '';
+    
+    if (filteredSales.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Aucune vente trouvée avec ces filtres</td></tr>';
+        return;
+    }
+    
+    filteredSales.forEach(sale => {
+        const row = document.createElement('tr');
+        
+        row.innerHTML = `
+            <td>${new Date(sale.date).toLocaleDateString('fr-FR')}</td>
+            <td>${sale.productName}</td>
+            <td>${sale.quantity}</td>
+            <td>${formatAriary(sale.salePrice)}</td>
+            <td>${formatAriary(sale.total)}</td>
+            <td>${formatAriary(sale.profit)}</td>
+        `;
+        
+        tableBody.appendChild(row);
+    });
+}
+
+function loadFilteredArchiveStats(filteredProducts, filteredSales) {
+    const tableBody = document.getElementById('archiveStatsTable');
+    if (!tableBody) return;
+    
+    // Calculer les statistiques filtrées
+    const totalRevenue = filteredSales.reduce((sum, sale) => sum + sale.total, 0);
+    const totalProfit = filteredSales.reduce((sum, sale) => sum + sale.profit, 0);
+    const totalCost = totalRevenue - totalProfit;
+    const averageProfit = filteredSales.length > 0 ? totalProfit / filteredSales.length : 0;
+    
+    tableBody.innerHTML = `
+        <tr>
+            <td>Produits filtrés</td>
+            <td>${filteredProducts.length}</td>
+        </tr>
+        <tr>
+            <td>Ventes filtrées</td>
+            <td>${filteredSales.length}</td>
+        </tr>
+        <tr>
+            <td>Chiffre d'affaires</td>
+            <td>${formatAriary(totalRevenue)}</td>
+        </tr>
+        <tr>
+            <td>Coût total</td>
+            <td>${formatAriary(totalCost)}</td>
+        </tr>
+        <tr>
+            <td>Bénéfice total</td>
+            <td>${formatAriary(totalProfit)}</td>
+        </tr>
+        <tr>
+            <td>Bénéfice moyen par vente</td>
+            <td>${formatAriary(averageProfit)}</td>
+        </tr>
+    `;
+}
+
+function updateArchiveCategoryDropdown() {
+    const dropdown = document.getElementById('archiveCategory');
+    if (!dropdown) return;
+    
+    // Sauvegarder la valeur sélectionnée
+    const selectedValue = dropdown.value;
+    
+    // Garder seulement les options par défaut
+    dropdown.innerHTML = `
+        <option value="all">Toutes les catégories</option>
+        <option value="ordinateur">Ordinateur</option>
+        <option value="telephone">Téléphone</option>
+        <option value="tablette">Tablette</option>
+        <option value="accessoire">Accessoire</option>
+    `;
+    
+    // Ajouter les catégories personnalisées
+    const customCategories = JSON.parse(localStorage.getItem('customCategories')) || [];
+    customCategories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category.id;
+        option.textContent = category.name;
+        dropdown.appendChild(option);
+    });
+    
+    // Restaurer la sélection si possible
+    if (selectedValue && dropdown.querySelector(`option[value="${selectedValue}"]`)) {
+        dropdown.value = selectedValue;
+    }
+    
+    console.log('🔄 Dropdown catégories d\'archive mis à jour avec', customCategories.length, 'catégories personnalisées');
 }
 
 function updateArchiveSummary() {
@@ -10021,82 +10832,373 @@ function exportCategoriesToPDF(doc, startY) {
 }
 // Sauvegarde COMPLÈTE par email
 // Sauvegarde COMPLÈTE par email - VERSION UNIVERSELLE
+// Fonction pour déclencher la restauration (compatible WebView Android)
+async function triggerFileRestore() {
+    console.log('🔄 Déclenchement de la restauration...');
+    
+    try {
+        // MÉTHODE 1: Interface Android personnalisée pour sélection de fichier
+        if (window.Android && typeof window.Android.selectRestoreFile === 'function') {
+            console.log('📱 Utilisation de l\'interface Android pour sélection de fichier');
+            window.Android.selectRestoreFile();
+            showToast('📂 Sélectionnez votre fichier de sauvegarde', 'info');
+            return;
+        }
+        
+        // MÉTHODE 2: Interface Android pour lecture directe
+        if (window.Android && typeof window.Android.readBackupFile === 'function') {
+            console.log('📱 Utilisation de l\'interface Android pour lecture directe');
+            window.Android.readBackupFile();
+            showToast('📂 Accès aux fichiers Android...', 'info');
+            return;
+        }
+        
+        // MÉTHODE 3: Input file standard (WebView moderne)
+        const fileInput = document.getElementById('restoreFile');
+        if (fileInput) {
+            console.log('📁 Utilisation de l\'input file standard');
+            
+            // Vérifier si l'input file fonctionne
+            try {
+                fileInput.click();
+                return;
+            } catch (clickError) {
+                console.warn('⚠️ Échec du click sur input file:', clickError);
+            }
+        }
+        
+        // MÉTHODE 4: Création dynamique d'input file
+        console.log('🔧 Création dynamique d\'input file');
+        try {
+            const dynamicInput = document.createElement('input');
+            dynamicInput.type = 'file';
+            dynamicInput.accept = '.json,application/json';
+            dynamicInput.style.display = 'none';
+            
+            dynamicInput.onchange = function(event) {
+                restoreFromFile(event);
+                document.body.removeChild(dynamicInput);
+            };
+            
+            document.body.appendChild(dynamicInput);
+            dynamicInput.click();
+            return;
+        } catch (dynamicError) {
+            console.warn('⚠️ Échec de création dynamique:', dynamicError);
+        }
+        
+        // MÉTHODE 5: Drag & Drop alternatif
+        console.log('🎯 Activation du mode Drag & Drop');
+        showDragDropRestore();
+        
+    } catch (error) {
+        console.error('❌ Erreur lors du déclenchement de restauration:', error);
+        showToast('❌ Erreur d\'accès aux fichiers', 'error');
+        
+        // Fallback: Restauration manuelle
+        await showManualRestoreInstructions();
+    }
+}
+
+// Fonction pour afficher les instructions de restauration manuelle
+async function showManualRestoreInstructions() {
+    const instructions = `
+📋 RESTAURATION MANUELLE
+
+Votre appareil ne supporte pas la sélection automatique de fichiers.
+
+MÉTHODES ALTERNATIVES:
+
+1️⃣ COPIER-COLLER:
+   • Ouvrez votre fichier .json de sauvegarde
+   • Copiez tout le contenu
+   • Utilisez la fonction "Restauration par copie" ci-dessous
+
+2️⃣ PARTAGE DE FICHIER:
+   • Partagez votre fichier .json vers cette application
+   • L'application devrait le détecter automatiquement
+
+3️⃣ EMAIL:
+   • Envoyez-vous le fichier par email
+   • Téléchargez-le depuis l'email
+   • Réessayez la restauration
+    `;
+    
+    await showInfo(instructions, 'Restauration Manuelle');
+    
+    // Proposer la restauration par copie de texte
+    setTimeout(async () => {
+        const confirmed = await confirmAction('Voulez-vous essayer la restauration par copie de texte ?');
+        if (confirmed) {
+            showTextRestoreDialog();
+        }
+    }, 1000);
+}
+
+// Fonction pour afficher le dialogue de restauration par texte
+async function showTextRestoreDialog() {
+    const textContent = await showModernPrompt({
+        title: '📋 Restauration par Copie',
+        message: 'Collez ici le contenu complet de votre fichier de sauvegarde .json:\n\n(Le texte doit commencer par { et finir par })',
+        placeholder: 'Collez votre sauvegarde JSON ici...',
+        isTextarea: true,
+        confirmText: 'Restaurer',
+        cancelText: 'Annuler',
+        icon: '📋'
+    });
+    
+    if (textContent && textContent.trim()) {
+        try {
+            const backupData = JSON.parse(textContent.trim());
+            
+            // Simuler un événement de fichier pour restoreFromFile
+            const mockEvent = {
+                target: {
+                    result: textContent.trim()
+                }
+            };
+            
+            // Appeler directement la logique de restauration
+            await processRestoreData(backupData);
+            
+        } catch (parseError) {
+            console.error('❌ Erreur de parsing:', parseError);
+            showToast('❌ Format de sauvegarde invalide', 'error');
+            
+            const retry = await confirmAction('Le format semble incorrect. Voulez-vous réessayer ?');
+            if (retry) {
+                showTextRestoreDialog();
+            }
+        }
+    }
+}
+
+// Fonction pour afficher la zone de Drag & Drop
+function showDragDropRestore() {
+    // Créer une zone de drop temporaire
+    const dropZone = document.createElement('div');
+    dropZone.id = 'tempDropZone';
+    dropZone.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 400px;
+        height: 200px;
+        border: 3px dashed #007bff;
+        background: rgba(0, 123, 255, 0.1);
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        font-family: Arial, sans-serif;
+        color: #007bff;
+        cursor: pointer;
+    `;
+    
+    dropZone.innerHTML = `
+        <div style="text-align: center;">
+            <i class="fas fa-cloud-upload-alt" style="font-size: 48px; margin-bottom: 15px;"></i>
+            <h3>Glissez votre fichier .json ici</h3>
+            <p>ou cliquez pour sélectionner</p>
+            <button onclick="document.getElementById('tempDropZone').remove()" 
+                    style="margin-top: 10px; padding: 5px 10px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                Annuler
+            </button>
+        </div>
+    `;
+    
+    // Événements de drag & drop
+    dropZone.ondragover = function(e) {
+        e.preventDefault();
+        dropZone.style.background = 'rgba(0, 123, 255, 0.2)';
+    };
+    
+    dropZone.ondragleave = function(e) {
+        e.preventDefault();
+        dropZone.style.background = 'rgba(0, 123, 255, 0.1)';
+    };
+    
+    dropZone.ondrop = function(e) {
+        e.preventDefault();
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            const file = files[0];
+            if (file.type === 'application/json' || file.name.endsWith('.json')) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    restoreFromFile({ target: { files: [file] } });
+                };
+                reader.readAsText(file);
+                dropZone.remove();
+            } else {
+                showToast('❌ Veuillez sélectionner un fichier .json', 'error');
+            }
+        }
+    };
+    
+    // Clic pour sélection alternative
+    dropZone.onclick = function() {
+        triggerFileRestore();
+        dropZone.remove();
+    };
+    
+    document.body.appendChild(dropZone);
+    
+    // Auto-suppression après 30 secondes
+    setTimeout(() => {
+        if (document.getElementById('tempDropZone')) {
+            dropZone.remove();
+        }
+    }, 30000);
+}
+
+// Fonction pour traiter les données de restauration (utilisée par toutes les méthodes)
+async function processRestoreData(backupData) {
+    try {
+        console.log('🔄 Traitement des données de restauration...');
+        
+        // Vérifier que c'est une sauvegarde valide
+        if (!backupData.products || !backupData.sales) {
+            showToast('❌ Fichier de sauvegarde invalide', 'error');
+            return false;
+        }
+        
+        const confirmMessage = `Êtes-vous sûr de vouloir restaurer cette sauvegarde?\n\n` +
+                             `📦 Produits: ${backupData.products.length}\n` +
+                             `💰 Ventes: ${backupData.sales.length}\n` +
+                             `📅 Date: ${new Date(backupData.backupDate).toLocaleString('fr-FR')}\n\n` +
+                             `⚠️ Toutes les données actuelles seront écrasées!`;
+        
+        const confirmed = await showModernConfirm({
+            title: '⚠️ Confirmer la Restauration',
+            message: confirmMessage,
+            type: 'warning',
+            confirmText: 'Restaurer',
+            cancelText: 'Annuler',
+            confirmClass: 'modern-btn-danger',
+            icon: '⚠️'
+        });
+        
+        if (!confirmed) {
+            showToast('ℹ️ Restauration annulée', 'info');
+            return false;
+        }
+        
+        console.log('✅ Confirmation utilisateur reçue');
+        
+        // 🔄 RESTAURER TOUTES LES DONNÉES
+        
+        // Données principales
+        if (backupData.products) {
+            localStorage.setItem('products', JSON.stringify(backupData.products));
+            products = backupData.products;
+            console.log(`📦 ${backupData.products.length} produits restaurés`);
+        }
+        
+        if (backupData.sales) {
+            localStorage.setItem('sales', JSON.stringify(backupData.sales));
+            sales = backupData.sales;
+            console.log(`💰 ${backupData.sales.length} ventes restaurées`);
+        }
+        
+        if (backupData.users) {
+            localStorage.setItem('users', JSON.stringify(backupData.users));
+            users = backupData.users;
+            console.log(`👥 ${backupData.users.length} utilisateurs restaurés`);
+        }
+        
+        if (backupData.currentUser) {
+            localStorage.setItem('currentUser', JSON.stringify(backupData.currentUser));
+            currentUser = backupData.currentUser;
+            console.log('👤 Utilisateur actuel restauré');
+        }
+        
+        if (backupData.customCategories) {
+            localStorage.setItem('customCategories', JSON.stringify(backupData.customCategories));
+            console.log(`🏷️ ${backupData.customCategories.length} catégories personnalisées restaurées`);
+        }
+        
+        // Profil et configuration
+        if (backupData.adminProfile) {
+            localStorage.setItem('adminProfile', JSON.stringify(backupData.adminProfile));
+            profileData = backupData.adminProfile;
+            console.log('👨‍💼 Profil admin restauré');
+        }
+        
+        if (backupData.archiveHistory) {
+            localStorage.setItem('archiveHistory', JSON.stringify(backupData.archiveHistory));
+            archiveHistory = backupData.archiveHistory;
+            console.log('📚 Historique des archives restauré');
+        }
+        
+        // Mettre à jour les variables globales
+        loadDataFromStorage();
+        
+        // 🔄 Recharger TOUTE l'interface
+        console.log('🔄 Rechargement de l\'interface...');
+        loadDashboardData();
+        loadProductsTable();
+        loadSalesTable();
+        loadReportsData();
+        loadArchiveData();
+        populateProfileForm();
+        updateProfileStats();
+        updateBackupStatus();
+        updateAllCategoryDropdowns();
+        
+        // Message de succès
+        const successMessage = `✅ Restauration COMPLÈTE réussie!\n\n` +
+                             `📦 ${backupData.products.length} produits restaurés\n` +
+                             `💰 ${backupData.sales.length} ventes restaurées\n` +
+                             `📅 Sauvegarde du ${new Date(backupData.backupDate).toLocaleString('fr-FR')}`;
+        
+        showToast('✅ Restauration complète réussie!', 'success');
+        
+        console.log('🎉 RESTAURATION COMPLÈTE TERMINÉE:', backupData);
+        
+        // Notification Android si disponible
+        if (window.Android && typeof window.Android.showNotification === 'function') {
+            window.Android.showNotification('Restauration réussie', `${backupData.products.length} produits et ${backupData.sales.length} ventes restaurés`);
+        }
+        
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Erreur lors du traitement de restauration:', error);
+        showToast('❌ Erreur lors de la restauration', 'error');
+        return false;
+    }
+}
+
+// Fonction appelée par Android pour restaurer des données
+async function restoreFromAndroid(jsonData) {
+    try {
+        console.log('📱 Restauration depuis Android...');
+        const backupData = JSON.parse(jsonData);
+        return await processRestoreData(backupData);
+    } catch (error) {
+        console.error('❌ Erreur restauration Android:', error);
+        showToast('❌ Erreur de format de données Android', 'error');
+        return false;
+    }
+}
+
 // Restauration COMPLÈTE depuis fichier
 function restoreFromFile(event) {
     const file = event.target.files[0];
     if (!file) return;
     
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = async function(e) {
         try {
             const backupData = JSON.parse(e.target.result);
-            
-            // Vérifier que c'est une sauvegarde valide
-            if (!backupData.products || !backupData.sales) {
-                showToast('Fichier de sauvegarde invalide', 'error');
-                return;
-            }
-            
-            if (confirm(`Êtes-vous sûr de vouloir restaurer cette sauvegarde?\n\n` +
-                       `Produits: ${backupData.products.length}\n` +
-                       `Ventes: ${backupData.sales.length}\n` +
-                       `Date: ${new Date(backupData.backupDate).toLocaleString('fr-FR')}\n\n` +
-                       `Toutes les données actuelles seront écrasées!`)) {
-                
-                // 🔄 RESTAURER TOUTES LES DONNÉES
-                
-                // Données principales
-                if (backupData.products) {
-                    localStorage.setItem('products', JSON.stringify(backupData.products));
-                    products = backupData.products;
-                }
-                
-                if (backupData.sales) {
-                    localStorage.setItem('sales', JSON.stringify(backupData.sales));
-                    sales = backupData.sales;
-                }
-                
-                if (backupData.users) {
-                    localStorage.setItem('users', JSON.stringify(backupData.users));
-                    users = backupData.users;
-                }
-                
-                if (backupData.currentUser) {
-                    localStorage.setItem('currentUser', JSON.stringify(backupData.currentUser));
-                    currentUser = backupData.currentUser;
-                }
-                
-                // Profil et configuration
-                if (backupData.adminProfile) {
-                    localStorage.setItem('adminProfile', JSON.stringify(backupData.adminProfile));
-                    profileData = backupData.adminProfile;
-                }
-                
-                if (backupData.archiveHistory) {
-                    localStorage.setItem('archiveHistory', JSON.stringify(backupData.archiveHistory));
-                    archiveHistory = backupData.archiveHistory;
-                }
-                
-                // Mettre à jour les variables globales
-                loadDataFromStorage();
-                
-                // 🔄 Recharger TOUTE l'interface
-                loadDashboardData();
-                loadProductsTable();
-                loadSalesTable();
-                loadReportsData();
-                loadArchiveData();
-                populateProfileForm();
-                updateProfileStats();
-                updateBackupStatus();
-                
-                showToast(`✅ Restauration COMPLÈTE réussie! ${backupData.products.length} produits et ${backupData.sales.length} ventes restaurés.`, 'success');
-                
-                console.log('🔄 RESTAURATION COMPLÈTE:', backupData);
-            }
+            await processRestoreData(backupData);
         } catch (error) {
-            console.error('Erreur restauration:', error);
-            showToast('Erreur: Fichier de sauvegarde corrompu ou invalide', 'error');
+            console.error('❌ Erreur lecture fichier:', error);
+            showToast('❌ Erreur: Fichier de sauvegarde corrompu ou invalide', 'error');
         }
     };
     reader.readAsText(file);
@@ -10105,7 +11207,7 @@ function restoreFromFile(event) {
     event.target.value = '';
 }
 // Vérifier le contenu d'une sauvegarde
-function inspectBackupFile(event) {
+ function inspectBackupFile(event) {
     const file = event.target.files[0];
     if (!file) return;
     
@@ -10129,7 +11231,7 @@ function inspectBackupFile(event) {
                 message += `Produits stock faible: ${backupData.totalStats.lowStockProducts}\n`;
             }
             
-            alert(message);
+            await showInfo(message, '📊 Inspection Sauvegarde');
             
         } catch (error) {
             showToast('Fichier invalide', 'error');
@@ -10138,6 +11240,8 @@ function inspectBackupFile(event) {
     reader.readAsText(file);
     event.target.value = '';
 }
+
+
 function updateBackupStatus() {
     document.getElementById('backupProductsCount').textContent = products.length;
     document.getElementById('backupSalesCount').textContent = sales.length;
@@ -10156,72 +11260,154 @@ function updateBackupStatus() {
 }
 
 function backupToEmail() {
-    // Récupérer TOUTES les données du localStorage
-    const allData = {
-        // Données principales
-        products: JSON.parse(localStorage.getItem('products') || '[]'),
-        sales: JSON.parse(localStorage.getItem('sales') || '[]'),
-        users: JSON.parse(localStorage.getItem('users') || '[]'),
-        currentUser: JSON.parse(localStorage.getItem('currentUser') || 'null'),
+    try {
+        console.log('🔄 Début de la sauvegarde...');
         
-        // Profil et configuration
-        adminProfile: JSON.parse(localStorage.getItem('adminProfile') || '{}'),
-        archiveHistory: JSON.parse(localStorage.getItem('archiveHistory') || '[]'),
-        
-        // Métadonnées
-        backupDate: new Date().toISOString(),
-        backupVersion: '1.0',
-        totalStats: {
-            productsCount: products.length,
-            salesCount: sales.length,
-            totalRevenue: sales.reduce((sum, sale) => sum + sale.total, 0),
-            totalProfit: sales.reduce((sum, sale) => sum + sale.profit, 0),
-            lowStockProducts: products.filter(p => p.stockQuantity < 5).length
-        }
-    };
-
-    // Créer le fichier de sauvegarde
-    const jsonString = JSON.stringify(allData, null, 2);
-    
-    // MÉTHODE SPÉCIALE POUR WEBVIEW ANDROID
-    if (window.Android && window.Android.saveBackup) {
-        // Appel direct à l'interface Android
-        window.Android.saveBackup(jsonString, `sauvegarde_stock_${new Date().toISOString().split('T')[0]}.json`);
-        showToast(`✅ Sauvegarde envoyée à l'application Android`, 'success');
-    } else {
-        // Fallback pour navigateur normal
-        try {
-            const blob = new Blob([jsonString], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
+        // Récupérer TOUTES les données du localStorage
+        const allData = {
+            // Données principales
+            products: JSON.parse(localStorage.getItem('products') || '[]'),
+            sales: JSON.parse(localStorage.getItem('sales') || '[]'),
+            users: JSON.parse(localStorage.getItem('users') || '[]'),
+            currentUser: JSON.parse(localStorage.getItem('currentUser') || 'null'),
+            customCategories: JSON.parse(localStorage.getItem('customCategories') || '[]'),
             
+            // Profil et configuration
+            adminProfile: JSON.parse(localStorage.getItem('adminProfile') || '{}'),
+            archiveHistory: JSON.parse(localStorage.getItem('archiveHistory') || '[]'),
+            
+            // Métadonnées
+            backupDate: new Date().toISOString(),
+            backupVersion: '2.0',
+            appVersion: 'WebView Compatible',
+            totalStats: {
+                productsCount: JSON.parse(localStorage.getItem('products') || '[]').length,
+                salesCount: JSON.parse(localStorage.getItem('sales') || '[]').length,
+                totalRevenue: JSON.parse(localStorage.getItem('sales') || '[]').reduce((sum, sale) => sum + (sale.total || 0), 0),
+                totalProfit: JSON.parse(localStorage.getItem('sales') || '[]').reduce((sum, sale) => sum + (sale.profit || 0), 0),
+                lowStockProducts: JSON.parse(localStorage.getItem('products') || '[]').filter(p => (p.stockQuantity || 0) < 5).length
+            }
+        };
+
+        // Créer le fichier de sauvegarde
+        const jsonString = JSON.stringify(allData, null, 2);
+        const fileName = `sauvegarde_stock_${new Date().toISOString().split('T')[0]}.json`;
+        
+        console.log('📦 Données préparées:', allData.totalStats);
+        
+        // MÉTHODE 1: Interface Android personnalisée (Recommandée)
+        if (window.Android && typeof window.Android.saveBackup === 'function') {
+            console.log('📱 Utilisation de l\'interface Android personnalisée');
+            window.Android.saveBackup(jsonString, fileName);
+            
+            // Sauvegarder la date de la dernière sauvegarde
+            localStorage.setItem('last_backup', JSON.stringify(allData));
+            updateBackupStatus();
+            
+            showToast('✅ Sauvegarde envoyée à l\'application Android', 'success');
+            return;
+        }
+        
+        // MÉTHODE 2: Interface Android pour email
+        if (window.Android && typeof window.Android.sendEmail === 'function') {
+            console.log('📧 Utilisation de l\'interface Android pour email');
+            const emailSubject = `Sauvegarde Stock - ${new Date().toLocaleDateString('fr-FR')}`;
+            const emailBody = `Sauvegarde automatique de votre gestion de stock.\n\nDate: ${new Date().toLocaleString('fr-FR')}\nProduits: ${allData.totalStats.productsCount}\nVentes: ${allData.totalStats.salesCount}`;
+            
+            window.Android.sendEmail(emailSubject, emailBody, jsonString, fileName);
+            
+            // Sauvegarder la date de la dernière sauvegarde
+            localStorage.setItem('last_backup', JSON.stringify(allData));
+            updateBackupStatus();
+            
+            showToast('✅ Email de sauvegarde préparé', 'success');
+            return;
+        }
+        
+        // MÉTHODE 3: Interface Android pour partage
+        if (window.Android && typeof window.Android.shareFile === 'function') {
+            console.log('📤 Utilisation de l\'interface Android pour partage');
+            window.Android.shareFile(jsonString, fileName, 'application/json');
+            showToast('✅ Fichier de sauvegarde partagé', 'success');
+            return;
+        }
+        
+        // MÉTHODE 4: Téléchargement direct (WebView moderne)
+        if (typeof Blob !== 'undefined' && typeof URL !== 'undefined') {
+            console.log('💾 Tentative de téléchargement direct');
+            try {
+                const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
+                
+                // Méthode moderne avec URL.createObjectURL
+                if (typeof URL.createObjectURL === 'function') {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = fileName;
+                    
+                    document.body.appendChild(a);
+                    a.click();
+                    
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }, 100);
+                    
+                    showToast('✅ Sauvegarde téléchargée', 'success');
+                    return;
+                }
+            } catch (downloadError) {
+                console.warn('⚠️ Échec du téléchargement direct:', downloadError);
+            }
+        }
+        
+        // MÉTHODE 5: Data URI (Fallback pour anciens WebView)
+        try {
+            console.log('🔗 Utilisation de Data URI');
+            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(jsonString);
             const a = document.createElement('a');
-            a.href = url;
-            a.download = `sauvegarde_complete_stock_${new Date().toISOString().split('T')[0]}.json`;
+            a.style.display = 'none';
+            a.href = dataUri;
+            a.download = fileName;
+            
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            URL.revokeObjectURL(url);
             
-            showToast(`✅ Sauvegarde COMPLÈTE téléchargée!`, 'success');
-        } catch (error) {
-            // Méthode alternative si le téléchargement échoue
-            showToast('❌ Erreur téléchargement. Utilisez la méthode manuelle:', 'error');
-            setTimeout(() => {
-                const backupInfo = `
-📦 SAUVEGARDE MANUELLE REQUISE
-
-Copiez ce texte et sauvegardez-le dans un fichier .json:
-
-${jsonString}
-
-Ensuite, envoyez ce fichier à votre email.
-                `;
-                alert(backupInfo);
-            }, 1000);
+            showToast('✅ Sauvegarde générée (Data URI)', 'success');
+            return;
+        } catch (dataUriError) {
+            console.warn('⚠️ Échec Data URI:', dataUriError);
         }
+        
+        // MÉTHODE 6: Copie dans le presse-papiers (si disponible)
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+            console.log('📋 Copie dans le presse-papiers');
+            try {
+                navigator.clipboard.writeText(jsonString).then(async () => {
+                    showToast('✅ Sauvegarde copiée dans le presse-papiers', 'success');
+                    await showInfo('📋 Sauvegarde copiée!\n\nCollez le contenu dans un fichier .json et sauvegardez-le.', 'Sauvegarde Copiée');
+                });
+                return;
+            } catch (clipboardError) {
+                console.warn('⚠️ Échec presse-papiers:', clipboardError);
+            }
+        }
+        
+       
+    } catch (error) {
+        console.error('❌ Erreur lors de la sauvegarde:', error);
+        showToast('❌ Erreur lors de la sauvegarde', 'error');
+        
+        // Sauvegarde d'urgence dans la console
+        console.log("🆘 SAUVEGARDE D'URGENCE - Copiez ces données:", {
+            products: localStorage.getItem('products'),
+            sales: localStorage.getItem('sales'),
+            users: localStorage.getItem('users'),
+            adminProfile: localStorage.getItem('adminProfile')
+        });
     }
-    
-    console.log('📦 SAUVEGARDE COMPLÈTE:', allData);
 }
 // Fonction individuelle pour gérer les nouvelles catégories
 function setupCategoryManagement() {
