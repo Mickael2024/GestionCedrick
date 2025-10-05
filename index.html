@@ -1585,6 +1585,24 @@ textarea.form-control {
         text-align: right;
     }
     
+    #recentSalesTable td:nth-child(6) { /* Actions */
+        min-width: 60px;
+        text-align: center;
+    }
+    
+    /* Bouton d'annulation de vente */
+    .btn-cancel-sale {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-cancel-sale:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+        transform: scale(1.05);
+    }
+    
     /* Statistiques */
     #statsTable td:nth-child(1) { /* Période */
         min-width: 100px;
@@ -3786,6 +3804,7 @@ textarea.form-control {
                                 <th>Quantité</th>
                                 <th>Prix de vente</th>
                                 <th>Total</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="recentSalesTable">
@@ -5944,7 +5963,7 @@ function showLotSelectionModal(productId, quantity, salePrice) {
             .slice(0, 5);
         
         if (recentSales.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Aucune vente récente</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Aucune vente récente</td></tr>';
             return;
         }
         
@@ -5960,10 +5979,80 @@ function showLotSelectionModal(productId, quantity, salePrice) {
                 <td>${sale.quantity}</td>
                 <td>${formatAriary(sale.salePrice, 2)}</td>
                 <td>${formatAriary(sale.total, 2)}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="cancelSale('${sale.id}')" title="Annuler cette vente">
+                        <i class="fas fa-undo"></i>
+                    </button>
+                </td>
             `;
             
             tableBody.appendChild(row);
         });
+    }
+
+    function cancelSale(saleId) {
+        // Demander confirmation avant d'annuler
+        if (!confirm('Êtes-vous sûr de vouloir annuler cette vente ? Cette action est irréversible.')) {
+            return;
+        }
+
+        try {
+            console.log('🔄 Annulation de la vente:', saleId);
+            
+            // Trouver la vente à annuler
+            const saleIndex = sales.findIndex(sale => sale.id === saleId);
+            if (saleIndex === -1) {
+                showToast('Vente introuvable', 'error');
+                return;
+            }
+
+            const saleToCancel = sales[saleIndex];
+            console.log('📋 Vente à annuler:', saleToCancel);
+
+            // Trouver le produit correspondant
+            const productIndex = products.findIndex(product => product.id === saleToCancel.productId);
+            if (productIndex === -1) {
+                showToast('Produit introuvable', 'error');
+                return;
+            }
+
+            const product = products[productIndex];
+            console.log('📦 Produit avant annulation:', product);
+
+            // Restaurer le stock
+            const quantityToRestore = saleToCancel.quantity;
+            products[productIndex].stockQuantity += quantityToRestore;
+            
+            console.log(`📈 Stock restauré: +${quantityToRestore} unités`);
+            console.log('📦 Produit après restauration:', products[productIndex]);
+
+            // Supprimer la vente de la liste
+            sales.splice(saleIndex, 1);
+            console.log('❌ Vente supprimée de la liste');
+
+            // Sauvegarder les modifications dans localStorage
+            localStorage.setItem('products', JSON.stringify(products));
+            localStorage.setItem('sales', JSON.stringify(sales));
+            console.log('💾 Données sauvegardées');
+
+            // Mettre à jour toutes les interfaces
+            loadDashboardData();
+            loadProductsTable();
+            loadSalesTable();
+            loadReportsData();
+            
+            // Mettre à jour les dropdowns de catégories
+            updateAllCategoryDropdowns();
+
+            // Message de succès
+            showToast(`Vente annulée avec succès. Stock de "${product.name}" restauré (+${quantityToRestore})`, 'success');
+            
+            console.log('✅ Annulation de vente terminée avec succès');
+
+        } catch (error) {
+            console.error('❌ Erreur lors de l\'annulation de la vente:', error);
+            showToast('Erreur lors de l\'annulation de la vente', 'error');
+        }
     }
 
     function loadRevenueChart() {
