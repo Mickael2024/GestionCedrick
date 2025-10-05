@@ -6,6 +6,7 @@
     <title>Gestion de Stock - Suivi Bénéfice Mensuel</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Dans la section head -->
+     <link rel='stylesheet' href='./dropdown-categories.css'>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
@@ -405,12 +406,156 @@
             box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
         }
 
-        .modal-footer {
-            padding: 20px;
-            border-top: 1px solid #eee;
+        /* Custom Dropdown Styles */
+        .custom-dropdown {
+            position: relative;
+            width: 100%;
+        }
+
+        .dropdown-selected {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            background-color: var(--white);
+            cursor: pointer;
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+            min-height: 42px;
+        }
+
+        .dropdown-selected:hover {
+            border-color: var(--primary);
+        }
+
+        .dropdown-selected.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+        }
+
+        .dropdown-selected .placeholder {
+            color: #999;
+        }
+
+        .dropdown-selected .selected-text {
+            flex: 1;
+            text-align: left;
+        }
+
+        .dropdown-arrow {
+            margin-left: 10px;
+            transition: transform 0.3s ease;
+            color: var(--gray);
+        }
+
+        .dropdown-selected.active .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 5px);
+            left: 0;
+            right: 0;
+            background-color: var(--white);
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            max-height: 250px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            animation: dropdownSlideIn 0.2s ease;
+        }
+
+        @keyframes dropdownSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-search {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 0;
+            background-color: var(--white);
+            z-index: 1;
+        }
+
+        .dropdown-search input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .dropdown-search input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .dropdown-option {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
             gap: 10px;
+        }
+
+        .dropdown-option:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+
+        .dropdown-option.selected {
+            background-color: rgba(67, 97, 238, 0.15);
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .dropdown-option .option-icon {
+            width: 20px;
+            text-align: center;
+            color: var(--primary);
+        }
+
+        .dropdown-menu::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .dropdown-menu::-webkit-scrollbar-thumb {
+            background-color: #ccc;
+            border-radius: 3px;
+        }
+
+        .dropdown-menu::-webkit-scrollbar-track {
+            background-color: #f1f1f1;
+        }
+
+        /* Responsive dropdown */
+        @media (max-width: 768px) {
+            .dropdown-menu {
+                max-height: 200px;
+            }
+
+            .dropdown-option {
+                padding: 12px 15px;
+                min-height: 44px;
+            }
         }
 
         /* Toast notifications */
@@ -4153,6 +4298,7 @@ textarea.form-control {
                                 <button class="btn btn-danger" onclick="removeProfilePhoto()">
                                     <i class="fas fa-trash"></i> Supprimer
                                 </button>
+                                
                             </div>
                         </div>
                     </div>
@@ -4250,10 +4396,14 @@ textarea.form-control {
                                     <div class="stat-label">Chiffre d'affaires</div>
                                 </div>
                             </div>
+                            
                         </div>
+<!-- 
+                        <button class="btn btn-danger" id="clearAllBtn" style="margin-top: 20px;">🗑 Supprimer toutes les données</button> -->
                     </div>
                 </div>
             </div>
+       
         </main>
     </div>
 
@@ -9397,5 +9547,8 @@ window.saveProfile = saveProfile;
 window.resetProfileForm = resetProfileForm;
 
 </script>
+<script src="dropdown.js"></script>
+<script src="fix_dropdown_bugs.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>

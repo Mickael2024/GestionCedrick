@@ -1,0 +1,87 @@
+/* Styles pour les séparations de catégories dans les dropdowns */
+
+.dropdown-category-header {
+    padding: 8px 15px;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-bottom: 1px solid #dee2e6;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #495057;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dropdown-category-header i {
+    color: #6c757d;
+    font-size: 0.8rem;
+}
+
+.dropdown-category-header:first-child {
+    border-top: none;
+}
+
+.dropdown-category-header + .dropdown-option {
+    border-top: none;
+}
+
+/* Options sous les catégories avec indentation */
+.dropdown-category-header + .dropdown-option,
+.dropdown-option:has(+ .dropdown-option:not(.dropdown-category-header)) {
+    padding-left: 25px;
+    position: relative;
+}
+
+.dropdown-option:not(.dropdown-category-header) {
+    padding-left: 25px;
+}
+
+/* Ligne de séparation subtile entre les catégories */
+.dropdown-category-header:not(:first-child) {
+    border-top: 2px solid #e9ecef;
+    margin-top: 2px;
+}
+
+/* Amélioration de la recherche avec les catégories */
+.dropdown-search {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: white;
+    border-bottom: 2px solid #e9ecef;
+}
+
+/* Animation pour les en-têtes de catégories */
+.dropdown-category-header {
+    transition: background-color 0.2s ease;
+}
+
+.dropdown-category-header:hover {
+    background: linear-gradient(135deg, #e9ecef, #dee2e6);
+}
+
+/* Style spécial pour les catégories vides */
+.dropdown-category-empty {
+    padding: 8px 25px;
+    color: #6c757d;
+    font-style: italic;
+    font-size: 0.85rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dropdown-category-header {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+    
+    .dropdown-option:not(.dropdown-category-header) {
+        padding-left: 20px;
+    }
+}
