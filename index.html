@@ -4537,7 +4537,7 @@ textarea.form-control {
                 </div>
 
                 <!-- Indicateurs de Performance -->
-                <div class="row">
+                <div class="row" style="display: none;">
                     <div class="col-md-12">
                         <div class="card">
                             <div class="card-header">
@@ -7060,8 +7060,7 @@ function calculateKPIs() {
     const dailyRevenue = recentSales.reduce((sum, sale) => sum + sale.total, 0) / 30;
     
     // Stock faible
-    const lowStockCount = products.filter(product => product.stockQuantity < 5).length;
-    
+    const lowStockCount = products.filter(product => product.stock <= product.minStock).length;
     // Jours d'activité
     const firstSaleDate = sales.length > 0 ? new Date(Math.min(...sales.map(sale => new Date(sale.date)))) : new Date();
     const activeDays = Math.ceil((new Date() - firstSaleDate) / (1000 * 60 * 60 * 24));
@@ -12495,11 +12494,16 @@ function updateKPIs() {
         avgSale: kpis.current.avgSale
     });
     
-    // Mise à jour des valeurs
-    document.getElementById('kpi-revenue').textContent = formatAriary(kpis.current.revenue, 0);
-    document.getElementById('kpi-profit').textContent = formatAriary(kpis.current.profit, 0);
-    document.getElementById('kpi-sales-count').textContent = kpis.current.salesCount;
-    document.getElementById('kpi-avg-sale').textContent = formatAriary(kpis.current.avgSale, 0);
+    // Mise à jour des valeurs principales (Analytics)
+    const kpiRevenueElem = document.getElementById('kpi-revenue');
+    const kpiProfitElem = document.getElementById('kpi-profit');
+    const kpiSalesCountElem = document.getElementById('kpi-sales-count');
+    const kpiAvgSaleElem = document.getElementById('kpi-avg-sale');
+    
+    if (kpiRevenueElem) kpiRevenueElem.textContent = formatAriary(kpis.current.revenue, 0);
+    if (kpiProfitElem) kpiProfitElem.textContent = formatAriary(kpis.current.profit, 0);
+    if (kpiSalesCountElem) kpiSalesCountElem.textContent = kpis.current.salesCount;
+    if (kpiAvgSaleElem) kpiAvgSaleElem.textContent = formatAriary(kpis.current.avgSale, 0);
     
     // Mise à jour des tendances avec icônes et couleurs
     const formatTrend = (trend, icon) => {
@@ -12508,12 +12512,49 @@ function updateKPIs() {
         return `<span style="color: ${color}">${icon} ${sign}${trend.toFixed(1)}% vs mois dernier</span>`;
     };
     
-    document.getElementById('kpi-revenue-trend').innerHTML = formatTrend(kpis.trends.revenue, '📈');
-    document.getElementById('kpi-profit-trend').innerHTML = formatTrend(kpis.trends.profit, '📊');
-    document.getElementById('kpi-sales-trend').innerHTML = formatTrend(kpis.trends.sales, '🛒');
-    document.getElementById('kpi-avg-trend').innerHTML = formatTrend(kpis.trends.avg, '🛍️');
+    const kpiRevenueTrendElem = document.getElementById('kpi-revenue-trend');
+    const kpiProfitTrendElem = document.getElementById('kpi-profit-trend');
+    const kpiSalesTrendElem = document.getElementById('kpi-sales-trend');
+    const kpiAvgTrendElem = document.getElementById('kpi-avg-trend');
+    
+    if (kpiRevenueTrendElem) kpiRevenueTrendElem.innerHTML = formatTrend(kpis.trends.revenue, '📈');
+    if (kpiProfitTrendElem) kpiProfitTrendElem.innerHTML = formatTrend(kpis.trends.profit, '📊');
+    if (kpiSalesTrendElem) kpiSalesTrendElem.innerHTML = formatTrend(kpis.trends.sales, '🛒');
+    if (kpiAvgTrendElem) kpiAvgTrendElem.innerHTML = formatTrend(kpis.trends.avg, '🛍️');
+    
+    // AJOUT : Mise à jour des KPIs détaillés (activeProducts, totalSalesCount, etc.)
+    const activeProducts = products.length;
+    const totalSalesCount = sales.length;
+    const averageTicket = totalSalesCount > 0 ? (sales.reduce((sum, sale) => sum + sale.total, 0) / totalSalesCount) : 0;
+    
+    // CA journalier (moyenne des 30 derniers jours)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const recentSales = sales.filter(sale => new Date(sale.date) >= thirtyDaysAgo);
+    const dailyRevenue = recentSales.reduce((sum, sale) => sum + sale.total, 0) / 30;
+    
+    // Stock faible
+    const lowStockCount = products.filter(product => product.stock <= product.minStock).length;
+    
+    // Jours d'activité
+    const firstSaleDate = sales.length > 0 ? new Date(Math.min(...sales.map(sale => new Date(sale.date)))) : new Date();
+    const activeDays = Math.ceil((new Date() - firstSaleDate) / (1000 * 60 * 60 * 24));
+    
+    // Mettre à jour l'affichage des KPIs détaillés
+    const activeProductsElem = document.getElementById('activeProducts');
+    const totalSalesCountElem = document.getElementById('totalSalesCount');
+    const averageTicketElem = document.getElementById('averageTicket');
+    const dailyRevenueElem = document.getElementById('dailyRevenue');
+    const lowStockCountElem = document.getElementById('lowStockCount');
+    const activeDaysElem = document.getElementById('activeDays');
+    
+    if (activeProductsElem) activeProductsElem.textContent = activeProducts;
+    if (totalSalesCountElem) totalSalesCountElem.textContent = totalSalesCount;
+    if (averageTicketElem) averageTicketElem.textContent = formatAriary(averageTicket, 0);
+    if (dailyRevenueElem) dailyRevenueElem.textContent = formatAriary(dailyRevenue, 0);
+    if (lowStockCountElem) lowStockCountElem.textContent = lowStockCount;
+    if (activeDaysElem) activeDaysElem.textContent = activeDays;
 }
-
 // Fonction pour obtenir les données de ventes par période
 function getSalesDataByPeriod(period = 'month', limit = 12) {
     console.log(`📅 Récupération des données par ${period}, limite: ${limit}`);
@@ -12698,7 +12739,7 @@ function createRevenueChart() {
             }
         }
     });
-    
+
     analyticsCharts.revenue = new Chart(ctxTable, {
         type: 'line',
         data: {
